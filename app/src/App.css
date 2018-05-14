@@ -1,0 +1,8 @@
+.myDiv {
+    position: absolute;
+    z-index: 1;
+    left: 50px;
+    top: 20px;
+    width: 100px;
+    height: 100px;
+}

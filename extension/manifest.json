@@ -1,0 +1,23 @@
+{
+    "manifest_version": 2,
+
+    "name": "Toonin",
+    "description": "Toonin to what your friends are listening to :)",
+    "version": "0.1",
+    "browser_action": {
+        "default_icon": "app/icon.png"
+    },
+    "web_accessible_resources": [
+        "app/js/inject.js"
+    ],
+    "background": {
+        "scripts": ["app/js/lib/adapter.js", "app/js/lib/socket.io.js", "background.js"],
+        "persistent": true
+    },
+    "permissions": [
+        "activeTab",
+        "storage",
+        "tabCapture"
+    ],
+    "content_security_policy": "script-src 'self' https://cdnjs.cloudflare.com https://socket.io https://webrtc.github.io https://www.gstatic.com/ https://*.firebaseio.com https://www.googleapis.com; object-src 'self'"
+}
