@@ -39,19 +39,19 @@ function injectTooninScripts() {
 
 function loadAdapter() {
     chrome.tabs.executeScript({
-        file: "app/js/lib/adapter.js"
+        file: "js/lib/adapter.js"
     }, loadSocketIO)
 }
 
 function loadSocketIO() {
     chrome.tabs.executeScript({
-        file: "app/js/lib/socket.io.js"
+        file: "js/lib/socket.io.js"
     }, injectAppScript)
 }
 
 function injectAppScript() {
     chrome.tabs.executeScript({
-        file: "app/js/inject.js"
+        file: "js/inject.js"
     }, function () {
         if (chrome.runtime.lastError) {
             console.error(chrome.runtime.lastError.message);

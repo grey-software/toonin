@@ -5,13 +5,13 @@
     "description": "Toonin to what your friends are listening to :)",
     "version": "0.1",
     "browser_action": {
-        "default_icon": "app/icon.png"
+        "default_icon": "icon.png"
     },
     "web_accessible_resources": [
-        "app/js/inject.js"
+        "js/inject.js"
     ],
     "background": {
-        "scripts": ["app/js/lib/adapter.js", "app/js/lib/socket.io.js", "background.js"],
+        "scripts": ["js/lib/adapter.js", "js/lib/socket.io.js", "js/background.js"],
         "persistent": true
     },
     "permissions": [
