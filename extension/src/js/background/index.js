@@ -1,15 +1,15 @@
-console.log("Background script running");
+import opus from './opus';
 
-var constraints = {
+const constraints = {
     audio: true
 };
 var port;
+
 chrome.runtime.onConnect.addListener(function (p) {
     port = p;
     p.onMessage.addListener(function (msg) {
-        console.log(msg);
         if (msg.type == "init") {
-            init();
+            socket.emit("create room");
         }
     });
 });
@@ -83,10 +83,6 @@ const offerOptions = {
     offerToReceiveAudio: 1
 };
 
-function init() {
-    socket.emit("create room");
-}
-
 
 function startShare(peerID) {
     console.log("Starting new connection for peer: " + peerID);
@@ -107,8 +103,8 @@ function startShare(peerID) {
         });
     };
 
-    rtcConn.createOffer(offerOptions).then(function (desc) {
-        preferOpus(desc.sdp);
+    rtcConn.createOffer(offerOptions).then((desc) => {
+        opus.preferOpus(desc.sdp);
         rtcConn.setLocalDescription(new RTCSessionDescription(desc)).then(function () {
             peers[peerID].localDesc = desc;
             socket.emit("src new desc", {
@@ -123,7 +119,7 @@ function startShare(peerID) {
 /* **************** *
  * Socket Listeners *
  * **************** */
-socket.on("room created", function (newRoomID) {
+socket.on("room created", (newRoomID) => {
     console.log("New room created with ID: " + newRoomID);
     roomID = newRoomID;
     port.postMessage({
@@ -133,7 +129,7 @@ socket.on("room created", function (newRoomID) {
     getTabAudio();
 });
 
-socket.on("peer joined", function (peerData) {
+socket.on("peer joined", (peerData) => {
     console.log("New peer has joined the room");
     peers[peerData.id] = {
         id: peerData.id,
@@ -143,7 +139,7 @@ socket.on("peer joined", function (peerData) {
     startShare(peerData.id);
 });
 
-socket.on("peer ice", function (iceData) {
+socket.on("peer ice", (iceData) => {
     console.log("Ice Candidate from peer: " + iceData.id + " in room: " + iceData.room);
     console.log("Ice Candidate: " + iceData.candidate);
     if (roomID != iceData.room || !(iceData.id in peers)) {
@@ -158,7 +154,7 @@ socket.on("peer ice", function (iceData) {
         });
 });
 
-socket.on("peer desc", function (descData) {
+socket.on("peer desc", (descData) => {
     console.log("Answer description from peer: " + descData.id + " in room: " + descData.room);
     console.log("Answer description: " + descData.desc);
     if (roomID != descData.room || !(descData.id in peers)) {
@@ -174,60 +170,3 @@ socket.on("peer desc", function (descData) {
             console.log("Error on setRemoteDescription: " + err);
         });
 });
-
-var preferOpus = function (sdp) {
-    var sdpLines = sdp.split('\r\n');
-
-    for (var i = 0; i < sdpLines.length; i++) {
-        if (sdpLines[i].search('m=audio') !== -1) {
-            var mLineIndex = i;
-            break;
-        }
-    }
-
-    if (mLineIndex === null) return sdp;
-
-    for (i = 0; i < sdpLines.length; i++) {
-        if (sdpLines[i].search('opus/48000') !== -1) {
-            var opusPayload = extractSdp(sdpLines[i], /:(\d+) opus\/48000/i);
-            if (opusPayload)
-                sdpLines[mLineIndex] = setDefaultCodec(sdpLines[mLineIndex], opusPayload);
-            break;
-        }
-    }
-
-    sdpLines = removeCN(sdpLines, mLineIndex);
-
-    sdp = sdpLines.join('\r\n');
-    return sdp;
-};
-
-var extractSdp = function (sdpLine, pattern) {
-    var result = sdpLine.match(pattern);
-    return (result && result.length == 2) ? result[1] : null;
-};
-
-var setDefaultCodec = function (mLine, payload) {
-    var elements = mLine.split(' ');
-    var newLine = new Array();
-    var index = 0;
-    for (var i = 0; i < elements.length; i++) {
-        if (index === 3) newLine[index++] = payload;
-        if (elements[i] !== payload) newLine[index++] = elements[i];
-    }
-    return newLine.join(' ');
-};
-
-var removeCN = function (sdpLines, mLineIndex) {
-    var mLineElements = sdpLines[mLineIndex].split(' ');
-    for (var i = sdpLines.length - 1; i >= 0; i--) {
-        var payload = extractSdp(sdpLines[i], /a=rtpmap:(\d+) CN\/\d+/i);
-        if (payload) {
-            var cnPos = mLineElements.indexOf(payload);
-            if (cnPos !== -1) mLineElements.splice(cnPos, 1);
-            sdpLines.splice(i, 1);
-        }
-    }
-    sdpLines[mLineIndex] = mLineElements.join(' ');
-    return sdpLines;
-};

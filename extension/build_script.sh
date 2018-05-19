@@ -5,7 +5,8 @@ rm -f build/*
 cp src/* build
 cp -r src/css/* build/css
 cp -r src/js/lib/* build/js/lib
-webpack-cli --entry ./src/js/inject/index.js -o build/js/inject.js
-webpack-cli --entry ./src/js/background/index.js -o build/js/background.js
+node html_to_string.js
+webpack-cli  --config ./webpack.config.js --entry ./src/js/inject/index.js -o build/js/inject.js
+webpack-cli  --config ./webpack.config.js --entry ./src/js/background/index.js -o build/js/background.js
 
 
