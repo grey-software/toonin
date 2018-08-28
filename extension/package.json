@@ -1,7 +1,7 @@
 {
-    "scripts": {
-        "build": "bash build_script.sh"
-    },
+  "scripts": {
+    "build": "bash build_script.sh"
+  },
   "dependencies": {
     "media-recorder-stream": "^2.1.1",
     "socket.io-client": "^2.1.1"
