@@ -34,7 +34,7 @@ chrome.browserAction.onClicked.addListener(injectTooninScripts);
 
 function injectTooninScripts() {
     console.log("Starting Toonin Script Injection");
-    loadAdapter();
+    loadAdapter(); // load webRTC adapter
 }
 
 function loadAdapter() {
@@ -61,7 +61,7 @@ function injectAppScript() {
 
 "use strict";
 console.log("application script running");
-var socket = io("http://206.189.69.217:8100");
+var socket = io("http://toonin-backend-54633158.us-east-1.elb.amazonaws.com:8100");
 
 var peers = {};
 var localAudioStream;

@@ -10,15 +10,16 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// reduced the gen room id length to 6 characters (2, 15) -> (2, 5)
 const genRoomID = () => {
   while (true) {
     const id =
       Math.random()
         .toString(36)
-        .substring(2, 15) +
+        .substring(2, 5) +
       Math.random()
         .toString(36)
-        .substring(2, 15);
+        .substring(2, 5);
     if (!(id in rooms)) {
       rooms[id] = {};
       return id;
