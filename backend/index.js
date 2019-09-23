@@ -4,7 +4,9 @@ var cors = require("cors");
 app.use(cors());
 var http = require("http").Server(app);
 var io = require("socket.io")(http);
-const rooms = {};
+var vars = require("./vars");
+
+var rooms = {}; // changed rooms from const to var to allow resetting of the rooms list.
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -65,6 +67,20 @@ io.on("connection", socket => {
   });
 });
 
+// clear rooms list through an http request with key as query
+app.get("/clearRooms", (req, res) => {
+  var key = req.query.key;
+  if(key === vars.deleteKey) {
+    rooms = {};
+    res.status(200);
+    res.send("Success! Rooms list reset");
+  }
+  else {
+    res.status(403);
+    res.send("Request Failed. Incorrect Key");
+  }
+});
+
 app.get("/:roomID", (req, res) => {
   console.log(rooms);
   const roomID = req.params.roomID;
@@ -78,6 +94,7 @@ app.get("/:roomID", (req, res) => {
 
 app.get("/", (req, res) => {
   res.send("Server is alive");
+  console.log(rooms);
 });
 
 http.listen(8100, () => {
