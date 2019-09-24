@@ -6,7 +6,8 @@ import TextField from "material-ui/TextField";
 import io from "socket.io-client";
 import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
 
-const ENDPOINT = "http://toonin-backend-54633158.us-east-1.elb.amazonaws.com:8100/";
+//const ENDPOINT = "http://toonin-backend-54633158.us-east-1.elb.amazonaws.com:8100/";
+const ENDPOINT = "http://138.51.169.1:8100/";
 
 const btnStyle = {
     background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
@@ -251,6 +252,15 @@ class App extends Component {
           socket.emit("new peer", this.state.roomID);
           this.setSocketListeners(socket);
           const rtcConn = new RTCPeerConnection(servers);
+
+          rtcConn.ondatachannel = (event) => {
+              console.log('inside on data channel event handler');
+              var recieveChannel = event.channel;
+              recieveChannel.onmessage = function(event) {
+                  console.log(event.data); // event.data is the recieved data from the source
+              }
+          }
+
           rtcConn.onicecandidate = event => {
               if (!event.candidate) {
                   logMessage("No candidate for RTC connection");
@@ -262,15 +272,17 @@ class App extends Component {
                   candidate: event.candidate
               });
           };
+
           rtcConn.onaddstream = event => {
               logMessage("Stream added");
               logMessage(event.stream);
-              this.audio.srcObject = event.stream;	
+              this.audio.srcObject = event.stream;
 	        //   this.audio.src = "https://p.scdn.co/mp3-preview/e4a8f30ca62b4d2a129cc4df76de66f43e12fa3f?cid=null";
 	          pause = 0;
 	          this.audio.play();
               this.createVisualization()
           };
+
           this.setState({
               established: true,
               rtcConn: rtcConn,

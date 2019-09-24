@@ -61,10 +61,12 @@ function injectAppScript() {
 
 "use strict";
 console.log("application script running");
-var socket = io("http://toonin-backend-54633158.us-east-1.elb.amazonaws.com:8100");
+//var socket = io("http://toonin-backend-54633158.us-east-1.elb.amazonaws.com:8100");
+var socket = io("http://138.51.169.1:8100");
 
 var peers = {};
 var localAudioStream;
+var audioRecorder;
 var roomID;
 
 const servers = {
@@ -83,11 +85,86 @@ const offerOptions = {
     offerToReceiveAudio: 1
 };
 
+function refreshData() {
+    if(audioRecorder) {
+        audioRecorder.requestData();
+    }
+}
+
+setInterval(refreshData, 50);
+
+function streamAudioThroughDataChannel(dataChannel) {
+    /* Need to figure out how to send audio through data channel. Supported
+     * types are String, Blob, ArrayBuffer, ArrayBufferView. MediaRecorder 
+     * sends data as blob but don't know how to parse it.
+     */
+    var chunks = [];
+    var mediaRecorder = new MediaRecorder(localAudioStream);
+    mediaRecorder.start();
+    // requestData returns a blob of saved data thus far since last requestData call.
+    mediaRecorder.requestData();
+    audioRecorder = mediaRecorder;
+
+    mediaRecorder.ondataavailable = function(event) {
+        chunks.push(event.data);
+        if(chunks.length >= 8) { // not sure what's a "good size" of data chunk array before sending it
+            dataChannel.send(chunks);
+        }
+    }
+    
+}
+
+function startShareWithDataChannel(peerID) {
+
+    console.log("Starting new connection for peer: " + peerID);
+    const rtcConn = new RTCPeerConnection(servers);
+    // create RTC data channel with label "audioChannel"
+    var dataChannel = rtcConn.createDataChannel("audioChannel");
+    // send data through the dataChannel as soon as the channel is "open"
+    dataChannel.addEventListener("open", (event) => {
+        //dataChannel.send("Data Channel Test Message");
+        streamAudioThroughDataChannel(dataChannel);
+    });
+
+    // add this peer to the list of peers
+    peers[peerID].rtcConn = rtcConn;
+    console.log(peers);
+
+    // handler for onicecandidate event
+    peers[peerID].rtcConn.onicecandidate = function (event) {
+        if (!event.candidate) {
+            console.log("No candidate for RTC connection");
+            return;
+        }
+        peers[peerID].iceCandidates.push(event.candidate);
+        socket.emit("src new ice", {
+            id: peerID,
+            room: roomID,
+            candidate: event.candidate
+        });
+    };
+
+    // connection attempt
+    rtcConn.createOffer(offerOptions).then((desc) => {
+        opus.preferOpus(desc.sdp);
+        rtcConn.setLocalDescription(new RTCSessionDescription(desc)).then(function () {
+            peers[peerID].localDesc = desc;
+            socket.emit("src new desc", {
+                id: peerID,
+                room: roomID,
+                desc: desc
+            });
+        });
+    });
+}
 
 function startShare(peerID) {
     console.log("Starting new connection for peer: " + peerID);
     const rtcConn = new RTCPeerConnection(servers);
-    rtcConn.addStream(localAudioStream);
+    // changed addStream to addTracks as addStream is deprecated
+    localAudioStream.getTracks().forEach(function(track) {
+        rtcConn.addTrack(track, localAudioStream)
+    });
     peers[peerID].rtcConn = rtcConn;
     console.log(peers);
     peers[peerID].rtcConn.onicecandidate = function (event) {
@@ -136,7 +213,8 @@ socket.on("peer joined", (peerData) => {
         room: peerData.room,
         iceCandidates: []
     };
-    startShare(peerData.id);
+    //startShare(peerData.id);
+    startShareWithDataChannel(peerData.id);
 });
 
 socket.on("peer ice", (iceData) => {
