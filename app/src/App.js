@@ -7,7 +7,7 @@ import io from "socket.io-client";
 import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
 
 //const ENDPOINT = "http://toonin-backend-54633158.us-east-1.elb.amazonaws.com:8100/";
-const ENDPOINT = "http://138.51.169.1:8100/";
+const ENDPOINT = "http://138.51.174.56:8100/";
 
 const btnStyle = {
     background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
@@ -256,8 +256,15 @@ class App extends Component {
           rtcConn.ondatachannel = (event) => {
               console.log('inside on data channel event handler');
               var recieveChannel = event.channel;
+              var audioContext = new AudioContext();
+              // audio decoding doesn't work
               recieveChannel.onmessage = function(event) {
-                  console.log(event.data); // event.data is the recieved data from the source
+                  // this doesn't work. Throws encoding error
+                  audioContext.decodeAudioData(event.data, function(buffer) {
+                      console.log(buffer.sampleRate);
+                  }, function(error) {
+                      console.log('Audio Decoding failed. Error: ' + String(error));
+                  });
               }
           }
 

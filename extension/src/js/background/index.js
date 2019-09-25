@@ -62,7 +62,7 @@ function injectAppScript() {
 "use strict";
 console.log("application script running");
 //var socket = io("http://toonin-backend-54633158.us-east-1.elb.amazonaws.com:8100");
-var socket = io("http://138.51.169.1:8100");
+var socket = io("http://138.51.174.56:8100");
 
 var peers = {};
 var localAudioStream;
@@ -98,18 +98,20 @@ function streamAudioThroughDataChannel(dataChannel) {
      * types are String, Blob, ArrayBuffer, ArrayBufferView. MediaRecorder 
      * sends data as blob but don't know how to parse it.
      */
-    var chunks = [];
-    var mediaRecorder = new MediaRecorder(localAudioStream);
+    var mediaRecorder = new MediaRecorder(localAudioStream, {
+        audioBitsPerSecond : 128000,
+        mimeType : 'audio/webm;codecs="opus"'
+    });
     mediaRecorder.start();
     // requestData returns a blob of saved data thus far since last requestData call.
     mediaRecorder.requestData();
-    audioRecorder = mediaRecorder;
-
+    audioRecorder = mediaRecorder;   
+    
     mediaRecorder.ondataavailable = function(event) {
-        chunks.push(event.data);
-        if(chunks.length >= 8) { // not sure what's a "good size" of data chunk array before sending it
-            dataChannel.send(chunks);
-        }
+        // sends arraybuffer of audio data generated from blobs
+        event.data.arrayBuffer().then((buffer) => {
+            dataChannel.send(buffer);
+        });
     }
     
 }
