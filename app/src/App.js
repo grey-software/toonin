@@ -7,7 +7,7 @@ import io from "socket.io-client";
 import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
 
 //const ENDPOINT = "http://toonin-backend-54633158.us-east-1.elb.amazonaws.com:8100/";
-const ENDPOINT = "http://10.0.0.82:8100/";
+const ENDPOINT = "http://138.51.161.161:8100/";
 
 const btnStyle = {
     background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
@@ -257,28 +257,42 @@ class App extends Component {
               console.log('inside on data channel event handler');
               var recieveChannel = event.channel;
               var audioContext = new AudioContext();
-              var soundSource = null;
               var soundDest = audioContext.createMediaStreamDestination();
+              var firstBufferDur = 0;
               var tabAudio = this.audio;
+              var visualizer = this.createVisualization;
 
               recieveChannel.onmessage = function(event) {
                   //console.log(event.data);
                   // this doesn't work for partial data because the audio encoding info is stored in the header.
                   // so after the first array buffer, it throws an error becuase it recieves raw audio
                   // data with no header. So it doesn't know how to decode the data.
-                  
-                  audioContext.decodeAudioData(event.data, function(buffer) {
-                      soundSource = audioContext.createBufferSource();
-                      soundSource.buffer = buffer;
-                      soundSource.start();
-                      soundSource.connect(soundDest);
-                      tabAudio.srcObject = soundDest.stream;
-                      tabAudio.play();
-                      //this.audio.srcObject = soundDest.stream;
-                      //this.audio.play();
-                  }, function(error) {
-                      console.log('Audio Decoding failed. Error: ' + String(error));
-                  });
+                  if(firstBufferDur === 0) {
+                      // recieve the offset from the src to compensate for extra data at the start of 
+                      // every arraybuffer
+                      firstBufferDur = Number(event.data);
+                      console.log(event.data);
+                      console.log('offset: ' + firstBufferDur);
+                  }
+                  else {
+                      audioContext.decodeAudioData(event.data, function(buffer) {
+                        //if (!firstBufferDur) {
+                        //    firstBufferDur = buffer.duration;
+                        //}
+                        //console.log(firstBufferDur);
+                        var soundSource = audioContext.createBufferSource();
+                        soundSource.buffer = buffer;
+                        // something here causes breakup for every audio buffer recieved
+                        soundSource.start(0, firstBufferDur);
+                        soundSource.connect(soundDest); // need to figure out how have a continuous stream playing
+                        tabAudio.srcObject = soundDest.stream;
+                        tabAudio.play();
+                        //visualizer();
+                        
+                    }, function(error) {
+                        console.log('Audio Decoding failed. Error: ' + String(error));
+                    });
+                  }
               }
           }
 
