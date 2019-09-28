@@ -61,7 +61,7 @@ function injectAppScript() {
 
 "use strict";
 console.log("application script running");
-var socket = io("http://206.189.69.217:8100");
+var socket = io("http://184.73.84.126:8100");
 
 var peers = {};
 var localAudioStream;

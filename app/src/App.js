@@ -6,7 +6,7 @@ import TextField from "material-ui/TextField";
 import io from "socket.io-client";
 import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
 
-const ENDPOINT = "http://206.189.69.217:8100/";
+const ENDPOINT = "http://184.73.84.126:8100/";
 
 const btnStyle = {
     background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
@@ -49,7 +49,7 @@ var canvas, ctx, source, context, analyser, fbc_array, rads,
 	bar_height, react_x, react_y, intensity, rot, inputURL,
 	JSONPThing, JSONResponse, soundCloudTrackName, audio, pause,
     artist, title, img_url, isSeeking;
-    
+
     bars = 200;
     react_x = 0;
     react_y = 0;
@@ -181,7 +181,7 @@ class App extends Component {
             ctx.arc(center_x, center_y, radius + 2, 0, Math.PI * 2, false);
             ctx.fill();
 
-            // shockwave effect			
+            // shockwave effect
             shockwave += 60;
 
             ctx.lineWidth = 15;
@@ -199,14 +199,14 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        
+
           <div>
         <canvas
                 ref="analyzerCanvas"
                 id="analyzer"
                 >
 
-               
+
                 </canvas>
                 </div>
 
@@ -232,7 +232,7 @@ class App extends Component {
             Toonin
           </Button>
     </div>
-        
+
       </div>
     );
   }
@@ -265,7 +265,7 @@ class App extends Component {
           rtcConn.onaddstream = event => {
               logMessage("Stream added");
               logMessage(event.stream);
-              this.audio.srcObject = event.stream;	
+              this.audio.srcObject = event.stream;
 	        //   this.audio.src = "https://p.scdn.co/mp3-preview/e4a8f30ca62b4d2a129cc4df76de66f43e12fa3f?cid=null";
 	          pause = 0;
 	          this.audio.play();
@@ -329,7 +329,7 @@ class App extends Component {
       });
   }
   }
-  
+
 const logMessage = (message) => {
     console.log(message);
 }
