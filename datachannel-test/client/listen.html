@@ -1,0 +1,210 @@
+<html>
+	<head>
+	    <meta charset="utf-8">
+	    <title>WebRTC Streaming Media from Files</title>
+   	    <script src="js/adapter.js"></script>
+		<script src="/socket.io/socket.io.js"></script>
+		<style>
+			#holder { border: 10px dashed #ccc; width: 300px; height: 300px; margin: 20px auto;}
+			#holder.hover { border: 10px dashed #333; }
+			#holder.background { background-size:100% 100%; background-repeat:no-repeat;}
+		</style>
+	</head>
+
+	<body>
+		<div id="blockcontent">
+			<article style="align: center;">
+				<div style="text-align: center;">
+					<h3 id='meta'>&nbsp;</h3>
+					<h3 id='rate'>&nbsp;</h3>
+				</div>
+
+				<div style="text-align: center;">
+					<audio controls id="player" autoplay/>
+				</div>
+
+			</article>
+
+		</div>
+	</body>
+
+    <script lang="javascript">
+    	// getting the session id from the request URI
+		var urlParams;
+		(window.onpopstate = function () {
+		    var match,
+		        pl     = /\+/g,  // Regex for replacing addition symbol with a space
+		        search = /([^&=]+)=?([^&]*)/g,
+		        decode = function (s) { return decodeURIComponent(s.replace(pl, " ")); },
+		        query  = window.location.search.substring(1);
+
+		    urlParams = {};
+		    while (match = search.exec(query))
+		       urlParams[decode(match[1])] = decode(match[2]);
+		})();
+
+		// if (!window.chrome) {
+		// 	alert('This page needs Google Chrome to play correctly.');
+		// }
+
+		window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
+		// var context = new AudioContext();
+
+		// UI elements that can be updated
+		var meta = document.getElementById('meta');
+   		var player = document.getElementById('player');
+   		var rate = document.getElementById('rate');
+
+		// check for required APIs
+		if (RTCPeerConnection) {
+		} else {
+			alert('The required APIs are not fully supported in this browser.');
+		}
+
+		// configuration for peer connections
+		var pc_config = {"iceServers": [{"urls": [
+        "stun:stun.l.google.com:19302",
+        "stun:stun2.l.google.com:19302",
+        "stun:stun3.l.google.com:19302",
+        "stun:stun4.l.google.com:19302"
+      ]}]};
+
+		// connect to the server
+		var socket = io.connect();
+
+		// references to the id of this listener and the id of the host.
+		var myId;
+		var to = urlParams.id;
+
+		// id of the listener is received from the server
+		socket.on('your-id', function(id) {
+			myId = id;
+			console.log('id = ' + id);
+			// send logon message to the host
+			socket.emit('logon', { from: myId, to: to } );
+		});
+
+		socket.on('error', function(message) {
+			alert(message);
+		});
+
+		window.onbeforeunload = function(e) {
+			player.pause();
+			socket.emit('logoff', { from: myId, to: to } );
+			for (var i=0;i<1000;i++){
+	    		// do something unnoticable but time consuming like writing a lot to console
+  				console.log('buying some time to finish sending data'); 
+			};
+		};
+	
+		// creates a peer connection
+		var pc = new RTCPeerConnection(pc_config, { optional: [ { RtpDataChannels: true } ]});
+
+		// creates a data channel to receive meta data 
+		var dataChannel = pc.createDataChannel('mediaDescription', { reliable: false });
+		dataChannel.onmessage = function (event) {
+			try {
+				var mediaDescription = JSON.parse(event.data);
+		    	meta.innerHTML = 'Listening to ' + mediaDescription.hello;
+			} catch (err) {
+				console.log(err);
+			}
+		}
+
+		function updateMediaDescription() {
+			console.log('media description received');
+		}
+
+		pc.onicecandidate = function(event) {
+			socket.emit('message', { from: myId, to: to, data: { type: 'candidate', candidate: event.candidate } });
+		}
+
+		// when a message is received add it to the peerconnection accordingly
+		socket.on('message', function(message) {
+			console.log('Received message: ' + JSON.stringify(message.data));
+			
+			if (message.data.type === 'candidate') {
+				if (message.data.candidate) {
+					console.log('adding an ice candidate');
+					pc.addIceCandidate(new RTCIceCandidate(message.data.candidate));
+				}
+			} else if (message.data.type === 'sdp') {
+				console.log('setting remote description and creating answer.')
+				pc.setRemoteDescription(new RTCSessionDescription(message.data.sdp), function() {
+					pc.createAnswer(function(desc) {
+						pc.setLocalDescription(desc);
+						socket.emit('message', { from: myId, to: message.from, data: { type: 'sdp', sdp: desc} } );
+					}, failedCreateAnswer);
+				}, failedSetRemoteDescription);
+			}
+		});
+
+	    pc.onaddstream = gotRemoteStream;
+
+	    // when a media stream is received attach it to the media element.
+    	function gotRemoteStream(event) {
+    		console.log('Got remote stream.');
+    		attachMediaStream(player, event.stream);
+    		player.play();
+    		monitorBitrate();
+    		player.onloadeddata = function (event) {
+    			console.log(event);
+    		}
+
+    		player.onprogress = function (event) {
+    			console.log(event);
+    		}
+    	}
+
+    	var timestampPrev = 0;
+    	var bytesPrev;
+    	var monitorInterval;
+
+    	function monitorBitrate() {
+    		if (monitorInterval) {
+	    		timestampPrev = 0;
+    			bytesPrev = 0;
+    			//clearInterval(monitorInterval);
+		    }
+
+    		monitorInterval = setInterval(function() {
+	    		if (pc.getRemoteStreams()[0]) {
+	    			pc.getStats(function(stats) {
+	    				var bitrateTxt = 'No bitrate stats';
+	    				var results = stats.result();
+	    				for (var i in results) {
+	    					var result = results[i];
+	    					if (!result.local || result.local === result) {
+	    						if (result.type === 'ssrc') {
+	    							var bytesNow = result.stat('bytesReceived');
+	    							if (timestampPrev > 0) {
+	    								var bitrate = Math.round((bytesNow - bytesPrev) * 8 / (result.timestamp - timestampPrev));
+
+	    								if (bitrate > 0) {
+	    									var bitrateTxt = 'Received in ' + bitrate + ' kbits/sec';
+	    								}	
+	    							}
+
+	    							timestampPrev = result.timestamp;
+	    							bytesPrev = bytesNow;
+	    						}
+	    					}
+
+							rate.innerHTML = bitrateTxt;
+	    				}
+	    			});
+	    		}
+    		}, 1000);
+    	}
+
+   	  	function failedCreateAnswer(error) {
+	    	console.log("Failure callback from createAnswer: " + JSON.stringify(error));
+  		}
+
+   	  	function failedSetRemoteDescription(error) {
+	    	console.log("Failure callback from setRemoteDescription: " + JSON.stringify(error));
+  		}
+
+    </script>
+</html>

@@ -1,0 +1,298 @@
+<!doctype html>
+<html>
+	<head>
+	    <meta charset="utf-8">
+	    <meta name="viewport" content="width=620"/>
+	    <title>Toonin test</title>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/webrtc-adapter/7.3.0/adapter.js" integrity="sha256-lIS0dMoAFZciS54UrVzTS9jXeTg3oIX2V+azpRKr0Cg=" crossorigin="anonymous"></script>
+
+		<script src="/socket.io/socket.io.js"></script>
+		<style>
+			#holder { border: 10px dashed #ccc; width: 200px; height: 200px; margin: 20px auto;}
+			#holder.hover { border: 10px dashed #333; }
+			#holder.background { background-size:100% 100%; background-repeat:no-repeat;}
+		</style>
+	</head>
+
+	<body>
+		<div id="blockcontent">
+			<article style="align: center;">
+
+				<div id="holder"></div>
+
+				<div style="text-align: center">
+					<p><label id="meta">&nbsp;</label></p>
+					<input type="button" onclick="toggleMute();" value="Mute/Unmute" class="button"/>
+					<input type="button" onclick="togglePlay();" value="Pause/Play" class="button"/>
+					<br/>
+					<label>Volume</label>
+					<input type="range" min="0" max="100" value="100" oninput="changeVolume(this);" class="button" style="vertical-align: middle"/>
+					<h3>You have <span id="counter">0</span> listeners.</h3>
+					<h4 id="room">
+					</h4>
+				</div>
+
+				<p id="status"></p>
+			</article>
+		</div>
+	</body>
+
+    <script lang="javascript">
+    	// references to UI elements that need to be updated
+    	var holder = document.getElementById('holder');
+    	var state = document.getElementById('status');
+    	var room = document.getElementById('room');
+    	var counter = document.getElementById('counter');
+    	var meta = document.getElementById('meta');
+
+		// Check for the various File API support.
+		if (window.File
+			&& window.FileReader 
+			&& window.FileList 
+			&& window.Blob
+			&& RTCPeerConnection
+			&& (window.AudioContext || window.webkitAudioContext)) {
+
+			window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
+			if (navigator.webkitGetUserMedia) {
+				state.className = 'success';
+				state.innerHTML = 'All the required APIs are available.'
+			} else {
+				state.className = 'fail';
+				state.innerHTML = 'This demo requires Chrome for playing mp3 encoded media.'
+			}
+		} else {
+			state.className = 'fail';
+		}
+
+		// handle file drops
+		holder.ondragover = function () { this.className = 'hover'; return false; };
+		holder.ondragend = function () { this.className = ''; return false; };
+		holder.ondrop = handleFileDrop;
+
+		// socket connection to the signalling server
+		var socket = io.connect();
+
+		// setup media objects
+		var context;
+		var currentStream;
+		var gainNode;
+		var mediaSource, mediaBuffer, remoteDestination, mediaDescription;
+		var muted, start, stop;
+
+		// webrtc connection configuration
+		var pc_config = {"iceServers": [{"urls": [
+        "stun:stun.l.google.com:19302",
+        "stun:stun2.l.google.com:19302",
+        "stun:stun3.l.google.com:19302",
+        "stun:stun4.l.google.com:19302"
+      ]}]};
+
+		// keep track of peers and the id of this session
+		var peers = {};
+		var myId;
+
+		// after connecting to the server an ID for this session is received and saved.
+		socket.on('your-id', function(id) {
+			myId = id;
+			console.log('id = ' + id);
+
+			var clientURL = window.location.protocol + '//' + window.location.host + '/listen.html?id=' + myId;
+			room.innerHTML = 'Invite others to listen to your stream by sharing this link:<br/><a href="' + clientURL + '" target="_blank">' + clientURL + '</a>'; 
+		});
+
+		socket.on('disconnected', function(from) {
+			peers[from] = undefined;
+		});
+
+		// when a listener logs on to the sessions we'll setup webrtc signalling for the session and check if we can start
+		// streaming media
+		socket.on('logon', function(message) {
+			pc = new RTCPeerConnection(pc_config, { optional: [ { RtpDataChannels: true } ]});
+			
+			pc.onicecandidate = function(event) {
+				socket.emit('message', { from: myId, to: message.from, data: { type: 'candidate', candidate: event.candidate } } );
+			}
+
+			var from = message.from;
+			peers[from] = { peerconnection: pc, stream: undefined };
+
+			// create a data channel for sending the media description
+			peers[from].dataChannel = peers[from].peerconnection.createDataChannel('mediaDescription', { reliable: true });
+			peers[from].dataChannel.onopen = function() {
+				startPlayingIfPossible(from);
+			};
+
+			peers[from].peerconnection.createOffer(function(desc) {
+				gotDescription(from, desc);
+			}, failed);
+
+			counter.innerHTML = Object.keys(peers).length;
+		});
+
+		// when a listener leaves remove the rtc stream for that peer
+		socket.on('logoff', function(message) {
+			console.log('received logoff message');
+			
+			try {
+				peers[message.from].peerconnection.removeStream(peers[message.from].stream);
+			} catch (err) {
+
+			}
+
+	    	peers[message.from].stream = undefined;
+	    	delete peers[message.from];
+			counter.innerHTML = Object.keys(peers).length;
+		});
+
+		// when a message is received from a listener we'll update the rtc session accordingly
+		socket.on('message', function(message) {
+			console.log('Received message: ' + JSON.stringify(message.data));
+
+			if (message.data.type === 'candidate') {
+				if (message.data.candidate) {
+					peers[message.from].peerconnection.addIceCandidate(new RTCIceCandidate(message.data.candidate));
+				}
+			} else if (message.data.type === 'sdp') {
+				peers[message.from].peerconnection.setRemoteDescription(new RTCSessionDescription(message.data.sdp));
+			}
+		});
+
+		// is called when SDP is received from a connected listener
+		function gotDescription(from, desc) {
+			peers[from].peerconnection.setLocalDescription(desc);
+			socket.emit('message', { from: myId, to: from, data: { type: 'sdp', sdp: desc } });
+		}
+
+		// checks if media is present and starts streaming media to a connected listener if possible
+		function startPlayingIfPossible(from) {
+			// add the stream to the peerconnection for this connection
+			if (mediaSource && remoteDestination) {
+				var constraints = { mandatory: {}, optional: [] };
+				// constraints.optional[0] = { 'bandwidth' : 100 }; // does not seem to influence quality
+				peers[from].peerconnection.addStream(remoteDestination.stream, constraints);
+				peers[from].stream = remoteDestination.stream;
+				peers[from].peerconnection.createOffer(function(desc) {
+					gotDescription(from, desc);
+				}, failed);
+
+				sendMediaDescription(peers[from].dataChannel);
+			}
+		}
+
+		// Sends media meta information over a rtc data channel to a connected listener
+		function sendMediaDescription(channel) {
+			if (channel.readyState === 'open') {
+				var data = JSON.stringify({"hello": "message"});
+				channel.send(data);
+			}
+		}
+
+		function onDataChannelOpen() {
+			sendMediaDescription(this);
+		}
+
+		function failed(code) {
+    		log("Failure callback: " + code);
+  		}
+
+  		// is called when a file is dropped in the drop zone
+    	function handleFileDrop(event) {
+    		// stop the current stream.
+    		stopStream();
+
+			this.className = '';
+			event.preventDefault();
+
+			var file = event.dataTransfer.files[0];
+			mediaDescription = {};
+			context = new AudioContext();
+			gainNode = context.createGain();
+			gainNode.connect(context.destination);
+
+			if (file.type.match('audio*')) {
+				var reader = new FileReader();
+
+				// read the mp3 and decode the audio.
+
+				reader.onload = (function(readEvent) {
+					context.decodeAudioData(readEvent.target.result, function(buffer) {
+						if (mediaSource) {
+							mediaSource.stop(0);
+						}
+
+						mediaBuffer = buffer;
+						playStream();
+						start = Date.now();
+					});
+				});
+
+				reader.readAsArrayBuffer(file);
+			}
+
+			return false;
+		}
+
+		// starts playing a media stream from a given offset.
+    	function playStream(offset) {
+    		offset = offset ? offset : 0;
+			mediaSource = context.createBufferSource();
+			mediaSource.buffer = mediaBuffer;
+			mediaSource.start(0, offset / 1000);
+			mediaSource.connect(gainNode);
+
+			// setup remote stream
+			remoteDestination = context.createMediaStreamDestination();
+			mediaSource.connect(remoteDestination);
+
+			for (var peer in peers) {
+				startPlayingIfPossible(peer);
+			}
+    	}
+
+    	// stops playing the stream and removes the stream from peer connections
+    	function stopStream() {
+    		for (var peer in peers) {
+    			if (peers[peer].stream) {
+    				peers[peer].stream.stop();
+	    			peers[peer].peerconnection.removeStream(peers[peer].stream);
+	    			peers[peer].stream = undefined;
+    			}
+    		}
+
+    		if (mediaSource) mediaSource.stop(0);
+    	}
+
+    	// sets the volume
+    	function changeVolume(element) {
+    		var volume = element.value;
+    		var fraction = parseInt(element.value, 10) / parseInt(element.max, 10);
+    		gainNode.gain.value = fraction * fraction;
+    	}
+
+    	// mutes the volume
+    	function toggleMute() {
+    		if (muted) {
+    			gainNode.gain.value = muted;
+    			muted = undefined;
+    		} else {
+    			muted = gainNode.gain.value;
+    			gainNode.gain.value = 0;
+    		}
+    	}
+
+    	// toggles pause resume
+    	function togglePlay() {
+    		if (stop) {
+    			var offset = stop - start;
+    			playStream(offset);
+    			start = Date.now() - offset;
+    			stop = undefined;
+    		} else {
+    			stopStream(offset);
+    			stop = Date.now();
+    		} 
+    	}
+    </script>
+</html>
