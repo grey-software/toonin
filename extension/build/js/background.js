@@ -1,1 +1,98 @@
-!function(e){var o={};function n(t){if(o[t])return o[t].exports;var r=o[t]={i:t,l:!1,exports:{}};return e[t].call(r.exports,r,r.exports,n),r.l=!0,r.exports}n.m=e,n.c=o,n.d=function(e,o,t){n.o(e,o)||Object.defineProperty(e,o,{configurable:!1,enumerable:!0,get:t})},n.r=function(e){Object.defineProperty(e,"__esModule",{value:!0})},n.n=function(e){var o=e&&e.__esModule?function(){return e.default}:function(){return e};return n.d(o,"a",o),o},n.o=function(e,o){return Object.prototype.hasOwnProperty.call(e,o)},n.p="",n(n.s=1)}([function(e,o,n){"use strict";var t=function(e,o){var n=e.match(o);return n&&2==n.length?n[1]:null},r=function(e,o){for(var n=e.split(" "),t=new Array,r=0,i=0;i<n.length;i++)3===r&&(t[r++]=o),n[i]!==o&&(t[r++]=n[i]);return t.join(" ")},i=function(e,o){for(var n=e[o].split(" "),r=e.length-1;r>=0;r--){var i=t(e[r],/a=rtpmap:(\d+) CN\/\d+/i);if(i){var c=n.indexOf(i);-1!==c&&n.splice(c,1),e.splice(r,1)}}return e[o]=n.join(" "),e};e.exports={preferOpus:function(e){for(var o=e.split("\r\n"),n=0;n<o.length;n++)if(-1!==o[n].search("m=audio")){var c=n;break}if(null===c)return e;for(n=0;n<o.length;n++)if(-1!==o[n].search("opus/48000")){var s=t(o[n],/:(\d+) opus\/48000/i);s&&(o[c]=r(o[c],s));break}return e=(o=i(o,c)).join("\r\n")}}},function(e,o,n){"use strict";var t,r=n(0),i=(t=r)&&t.__esModule?t:{default:t};var c,s={audio:!0};function a(){chrome.tabs.executeScript({file:"js/lib/socket.io.js"},d)}function d(){chrome.tabs.executeScript({file:"js/inject.js"},function(){chrome.runtime.lastError?console.error(chrome.runtime.lastError.message):console.log("All scripts successfully loaded")})}chrome.runtime.onConnect.addListener(function(e){c=e,e.onMessage.addListener(function(e){"init"==e.type&&f.emit("create room")})}),chrome.browserAction.onClicked.addListener(function(){console.log("Starting Toonin Script Injection"),chrome.tabs.executeScript({file:"js/lib/adapter.js"},a)}),console.log("application script running");var l,u,f=io("http://toonin-backend-54633158.us-east-1.elb.amazonaws.com:8100"),p={},m={iceServers:[{urls:["stun:stun.l.google.com:19302","stun:stun2.l.google.com:19302","stun:stun3.l.google.com:19302","stun:stun4.l.google.com:19302"]}]},g={offerToReceiveAudio:1};f.on("room created",function(e){console.log("New room created with ID: "+e),u=e,c.postMessage({type:"roomID",roomID:e}),chrome.tabCapture.capture(s,function(e){if(e){var o=e.getAudioTracks(),n=new MediaStream(o);window.audio=document.createElement("audio"),window.audio.srcObject=n,window.audio.play(),l=n,console.log("Tab audio captured. Now sending url to injected content script")}else console.error("Error starting tab capture: "+(chrome.runtime.lastError.message||"UNKNOWN"))})}),f.on("peer joined",function(e){console.log("New peer has joined the room"),p[e.id]={id:e.id,room:e.room,iceCandidates:[]},function(e){console.log("Starting new connection for peer: "+e);var o=new RTCPeerConnection(m);o.addStream(l),p[e].rtcConn=o,console.log(p),p[e].rtcConn.onicecandidate=function(o){o.candidate?(p[e].iceCandidates.push(o.candidate),f.emit("src new ice",{id:e,room:u,candidate:o.candidate})):console.log("No candidate for RTC connection")},o.createOffer(g).then(function(n){i.default.preferOpus(n.sdp),o.setLocalDescription(new RTCSessionDescription(n)).then(function(){p[e].localDesc=n,f.emit("src new desc",{id:e,room:u,desc:n})})})}(e.id)}),f.on("peer ice",function(e){console.log("Ice Candidate from peer: "+e.id+" in room: "+e.room),console.log("Ice Candidate: "+e.candidate),u==e.room&&e.id in p?p[e.id].rtcConn.addIceCandidate(new RTCIceCandidate(e.candidate)).then(console.log("Ice Candidate added successfully for peer: "+e.id)).catch(function(e){console.log("Error on addIceCandidate: "+e)}):console.log("Ice Candidate not for me")}),f.on("peer desc",function(e){console.log("Answer description from peer: "+e.id+" in room: "+e.room),console.log("Answer description: "+e.desc),u==e.room&&e.id in p?p[e.id].rtcConn.setRemoteDescription(new RTCSessionDescription(e.desc)).then(function(){console.log("Remote description set successfully for peer: "+e.id)}).catch(function(e){console.log("Error on setRemoteDescription: "+e)}):console.log("Answer Description not for me")})}]);
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, {
+/******/ 				configurable: false,
+/******/ 				enumerable: true,
+/******/ 				get: getter
+/******/ 			});
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// define __esModule on exports
+/******/ 	__webpack_require__.r = function(exports) {
+/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = "./src/js/background/index.js");
+/******/ })
+/************************************************************************/
+/******/ ({
+
+/***/ "./src/js/background/index.js":
+/*!************************************!*\
+  !*** ./src/js/background/index.js ***!
+  \************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+eval("\n\nvar _opus = __webpack_require__(/*! ./opus */ \"./src/js/background/opus.js\");\n\nvar _opus2 = _interopRequireDefault(_opus);\n\nfunction _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }\n\nvar constraints = {\n    audio: true\n};\nvar port;\n\nchrome.runtime.onConnect.addListener(function (p) {\n    port = p;\n    p.onMessage.addListener(function (msg) {\n        if (msg.type == \"init\") {\n            socket.emit(\"create room\");\n        }\n    });\n});\n\nfunction getTabAudio() {\n    chrome.tabCapture.capture(constraints, function (stream) {\n        if (!stream) {\n            console.error(\"Error starting tab capture: \" + (chrome.runtime.lastError.message || \"UNKNOWN\"));\n            return;\n        }\n        var tracks = stream.getAudioTracks();\n        var tabStream = new MediaStream(tracks);\n        window.audio = document.createElement(\"audio\");\n        window.audio.srcObject = tabStream;\n        window.audio.play();\n        localAudioStream = tabStream;\n        console.log(\"Tab audio captured. Now sending url to injected content script\");\n    });\n}\n\nchrome.browserAction.onClicked.addListener(injectTooninScripts);\n\nfunction injectTooninScripts() {\n    console.log(\"Starting Toonin Script Injection\");\n    loadAdapter(); // load webRTC adapter\n}\n\nfunction loadAdapter() {\n    chrome.tabs.executeScript({\n        file: \"js/lib/adapter.js\"\n    }, loadSocketIO);\n}\n\nfunction loadSocketIO() {\n    chrome.tabs.executeScript({\n        file: \"js/lib/socket.io.js\"\n    }, injectAppScript);\n}\n\nfunction injectAppScript() {\n    chrome.tabs.executeScript({\n        file: \"js/inject.js\"\n    }, function () {\n        if (chrome.runtime.lastError) {\n            console.error(chrome.runtime.lastError.message);\n        } else console.log(\"All scripts successfully loaded\");\n    });\n}\n\n\"use strict\";\nconsole.log(\"application script running\");\nvar socket = io(\"http://toonin-backend-54633158.us-east-1.elb.amazonaws.com:8100\");\n\nvar peers = {};\nvar localAudioStream;\nvar roomID;\n\nvar servers = {\n    iceServers: [{\n        urls: [\"stun:stun.l.google.com:19302\", \"stun:stun2.l.google.com:19302\", \"stun:stun3.l.google.com:19302\", \"stun:stun4.l.google.com:19302\"]\n    }]\n};\n\n// Set up to exchange only audio.\nvar offerOptions = {\n    offerToReceiveAudio: 1\n};\n\nfunction startShare(peerID) {\n    console.log(\"Starting new connection for peer: \" + peerID);\n    var rtcConn = new RTCPeerConnection(servers);\n    rtcConn.addStream(localAudioStream);\n    peers[peerID].rtcConn = rtcConn;\n    console.log(peers);\n    peers[peerID].rtcConn.onicecandidate = function (event) {\n        if (!event.candidate) {\n            console.log(\"No candidate for RTC connection\");\n            return;\n        }\n        peers[peerID].iceCandidates.push(event.candidate);\n        socket.emit(\"src new ice\", {\n            id: peerID,\n            room: roomID,\n            candidate: event.candidate\n        });\n    };\n\n    rtcConn.createOffer(offerOptions).then(function (desc) {\n        _opus2.default.preferOpus(desc.sdp);\n        rtcConn.setLocalDescription(new RTCSessionDescription(desc)).then(function () {\n            peers[peerID].localDesc = desc;\n            socket.emit(\"src new desc\", {\n                id: peerID,\n                room: roomID,\n                desc: desc\n            });\n        });\n    });\n}\n\n/* **************** *\n * Socket Listeners *\n * **************** */\nsocket.on(\"room created\", function (newRoomID) {\n    console.log(\"New room created with ID: \" + newRoomID);\n    roomID = newRoomID;\n    port.postMessage({\n        type: \"roomID\",\n        roomID: newRoomID\n    });\n    getTabAudio();\n});\n\nsocket.on(\"peer joined\", function (peerData) {\n    console.log(\"New peer has joined the room\");\n    peers[peerData.id] = {\n        id: peerData.id,\n        room: peerData.room,\n        iceCandidates: []\n    };\n    startShare(peerData.id);\n});\n\nsocket.on(\"peer ice\", function (iceData) {\n    console.log(\"Ice Candidate from peer: \" + iceData.id + \" in room: \" + iceData.room);\n    console.log(\"Ice Candidate: \" + iceData.candidate);\n    if (roomID != iceData.room || !(iceData.id in peers)) {\n        console.log(\"Ice Candidate not for me\");\n        return;\n    }\n    peers[iceData.id].rtcConn.addIceCandidate(new RTCIceCandidate(iceData.candidate)).then(console.log(\"Ice Candidate added successfully for peer: \" + iceData.id)).catch(function (err) {\n        console.log(\"Error on addIceCandidate: \" + err);\n    });\n});\n\nsocket.on(\"peer desc\", function (descData) {\n    console.log(\"Answer description from peer: \" + descData.id + \" in room: \" + descData.room);\n    console.log(\"Answer description: \" + descData.desc);\n    if (roomID != descData.room || !(descData.id in peers)) {\n        console.log(\"Answer Description not for me\");\n        return;\n    }\n    peers[descData.id].rtcConn.setRemoteDescription(new RTCSessionDescription(descData.desc)).then(function () {\n        console.log(\"Remote description set successfully for peer: \" + descData.id);\n    }).catch(function (err) {\n        console.log(\"Error on setRemoteDescription: \" + err);\n    });\n});\n\n//# sourceURL=webpack:///./src/js/background/index.js?");
+
+/***/ }),
+
+/***/ "./src/js/background/opus.js":
+/*!***********************************!*\
+  !*** ./src/js/background/opus.js ***!
+  \***********************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+eval("\n\nvar preferOpus = function preferOpus(sdp) {\n    var sdpLines = sdp.split('\\r\\n');\n\n    for (var i = 0; i < sdpLines.length; i++) {\n        if (sdpLines[i].search('m=audio') !== -1) {\n            var mLineIndex = i;\n            break;\n        }\n    }\n\n    if (mLineIndex === null) return sdp;\n\n    for (i = 0; i < sdpLines.length; i++) {\n        if (sdpLines[i].search('opus/48000') !== -1) {\n            var opusPayload = extractSdp(sdpLines[i], /:(\\d+) opus\\/48000/i);\n            if (opusPayload) sdpLines[mLineIndex] = setDefaultCodec(sdpLines[mLineIndex], opusPayload);\n            break;\n        }\n    }\n\n    sdpLines = removeCN(sdpLines, mLineIndex);\n\n    sdp = sdpLines.join('\\r\\n');\n    return sdp;\n};\n\nvar extractSdp = function extractSdp(sdpLine, pattern) {\n    var result = sdpLine.match(pattern);\n    return result && result.length == 2 ? result[1] : null;\n};\n\nvar setDefaultCodec = function setDefaultCodec(mLine, payload) {\n    var elements = mLine.split(' ');\n    var newLine = new Array();\n    var index = 0;\n    for (var i = 0; i < elements.length; i++) {\n        if (index === 3) newLine[index++] = payload;\n        if (elements[i] !== payload) newLine[index++] = elements[i];\n    }\n    return newLine.join(' ');\n};\n\nvar removeCN = function removeCN(sdpLines, mLineIndex) {\n    var mLineElements = sdpLines[mLineIndex].split(' ');\n    for (var i = sdpLines.length - 1; i >= 0; i--) {\n        var payload = extractSdp(sdpLines[i], /a=rtpmap:(\\d+) CN\\/\\d+/i);\n        if (payload) {\n            var cnPos = mLineElements.indexOf(payload);\n            if (cnPos !== -1) mLineElements.splice(cnPos, 1);\n            sdpLines.splice(i, 1);\n        }\n    }\n    sdpLines[mLineIndex] = mLineElements.join(' ');\n    return sdpLines;\n};\n\nmodule.exports = {\n    preferOpus: preferOpus\n};\n\n//# sourceURL=webpack:///./src/js/background/opus.js?");
+
+/***/ })
+
+/******/ });
