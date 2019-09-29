@@ -6,4 +6,4 @@ var html = fs.readFileSync('./src/toonin_box.html', 'utf-8');
 html = html.replace(/(\r\n\t|\n|\r\t)/gm,"");
 var moduleString = "module.exports = {html: '";
 moduleString += html + "'}";
-fs.writeFileSync('./src/js/inject/toonin_box.js', moduleString);
+//fs.writeFileSync('./src/js/inject/toonin_box.js', moduleString);

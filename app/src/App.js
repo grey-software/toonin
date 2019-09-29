@@ -6,7 +6,11 @@ import TextField from "material-ui/TextField";
 import io from "socket.io-client";
 import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
 
+<<<<<<< HEAD
 const ENDPOINT = "http://184.73.84.126:8100/";
+=======
+const ENDPOINT = "http://toonin-backend-54633158.us-east-1.elb.amazonaws.com:8100/";
+>>>>>>> 05ee32106a5ba7afdab8346e440099bff7f588f1
 
 const btnStyle = {
     background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
