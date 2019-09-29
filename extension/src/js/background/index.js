@@ -101,8 +101,8 @@ function handleFirstBlob(blob, dataChannel) {
         context.decodeAudioData(buffer, (decodedData) => {
             // sends the offset to client to compensate for the extra audio data at the start
             // which is needed for decoding
-            dataChannel.send(decodedData.duration.toString()); 
-            dataChannel.send(blob);
+            dataChannel.send(decodedData.duration.toString());
+            dataChannel.send(buffer);
         });
     });
 }
@@ -117,7 +117,7 @@ function refreshData() {
 // because audio decoding works only for the first arrayBuffer sent to client.
 // The subsequent audio buffers don't have headers, so they can't be decoded
 // by the built-in AudioContext decoder for now.
-setInterval(refreshData, 2500); // this should be less for realtime streaming
+setInterval(refreshData, 1500); // this should be less for realtime streaming
 
 function streamAudioThroughDataChannel(dataChannel) {
     /* Need to figure out how to decode decode arrayBuffers after the first one.

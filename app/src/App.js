@@ -238,6 +238,8 @@ class App extends Component {
     );
   }
 
+  
+
   checkStream() {
       fetch(ENDPOINT + this.state.roomID)
           .then(res => res.json())
@@ -258,7 +260,12 @@ class App extends Component {
               var recieveChannel = event.channel;
               var audioContext = new AudioContext();
               var soundDest = audioContext.createMediaStreamDestination();
+              var soundSource = null;
+              //var tempDest = audioContext.createMediaStreamDestination();
+              var bufferQueue = [];
+              var nextBuffer = null;
               var firstBufferDur = 0;
+              var prevBufferDur = 0;
               var tabAudio = this.audio;
               var visualizer = this.createVisualization;
 
@@ -267,26 +274,29 @@ class App extends Component {
                   // this doesn't work for partial data because the audio encoding info is stored in the header.
                   // so after the first array buffer, it throws an error becuase it recieves raw audio
                   // data with no header. So it doesn't know how to decode the data.
-                  if(firstBufferDur === 0) {
+                  if(typeof(event.data) === "string") {
                       // recieve the offset from the src to compensate for extra data at the start of 
                       // every arraybuffer
                       firstBufferDur = Number(event.data);
-                      console.log(event.data);
                       console.log('offset: ' + firstBufferDur);
                   }
                   else {
                       audioContext.decodeAudioData(event.data, function(buffer) {
-                        //if (!firstBufferDur) {
-                        //    firstBufferDur = buffer.duration;
-                        //}
-                        //console.log(firstBufferDur);
-                        var soundSource = audioContext.createBufferSource();
-                        soundSource.buffer = buffer;
-                        // something here causes breakup for every audio buffer recieved
-                        soundSource.start(0, firstBufferDur);
-                        soundSource.connect(soundDest); // need to figure out how have a continuous stream playing
-                        tabAudio.srcObject = soundDest.stream;
-                        tabAudio.play();
+                          if(bufferQueue.length < 4) {
+                              bufferQueue.unshift(buffer);
+                          }
+                          else {
+                              bufferQueue.unshift(buffer);
+                              nextBuffer = bufferQueue.pop();
+                              soundSource = audioContext.createBufferSource();
+                              soundSource.buffer = nextBuffer;
+                              soundSource.start(audioContext.currentTime + prevBufferDur, firstBufferDur);
+                              prevBufferDur = nextBuffer.duration;
+                              soundSource.connect(soundDest); // need to figure out how have a continuous stream playing
+                              tabAudio.srcObject = soundDest.stream;
+                              tabAudio.play();
+                          }
+                        
                         //visualizer();
                         
                     }, function(error) {
