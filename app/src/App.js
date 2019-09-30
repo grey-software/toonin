@@ -7,7 +7,7 @@ import io from "socket.io-client";
 import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
 
 //const ENDPOINT = "http://toonin-backend-54633158.us-east-1.elb.amazonaws.com:8100/";
-const ENDPOINT = "http://138.51.161.161:8100/";
+const ENDPOINT = "http://10.0.0.82:8100/";
 
 const btnStyle = {
     background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
@@ -81,6 +81,8 @@ const servers = {
     }
   ]
 };
+
+
 class App extends Component {
     constructor(props) {
         super(props);
@@ -259,21 +261,17 @@ class App extends Component {
               console.log('inside on data channel event handler');
               var recieveChannel = event.channel;
               var audioContext = new AudioContext();
-              var soundDest = audioContext.createMediaStreamDestination();
+              var gainNode = null;
               var soundSource = null;
-              //var tempDest = audioContext.createMediaStreamDestination();
               var bufferQueue = [];
-              var nextBuffer = null;
+              const minBufferSize = 4;
               var firstBufferDur = 0;
               var prevBufferDur = 0;
-              var tabAudio = this.audio;
-              var visualizer = this.createVisualization;
+              var isPlaying = false;
+              var startTime = 0;
 
               recieveChannel.onmessage = function(event) {
-                  //console.log(event.data);
-                  // this doesn't work for partial data because the audio encoding info is stored in the header.
-                  // so after the first array buffer, it throws an error becuase it recieves raw audio
-                  // data with no header. So it doesn't know how to decode the data.
+                  
                   if(typeof(event.data) === "string") {
                       // recieve the offset from the src to compensate for extra data at the start of 
                       // every arraybuffer
@@ -282,26 +280,63 @@ class App extends Component {
                   }
                   else {
                       audioContext.decodeAudioData(event.data, function(buffer) {
-                          if(bufferQueue.length < 4) {
-                              bufferQueue.unshift(buffer);
+                          // create an audio buffer node to feed audio data to client browser
+                          soundSource = audioContext.createBufferSource();
+                          soundSource.buffer = buffer;
+                          soundSource.connect(audioContext.destination);
+                          // gain Node to fix clicking sound. doesn't work at the moment. A constant clicking can
+                          // be heard the background
+                          gainNode = audioContext.createGain();
+                          gainNode.connect(audioContext.destination);
+                          //soundSource.start(audioContext.currentTime + prevBufferDur, firstBufferDur);
+                          //prevBufferDur = buffer.duration;
+                          // obj to enqueue to the buffer queue
+                          var tempObj = {src: soundSource, gainNode: gainNode, isScheduled: false};
+                          if(isPlaying) {
+                              // if the audio is alreay playing, accept the new buffer and schedule it
+                              soundSource.start(startTime + prevBufferDur, firstBufferDur);
+                              prevBufferDur += soundSource.buffer.duration - firstBufferDur;
+                              let gainStartTime = startTime + prevBufferDur + soundSource.buffer.duration
+                              gainNode.gain.exponentialRampToValueAtTime(0.0000000001, gainStartTime);
+                              tempObj.isScheduled = true;
                           }
-                          else {
-                              bufferQueue.unshift(buffer);
-                              nextBuffer = bufferQueue.pop();
-                              soundSource = audioContext.createBufferSource();
-                              soundSource.buffer = nextBuffer;
-                              soundSource.start(audioContext.currentTime + prevBufferDur, firstBufferDur);
-                              prevBufferDur = nextBuffer.duration;
-                              soundSource.connect(soundDest); // need to figure out how have a continuous stream playing
-                              tabAudio.srcObject = soundDest.stream;
-                              tabAudio.play();
+                          bufferQueue.push(tempObj);
+                          // when this buffer has played its audio, delete it from the buffer queue
+                          soundSource.onended = (ev) => {
+                              bufferQueue.splice(bufferQueue.indexOf(tempObj), 1);
+                              // if no audio buffers left in the the buffer queue, cleanup (audio finished)
+                              if(bufferQueue.length === 0) {
+                                  isPlaying = false;
+                                  prevBufferDur = 0;
+                                  startTime = 0;
+                              }
                           }
-                        
-                        //visualizer();
                         
                     }, function(error) {
                         console.log('Audio Decoding failed. Error: ' + String(error));
                     });
+
+                    // if no audio playing, wait for buffer to fill up to minBufferSize (first time connection)
+                    if(!isPlaying && bufferQueue.length > minBufferSize) {
+                        if(startTime === 0) {
+                            // start time needed to offset every buffer's playing time
+                            startTime = audioContext.currentTime;
+                        }
+                        for(var i = 0; i < bufferQueue.length; i++) {
+                            // schedule each audio buffer in queue to play on after the other
+                            let chunk = bufferQueue[i];
+                            if(!chunk.isScheduled) {
+                                chunk.src.start(startTime + prevBufferDur, firstBufferDur);
+                                let gainStartTime = startTime + prevBufferDur + chunk.src.buffer.duration;
+                                chunk.gainNode.gain.exponentialRampToValueAtTime(0.0000000001, gainStartTime);
+                                chunk.isScheduled = true;
+                                prevBufferDur += chunk.src.buffer.duration - firstBufferDur;
+                            }
+                        }
+                        isPlaying = true;
+                        //console.log(bufferQueue);
+                    }
+
                   }
               }
           }

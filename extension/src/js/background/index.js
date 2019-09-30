@@ -14,7 +14,7 @@ chrome.runtime.onConnect.addListener(function (p) {
     });
 });
 
-function getTabAudio() {
+function getTabAudio(onFinishCallback) {
     chrome.tabCapture.capture(constraints, function (stream) {
         if (!stream) {
             console.error("Error starting tab capture: " + (chrome.runtime.lastError.message || "UNKNOWN"));
@@ -26,6 +26,7 @@ function getTabAudio() {
         window.audio.srcObject = tabStream;
         //window.audio.play();
         localAudioStream = tabStream;
+        onFinishCallback();
         console.log("Tab audio captured. Now sending url to injected content script");
     });
 }
@@ -62,12 +63,16 @@ function injectAppScript() {
 "use strict";
 console.log("application script running");
 //var socket = io("http://toonin-backend-54633158.us-east-1.elb.amazonaws.com:8100");
-var socket = io("http://138.51.161.161:8100");
+var socket = io("http://10.0.0.82:8100");
 
 var peers = {};
+var dataChannels = [];
 var localAudioStream;
 var audioRecorder;
-var dataChannelGlobal;
+var startDataRequests = false;
+var headerBlob = null;
+var superBlob = null; // Blob with combined headerBlob and event.data
+var headerOffset = 0;
 var roomID;
 
 const servers = {
@@ -86,30 +91,26 @@ const offerOptions = {
     offerToReceiveAudio: 1
 };
 
-/*
-function sendDataBuffer(event) {
-    new Response(event.data).arrayBuffer().then((buffer) => {
-        streamAudioThroughDataChannel(dataChannelGlobal);
-        dataChannelGlobal.send(buffer);
-    });
-}
-*/
-
-function handleFirstBlob(blob, dataChannel) {
+function sendOffset(blob, dataChannel) {
     var context = new AudioContext();
     new Response(blob).arrayBuffer().then((buffer) => {
         context.decodeAudioData(buffer, (decodedData) => {
             // sends the offset to client to compensate for the extra audio data at the start
             // which is needed for decoding
             dataChannel.send(decodedData.duration.toString());
-            dataChannel.send(buffer);
+            headerOffset = decodedData.duration;
         });
     });
 }
 
 function refreshData() {
-    if(audioRecorder) {
-        audioRecorder.requestData();
+    if(audioRecorder && startDataRequests) {
+        try {
+            audioRecorder.requestData();
+        }
+        catch(e) {
+            
+        }
     }
 }
 
@@ -117,60 +118,61 @@ function refreshData() {
 // because audio decoding works only for the first arrayBuffer sent to client.
 // The subsequent audio buffers don't have headers, so they can't be decoded
 // by the built-in AudioContext decoder for now.
-setInterval(refreshData, 1500); // this should be less for realtime streaming
+setInterval(refreshData, 150); // this should be less for realtime streaming
 
-function streamAudioThroughDataChannel(dataChannel) {
-    /* Need to figure out how to decode decode arrayBuffers after the first one.
-     * Could pull header from the first data chunk and insert it at the start of
-     * all the subsequent data chunks
-     */
+function setupMediaRecorder() {
     var mediaRecorder = new MediaRecorder(localAudioStream, {
         audioBitsPerSecond : 128000,
         mimeType : 'audio/webm;codecs="opus"'
     });
-    // requestData returns a blob of saved data thus far since last requestData call.
-    mediaRecorder.start();
-    audioRecorder = mediaRecorder;
-    //var chunks = []; // store multiple audio blobs for combining later
-    var superBlob = null; // Blob with combined firstBlob and event.data
-    var firstBlob = null; // need to store the first blob as it contains the header info
-    // the firstBlob is attached to every other blob as the header info is needed for 
-    // audio decoding
 
-    mediaRecorder.ondataavailable = function(event) {
-        if(!firstBlob) {
-            firstBlob = event.data;
-            handleFirstBlob(event.data, dataChannel);
+    //mediaRecorder.start();
+    audioRecorder = mediaRecorder;
+}
+
+function linkOnDataCallback() {
+    audioRecorder.ondataavailable = function(event) {
+        if(!headerBlob) {
+            headerBlob = event.data;
+            for(var i = 0; i < dataChannels.length; i++) {
+                sendOffset(event.data, dataChannels[i]);
+            }
         }
         else {
             // combine firstBlob and event.data to make sure every 
             // blob sent has a header needed for decoding
-            superBlob = new Blob([firstBlob, event.data]);
+            superBlob = new Blob([headerBlob, event.data]);
             new Response(superBlob).arrayBuffer().then((buffer) => {
                 // sends arraybuffer of audio data
-                dataChannel.send(buffer);
+                for(var i = 0; i < dataChannels.length; i++) {
+                    dataChannels[i].send(buffer);
+                }
             });
         }
     };
-    
 }
 
 function startShareWithDataChannel(peerID) {
 
     console.log("Starting new connection for peer: " + peerID);
     const rtcConn = new RTCPeerConnection(servers);
-    // create RTC data channel with label "audioChannel"
-    var dataChannel = rtcConn.createDataChannel("audioChannel");
-    // send data through the dataChannel as soon as the channel is "open"
-    dataChannel.addEventListener("open", (event) => {
-        //dataChannel.send("Data Channel Test Message");
-        dataChannelGlobal = dataChannel;
-        streamAudioThroughDataChannel(dataChannel);
-    });
-
     // add this peer to the list of peers
     peers[peerID].rtcConn = rtcConn;
     console.log(peers);
+
+    // create RTC data channel with label "audioChannel"
+    peers[peerID].dataChannel = rtcConn.createDataChannel(peerID + "-audioChannel");
+    dataChannels.push(peers[peerID].dataChannel);
+
+    // send data through the dataChannel as soon as the channel is "open"
+    peers[peerID].dataChannel.addEventListener("open", (event) => {
+        if(!startDataRequests) {
+            linkOnDataCallback();
+            audioRecorder.start();
+            startDataRequests = true;
+        }
+        if(headerOffset !== 0) { peers[peerID].dataChannel.send(headerOffset.toString()); }
+    });
 
     // handler for onicecandidate event
     peers[peerID].rtcConn.onicecandidate = function (event) {
@@ -245,7 +247,7 @@ socket.on("room created", (newRoomID) => {
         type: "roomID",
         roomID: newRoomID
     });
-    getTabAudio();
+    getTabAudio(setupMediaRecorder);
 });
 
 socket.on("peer joined", (peerData) => {
