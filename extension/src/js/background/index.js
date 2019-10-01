@@ -25,7 +25,7 @@ function getTabAudio() {
         let tabStream = new MediaStream(tracks);
         window.audio = document.createElement("audio");
         window.audio.srcObject = tabStream;
-        //window.audio.play();
+        window.audio.play();
         localAudioStream = tabStream;
         console.log("Tab audio captured. Now sending url to injected content script");
     });
