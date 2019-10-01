@@ -25,12 +25,8 @@ function getTabAudio() {
         let tabStream = new MediaStream(tracks);
         window.audio = document.createElement("audio");
         window.audio.srcObject = tabStream;
-        window.audio.play();
+        //window.audio.play();
         localAudioStream = tabStream;
-        var context = new AudioContext();
-        context.decodeAudioData([], (buffer) => {
-            // buffer is a AudioBuffer
-        });
         console.log("Tab audio captured. Now sending url to injected content script");
     });
 }
@@ -66,7 +62,9 @@ function injectAppScript() {
 
 "use strict";
 console.log("application script running");
-var socket = io("http://toonin-backend-54633158.us-east-1.elb.amazonaws.com:8100");
+//var socket = io("http://toonin-backend-54633158.us-east-1.elb.amazonaws.com:8100");
+var socket = io("http://www.toonin.ml:8100");
+
 
 var peers = {};
 var localAudioStream;

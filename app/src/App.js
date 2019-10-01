@@ -6,7 +6,8 @@ import TextField from "material-ui/TextField";
 import io from "socket.io-client";
 import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
 
-const ENDPOINT = "http://toonin-backend-54633158.us-east-1.elb.amazonaws.com:8100/";
+//const ENDPOINT = "http://toonin-backend-54633158.us-east-1.elb.amazonaws.com:8100/";
+const ENDPOINT = "http://www.toonin.ml:8100/";
 
 const btnStyle = {
     background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
@@ -269,7 +270,7 @@ class App extends Component {
 	        //   this.audio.src = "https://p.scdn.co/mp3-preview/e4a8f30ca62b4d2a129cc4df76de66f43e12fa3f?cid=null";
 	          pause = 0;
 	          this.audio.play();
-              this.createVisualization()
+              //this.createVisualization()
           };
           this.setState({
               established: true,
