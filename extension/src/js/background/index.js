@@ -1,4 +1,5 @@
 import opus from './opus';
+var remoteDestination, audioSourceNode, gainNode;
 
 const constraints = {
     audio: true
@@ -20,12 +21,16 @@ function getTabAudio() {
             console.error("Error starting tab capture: " + (chrome.runtime.lastError.message || "UNKNOWN"));
             return;
         }
-        let tracks = stream.getAudioTracks();
+        let tracks = stream.getAudioTracks(); // MediaStreamTrack[], stream is MediaStream
         let tabStream = new MediaStream(tracks);
         window.audio = document.createElement("audio");
         window.audio.srcObject = tabStream;
         window.audio.play();
         localAudioStream = tabStream;
+        var context = new AudioContext();
+        context.decodeAudioData([], (buffer) => {
+            // buffer is a AudioBuffer
+        });
         console.log("Tab audio captured. Now sending url to injected content script");
     });
 }
@@ -83,11 +88,20 @@ const offerOptions = {
     offerToReceiveAudio: 1
 };
 
+function getStreamableData() {
+    var audioContext = new AudioContext();
+    gainNode = audioContext.createGain();
+	gainNode.connect(audioContext.destination);
+    audioSourceNode = audioContext.createMediaStreamSource(localAudioStream); // of type MediaStreamAudioSourceNode
+    remoteDestination = audioContext.createMediaStreamDestination();
+    audioSourceNode.connect(remoteDestination);
+}
 
 function startShare(peerID) {
     console.log("Starting new connection for peer: " + peerID);
     const rtcConn = new RTCPeerConnection(servers);
-    rtcConn.addStream(localAudioStream);
+    getStreamableData(); // test function
+    rtcConn.addStream(remoteDestination.stream);
     peers[peerID].rtcConn = rtcConn;
     console.log(peers);
     peers[peerID].rtcConn.onicecandidate = function (event) {
