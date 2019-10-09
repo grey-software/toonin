@@ -1,18 +1,17 @@
 <template>
   <v-app>
-    <v-content>
-      <v-text-field v-model="room" />
-      <v-btn @click="checkstream">Toonin</v-btn>
+    <v-content style="margin-left: 4%; margin-top: 4%;">
+      <v-text-field v-model="room" :autofocus="true" placeholder="Room Key" 
+      style="width: 40%;" label="Connect" outlined rounded />
+      <v-btn @click="checkstream" style="margin-left: 1.5%;">Toonin</v-btn>
       <div>
         <audio ref="audio" />
       </div>
 
-      <div class="title">{{Timeline}}</div>
-      <!-- <v-timeline>
-        <v-timeline-item>Room Found</v-timeline-item>
-        <v-timeline-item class="text-right">timeline item</v-timeline-item>
-        <v-timeline-item>timeline item</v-timeline-item>
-      </v-timeline> -->
+      <img src='./icon.png' style="height: 35%; margin-left: 40%; margin-top: 6%;"/>
+
+      <!--<div class="title">{{Timeline}}</div>-->
+      
     </v-content>
   </v-app>
 </template>
@@ -29,7 +28,7 @@ export default {
       peerID: "",
       rtcConn: null,
       isPlaying: false,
-      stream: null
+      stream: null,
     }),
     methods: {
       toonin,

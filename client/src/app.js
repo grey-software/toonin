@@ -74,6 +74,7 @@ export function checkStreamResult(result, obj) {
             logMessage(event.stream);
             audioElem.srcObject = event.stream;	
             //pause = 0;
+            console.log(audioElem);
             audioElem.oncanplay = () => {
                 audioElem.play();
                 obj.isPlaying = audioElem.srcObject.active;
