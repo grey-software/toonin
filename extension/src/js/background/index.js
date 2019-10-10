@@ -61,7 +61,7 @@ function injectAppScript() {
 
 "use strict";
 console.log("application script running");
-var socket = io("http://toonin-backend-54633158.us-east-1.elb.amazonaws.com:8100");
+var socket = io("http://www.toonin.ml:8100");
 
 var peers = {};
 var localAudioStream;
