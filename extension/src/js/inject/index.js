@@ -16,6 +16,7 @@ div.style.right = '30px';
 div.style.zIndex = '10000';
 div.innerHTML = html;
 document.body.appendChild(div);
+var roomID;
 
 const dragElement= (elmnt) => {
     console.log("its being called");
@@ -58,6 +59,7 @@ dragElement(document.getElementById(("tooninBox")));
 
 const shareButton = document.getElementById("btnShare");
 const sessionIDText = document.getElementById("roomID");
+const copyButton = document.getElementById("btnCopy");
 
 shareButton.onclick = () =>{
     port.postMessage({
@@ -70,7 +72,26 @@ port.onMessage.addListener((msg) => {
     if (msg.type == "audio") {
         if (msg.status == "ok") localAudio.src = msg.url;
     } else if (msg.type == "roomID") {
-        sessionIDText.innerHTML = "Your Toonin ID is: \n" + msg.roomID;
+        roomID=msg.roomID
+        sessionIDText.innerHTML = "Your Toonin ID is: \n" + roomID;
         sessionIDText.style.visibility = "visible";
     }
 });
+
+copyButton.onclick = () => {
+    var str = roomID;
+    // Create new element
+    var el = document.createElement('textarea');
+    // Set value (string to be copied)
+    el.value = str;
+    // Set non-editable to avoid focus and move outside of view
+    el.setAttribute('readonly', '');
+    el.style = {position: 'absolute', left: '-9999px'};
+    document.body.appendChild(el);
+    // Select text inside element
+    el.select();
+    // Copy text to clipboard
+    document.execCommand('copy');
+    // Remove temporary element
+    document.body.removeChild(el);
+};
