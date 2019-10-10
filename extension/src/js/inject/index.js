@@ -74,3 +74,14 @@ port.onMessage.addListener((msg) => {
         sessionIDText.style.visibility = "visible";
     }
 });
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    if (request.message === "clicked_browser_action") {
+        console.log("clicked the button")
+        if (div.style.display === "none") {
+            div.style.display = "block";
+          } else {
+            div.style.display = "none";
+          }
+    }
+  });

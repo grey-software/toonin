@@ -51,19 +51,23 @@ function loadSocketIO() {
 }
 
 function injectAppScript() {
-    chrome.tabs.executeScript({
-        file: "js/inject.js"
-    }, function () {
-        if (chrome.runtime.lastError) {
-            console.error(chrome.runtime.lastError.message);
-        } else console.log("All scripts successfully loaded");
-    });
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        var activeTab = tabs[0];
+        chrome.tabs.sendMessage(activeTab.id, {"message": "clicked_browser_action"});
+      });
+    // chrome.tabs.executeScript({
+    //     file: "js/inject.js"
+    // }, function () {
+    //     if (chrome.runtime.lastError) {
+    //         console.error(chrome.runtime.lastError.message);
+    //     } else console.log("All scripts successfully loaded");
+    // });
 }
 
 "use strict";
 console.log("application script running");
 //var socket = io("http://toonin-backend-54633158.us-east-1.elb.amazonaws.com:8100");
-var socket = io("http://www.toonin.ml:8100");
+var socket = io("http://localhost:8100");
 
 
 var peers = {};
