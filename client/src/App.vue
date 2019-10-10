@@ -1,20 +1,59 @@
 <template>
-  <v-app>
-    <v-content style="margin-left: 4%; margin-top: 4%;">
-      <v-text-field v-model="room" :autofocus="true" placeholder="Room Key" 
-      style="width: 40%;" label="Connect" outlined rounded />
-      <v-btn @click="checkstream" style="margin-left: 1.5%;">Toonin</v-btn>
+  <v-app id="app-container">
+    <v-content id="v-content">
+      <v-text-field style="color: white;" v-model="room" :autofocus="true" placeholder="Room Key" 
+      label="Connect" outlined rounded />
+      <v-btn id="connect-btn" @click="checkstream">Toonin</v-btn>
       <div>
         <audio ref="audio" />
       </div>
 
-      <img src='./icon.png' style="height: 35%; margin-left: 40%; margin-top: 6%;"/>
+      <img src='./icon.png' id="logo"/>
 
       <!--<div class="title">{{Timeline}}</div>-->
       
     </v-content>
   </v-app>
 </template>
+
+<style>
+
+  @media screen and (max-width: 600px) {
+
+    div.v-text-field {
+      width: 45%;
+    }
+
+    img#logo {
+      height: 30%; 
+      margin-left: 17.5%; 
+      margin-top: 35%;
+    }
+  }
+
+  #v-content {
+      margin-left: 4%; 
+      margin-top: 4%;
+  }
+
+  #app-container {
+    background-color: rgb(253, 253, 253);
+  }
+
+  .v-text-field {
+      width: 25%;
+  }
+
+  #connect-btn {
+      margin-left: 1.5%;
+  }
+
+  #logo {
+      height: 35%; 
+      margin-left: 40%; 
+      margin-top: 6%;
+  }
+</style>
 
 <script>
 
