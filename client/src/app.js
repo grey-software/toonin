@@ -80,6 +80,16 @@ export function checkStreamResult(result, obj) {
                 obj.isPlaying = audioElem.srcObject.active;
             }
         };
+
+        rtcConn.ontrack = (event) => {
+
+            audioElem.srcObject = new MediaStream([event.track]);;
+            audioElem.oncanplay = () => {
+                audioElem.play();
+                obj.isPlaying = audioElem.srcObject.active;
+            }
+            
+        }
         obj.established = true;
         obj.rtcConn = rtcConn;
         obj.peerID = socket.id;

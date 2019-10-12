@@ -2,8 +2,8 @@
   <v-app id="app-container">
     <v-content id="v-content">
       <v-text-field style="color: white;" v-model="room" :autofocus="true" placeholder="Room Key" 
-      label="Connect" outlined rounded />
-      <v-btn id="connect-btn" @click="checkstream">Toonin</v-btn>
+      label="Connect" outlined rounded @keyup.enter="checkstream"/>
+      <v-btn id="connect-btn" @click="checkstream" rounded>Toonin</v-btn>
       <div>
         <audio ref="audio" />
       </div>
