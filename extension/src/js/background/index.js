@@ -7,6 +7,7 @@ const constraints = {
 var port;
 
 var play = false;
+var firstTime = true;
 
 var room;
 var rtcConn2 = null;
@@ -114,11 +115,16 @@ function getTabAudio() {
 chrome.browserAction.onClicked.addListener(injectTooninScripts);
 
 function injectTooninScripts() {
-    console.log("Starting Toonin Script Injection");
-    loadAdapter(); // load webRTC adapter
+    if(firstTime){
+        firstTime = false;
+        loadAdapter(); // load webRTC adapter
+    } else {
+        injectAppScript();
+    }
 }
 
 function loadAdapter() {
+    console.log("Starting Toonin Script Injection");
     chrome.tabs.executeScript({
         file: "js/lib/adapter.js"
     }, loadSocketIO)
@@ -135,14 +141,6 @@ function injectAppScript() {
         var activeTab = tabs[0];
         chrome.tabs.sendMessage(activeTab.id, {"message": "clicked_browser_action"});
       });
-      
-    // chrome.tabs.executeScript({
-    //     file: "js/inject.js"
-    // }, function () {
-    //     if (chrome.runtime.lastError) {
-    //         console.error(chrome.runtime.lastError.message);
-    //     } else console.log("All scripts successfully loaded");
-    // });
 }
 
 "use strict";

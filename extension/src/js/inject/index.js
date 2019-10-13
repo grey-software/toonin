@@ -9,7 +9,7 @@ const port = chrome.runtime.connect({
 
 var div = document.createElement('div');
 div.id = "tooninBox";
-div.style.display = "inline-block";
+div.style.display = "none";
 div.style.position = "absolute";
 div.style.top = '30px';
 div.style.right = '30px';
