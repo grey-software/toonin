@@ -1,7 +1,4 @@
-rm -f build/css/*
-rm -f build/js/*
-rm -f build/js/lib/*
-rm -f build/*
+rm -rf build/*
 cp src/* build
 cp -r src/css/* build/css
 cp -r src/js/lib/* build/js/lib
