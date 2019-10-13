@@ -57,7 +57,7 @@
 
 <script>
 
-import {init, toonin, logMessage, checkstream} from './app';
+import {init, logMessage, checkstream} from './app';
 
 export default {
     name: "App",
@@ -70,12 +70,11 @@ export default {
       stream: null,
     }),
     methods: {
-      toonin,
       logMessage,
       checkstream
     },
     mounted: function() {
-      init(this.$refs.audio);
+      init(this, this.$refs.audio);
     }
 };
 </script>

@@ -18,35 +18,39 @@ const servers = {
 var socket;
 var audioElem;
 
-export function init(audioElement) {
+export function init(vueDataRef, audioElement) {
     audioElem = audioElement;
+    var key = window.location.pathname;
+    if(key !== '/') {
+        checkstream(null, key.substr(1, key.length), vueDataRef);
+    }
+
     setSocketListeners = setSocketListeners.bind(this);
     createAnswer = createAnswer.bind(this);
 }
 
-export function toonin() {
-    return;
-}
-
 export function logMessage(msg) { console.log(msg); }
 
-export function checkstream() {
+export function checkstream(thisClass, roomID, vueDataRef) {
+    
+    var ref = this || vueDataRef;
     var obj = {
-        room: this.room,
-        isPlaying: this.isPlaying,
-        established: this.established,
-        rtcConn: this.rtcConn,
-        peerID: this.peerID
+        room: roomID || ref.room,
+        isPlaying: null,//this.isPlaying,
+        established: null,//this.established,
+        rtcConn: null,//this.rtcConn,
+        peerID: null//this.peerID
     };
-    fetch(ENDPOINT + this.room)
+
+    fetch(ENDPOINT + obj.room)
         .then(res => res.json())
         .then(res => checkStreamResult(res, obj))
         .then(() => {
-            this.room = obj.room,
-            this.isPlaying = obj.isPlaying,
-            this.established = obj.established,
-            this.rtcConn = obj.rtcConn,
-            this.peerID= obj.peerID
+            ref.room = obj.room,
+            ref.isPlaying = obj.isPlaying,
+            ref.established = obj.established,
+            ref.rtcConn = obj.rtcConn,
+            ref.peerID= obj.peerID;
         })
         .catch(err => logMessage(err));
 }
