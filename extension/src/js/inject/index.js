@@ -58,11 +58,15 @@ dragElement(document.getElementById(("tooninBox")));
 
 const shareButton = document.getElementById("btnShare");
 const sessionIDText = document.getElementById("roomID");
+const roomNameInput = document.getElementById("roomNameInput");
 
 shareButton.onclick = () =>{
+    var roomName = roomNameInput.value;
     port.postMessage({
-        type: "init"
+        type: "init",
+        roomName: roomName
     });
+    roomNameInput.disabled = true;
 };
 
 port.onMessage.addListener((msg) => {

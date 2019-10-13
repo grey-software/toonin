@@ -6,3 +6,22 @@
     width: 100px;
     height: 100px;
 }
+
+#room-info-box {
+    border: 1px solid;
+    border-color: white;
+    border-radius: 10px;
+    padding: 10%;
+    width: 250%;
+    line-height: 180%;
+}
+
+.room-info-values {
+    font-weight: 200;
+    color: white;
+    opacity: 0.8;
+}
+
+.room-info-box-text {
+    font-weight: 600;
+}

@@ -6,14 +6,15 @@ var http = require("http").Server(app);
 var io = require("socket.io")(http);
 var vars = require("./vars");
 
-var rooms = {}; // changed rooms from const to var to allow resetting of the rooms list.
+var rooms = {};
+var roomNameDict = {};
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 // reduced the gen room id length to 6 characters (2, 15) -> (2, 5)
-const genRoomID = () => {
+const genRoomID = (roomName) => {
   while (true) {
     const id =
       Math.random()
@@ -24,17 +25,19 @@ const genRoomID = () => {
         .substring(2, 5);
     if (!(id in rooms)) {
       rooms[id] = {};
+      roomNameDict[id] = roomName;
       return id;
     }
   }
 };
 
 io.on("connection", socket => {
-  socket.on("create room", () => {
+  socket.on("create room", (roomName) => {
     console.log("Received request to create new room");
-    const newRoomID = genRoomID();
+    const newRoomID = genRoomID(roomName);
     socket.join(newRoomID, () => {
       socket.emit("room created", newRoomID);
+      console.log(roomNameDict);
     });
   });
 
@@ -78,6 +81,18 @@ app.get("/clearRooms", (req, res) => {
   else {
     res.status(403);
     res.send("Request Failed. Incorrect Key");
+  }
+});
+
+app.get('/get-room-name', (req, res) => {
+  var id = req.query.id;
+  
+  if(id in roomNameDict) {
+    res.status(200);
+    res.json({ roomName: roomNameDict[id]});
+  }
+  else {
+    res.status(404);
   }
 });
 
