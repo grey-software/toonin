@@ -12,12 +12,6 @@ var room;
 var rtcConn2 = null;
 var audioElement = document.createElement('audio');
     audioElement.setAttribute("preload", "auto");
-    // audioElement.autobuffer = true;
-    
-    // var source1 = document.createElement('source');
-    // source1.type= 'audio/mpeg';
-    // source1.src= 'http://lezotre.free.fr/Mp3/disco.mp3';
-    // audioElement.appendChild(source1);
     audioElement.load;
 chrome.runtime.onConnect.addListener(function (p) {
     port = p;
