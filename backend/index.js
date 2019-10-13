@@ -29,6 +29,7 @@ const genRoomID = () => {
   }
 };
 
+//Socket create a new "room" and listens for other connections
 io.on("connection", socket => {
   socket.on("create room", () => {
     console.log("Received request to create new room");
