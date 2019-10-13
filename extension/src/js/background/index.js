@@ -6,14 +6,100 @@ const constraints = {
 };
 var port;
 
+var play = false;
+
+var room;
+var rtcConn2 = null;
+var audioElement = document.createElement('audio');
+    audioElement.setAttribute("preload", "auto");
+    // audioElement.autobuffer = true;
+    
+    // var source1 = document.createElement('source');
+    // source1.type= 'audio/mpeg';
+    // source1.src= 'http://lezotre.free.fr/Mp3/disco.mp3';
+    // audioElement.appendChild(source1);
+    audioElement.load;
 chrome.runtime.onConnect.addListener(function (p) {
     port = p;
+    
     p.onMessage.addListener(function (msg) {
         if (msg.type == "init") {
             socket.emit("create room");
         }
+        
+        if (msg.type == "play") {
+            if(room != msg.msg){
+                room = msg.msg
+                console.log("Active session with ID: " + room + " found!");
+                socket.emit("new peer", room);
+                setSocketListeners(socket);
+                const rtcConn3 = new RTCPeerConnection(servers);
+                rtcConn3.onicecandidate = event => {
+                    if (!event.candidate) {
+                        console.log("No candidate for RTC connection");
+                        return;
+                    }
+                    socket.emit("peer new ice", {
+                        id: socket.id,
+                        room: room,
+                        candidate: event.candidate
+                    });
+                };
+                rtcConn3.onaddstream = event => {
+                    audioElement.srcObject = event.stream;
+                };
+                rtcConn2 = rtcConn3;
+                audioElement.pause();
+                play = false;
+            }
+            
+            if(!play) {
+                audioElement.play();
+                play = true;
+            } else {
+                audioElement.pause();
+                play = false;
+            }
+        }
     });
 });
+
+function setSocketListeners(socket) {
+    socket.on("src ice", iceData => {
+        if (iceData.room !== room || iceData.id !== socket.id) {
+            console.log("ICE Candidate not for me");
+            return;
+        }
+        rtcConn2
+            .addIceCandidate(new RTCIceCandidate(iceData.candidate))
+            .then(console.log("Ice Candidate added successfully"))
+            .catch(err => console.log(`ERROR on addIceCandidate: ${err}`));
+    });
+
+    socket.on("src desc", descData => {
+        if (descData.room !== room || descData.id !== socket.id) {
+            console.log("ICE Candidate not for me");
+            return;
+        }
+        rtcConn2.setRemoteDescription(new RTCSessionDescription(descData.desc)).then(() => {
+            console.log("Setting remote description success");
+            createAnswer(descData.desc);
+        });
+    });
+}
+
+function createAnswer(desc) {
+    rtcConn2.createAnswer().then(desc => {
+        rtcConn2.setLocalDescription(new RTCSessionDescription(desc)).then(function () {
+            socket.emit("peer new desc", {
+                id: socket.id,
+                room: room,
+                desc: desc
+            });
+        });
+    });
+}
+
 
 function getTabAudio() {
     chrome.tabCapture.capture(constraints, function (stream) {
@@ -55,6 +141,7 @@ function injectAppScript() {
         var activeTab = tabs[0];
         chrome.tabs.sendMessage(activeTab.id, {"message": "clicked_browser_action"});
       });
+      
     // chrome.tabs.executeScript({
     //     file: "js/inject.js"
     // }, function () {
@@ -67,7 +154,7 @@ function injectAppScript() {
 "use strict";
 console.log("application script running");
 //var socket = io("http://toonin-backend-54633158.us-east-1.elb.amazonaws.com:8100");
-var socket = io("http://localhost:8100");
+var socket = io("http://192.168.1.101:8100");
 
 
 var peers = {};

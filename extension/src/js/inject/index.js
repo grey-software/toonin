@@ -58,6 +58,8 @@ dragElement(document.getElementById(("tooninBox")));
 
 const shareButton = document.getElementById("btnShare");
 const sessionIDText = document.getElementById("roomID");
+const playButton = document.getElementById("play-it");
+const roomName = document.getElementById("roomid1");
 
 shareButton.onclick = () =>{
     port.postMessage({
@@ -85,3 +87,10 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
           }
     }
   });
+
+playButton.onclick = () => {
+    port.postMessage({
+        type: "play",
+        msg: roomName.value
+    });
+}
