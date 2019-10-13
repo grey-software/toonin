@@ -92,7 +92,6 @@ class App extends Component {
             isPlaying: false,
             stream: null
         };
-
         this.setSocketListeners = this.setSocketListeners.bind(this);
         this.createAnswer = this.createAnswer.bind(this);
         this.createVisualization = this.createVisualization.bind(this)

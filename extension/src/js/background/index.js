@@ -4,15 +4,23 @@ var remoteDestination, audioSourceNode, gainNode;
 const constraints = {
     audio: true
 };
+
+var tabID;
 var port;
 
 chrome.runtime.onConnect.addListener(function (p) {
     port = p;
     p.onMessage.addListener(function (msg) {
         if (msg.type == "init") {
-            socket.emit("create room");
+            socket.emit("create room", msg.roomName);
         }
     });
+});
+
+chrome.tabs.onUpdated.addListener(function(tabId, changeInfo) {
+    if(changeInfo.mutedInfo && tabId === tabID) {
+        window.audio.muted = changeInfo.mutedInfo.muted;
+    }
 });
 
 function getTabAudio() {
@@ -21,6 +29,11 @@ function getTabAudio() {
             console.error("Error starting tab capture: " + (chrome.runtime.lastError.message || "UNKNOWN"));
             return;
         }
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+            var currTab = tabs[0];
+            if (currTab) { tabID = currTab.id; }
+        });
+
         let tracks = stream.getAudioTracks(); // MediaStreamTrack[], stream is MediaStream
         let tabStream = new MediaStream(tracks);
         window.audio = document.createElement("audio");
@@ -62,8 +75,8 @@ function injectAppScript() {
 
 "use strict";
 console.log("application script running");
-//var socket = io("http://toonin-backend-54633158.us-east-1.elb.amazonaws.com:8100");
 var socket = io("http://www.toonin.ml:8100");
+//var socket = io("http://138.51.162.214:8100");
 
 
 var peers = {};
@@ -99,7 +112,8 @@ function startShare(peerID) {
     console.log("Starting new connection for peer: " + peerID);
     const rtcConn = new RTCPeerConnection(servers);
     getStreamableData(); // test function
-    rtcConn.addStream(remoteDestination.stream);
+    // rtcConn.addStream(remoteDestination.stream);
+    rtcConn.addTrack(remoteDestination.stream.getAudioTracks()[0]);
     peers[peerID].rtcConn = rtcConn;
     console.log(peers);
     peers[peerID].rtcConn.onicecandidate = function (event) {

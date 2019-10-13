@@ -1,0 +1,81 @@
+<template>
+  <v-app id="app-container">
+    <v-content id="v-content">
+      <v-text-field style="color: white;" v-model="room" :autofocus="true" placeholder="Room Key" 
+      label="Connect" outlined rounded @keyup.enter="checkstream"/>
+      <v-btn id="connect-btn" @click="checkstream" rounded>Toonin</v-btn>
+      <div>
+        <audio ref="audio" />
+      </div>
+
+      <img src='./icon.png' id="logo"/>
+
+      <!--<div class="title">{{Timeline}}</div>-->
+      
+    </v-content>
+  </v-app>
+</template>
+
+<style>
+
+  @media screen and (max-width: 600px) {
+
+    div.v-text-field {
+      width: 45%;
+    }
+
+    img#logo {
+      height: 30%; 
+      margin-left: 17.5%; 
+      margin-top: 35%;
+    }
+  }
+
+  #v-content {
+      margin-left: 4%; 
+      margin-top: 4%;
+  }
+
+  #app-container {
+    background-color: rgb(253, 253, 253);
+  }
+
+  .v-text-field {
+      width: 25%;
+  }
+
+  #connect-btn {
+      margin-left: 1.5%;
+  }
+
+  #logo {
+      height: 35%; 
+      margin-left: 40%; 
+      margin-top: 6%;
+  }
+</style>
+
+<script>
+
+import {init, toonin, logMessage, checkstream} from './app';
+
+export default {
+    name: "App",
+    data: () => ({
+      room: "",
+      established: false,
+      peerID: "",
+      rtcConn: null,
+      isPlaying: false,
+      stream: null,
+    }),
+    methods: {
+      toonin,
+      logMessage,
+      checkstream
+    },
+    mounted: function() {
+      init(this.$refs.audio);
+    }
+};
+</script>
