@@ -6,7 +6,6 @@ const port = chrome.runtime.connect({
     name: "toonin-extension"
 });
 
-
 var div = document.createElement('div');
 div.id = "tooninBox";
 div.style.display = "none";

@@ -32,7 +32,7 @@ resource "aws_launch_configuration" "toonin_backend_config" {
               aws s3 cp s3://toonin-server-src/app.zip ./app.zip
               unzip app.zip
               wait
-              npm start
+              NODE_ENV=production node server.js
               EOF
   
   lifecycle {
