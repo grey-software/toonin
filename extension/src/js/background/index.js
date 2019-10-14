@@ -76,7 +76,6 @@ function injectAppScript() {
 "use strict";
 console.log("application script running");
 var socket = io("http://www.toonin.ml:8100");
-//var socket = io("http://138.51.162.214:8100");
 
 var peers = {};
 var localAudioStream;
@@ -153,6 +152,13 @@ socket.on("room created", (newRoomID) => {
     });
     getTabAudio();
 });
+
+socket.on("room creation failed", (reason) => {
+    port.postMessage({
+        type: "room creation fail",
+        reason: reason
+    });
+})
 
 socket.on("peer joined", (peerData) => {
     console.log("New peer has joined the room");

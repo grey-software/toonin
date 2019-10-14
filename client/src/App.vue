@@ -1,11 +1,11 @@
 <template>
   <v-app id="app-container">
-    <v-content id="v-content">
+    <v-content id="v-content" @mousemove="enablePlayback">
       <v-text-field style="color: white;" v-model="room" :autofocus="true" placeholder="Room Key" 
       label="Connect" outlined rounded @keyup.enter="checkstream"/>
       <v-btn id="connect-btn" @click="checkstream" rounded>Toonin</v-btn>
       <div>
-        <audio ref="audio" />
+        <audio ref="audio" muted autoplay/>
       </div>
 
       <img src='./icon.png' id="logo"/>
@@ -57,7 +57,7 @@
 
 <script>
 
-import {init, logMessage, checkstream} from './app';
+import {init, logMessage, checkstream, enablePlayback} from './app';
 
 export default {
     name: "App",
@@ -71,7 +71,8 @@ export default {
     }),
     methods: {
       logMessage,
-      checkstream
+      checkstream,
+      enablePlayback
     },
     mounted: function() {
       init(this, this.$refs.audio);

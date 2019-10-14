@@ -76,4 +76,9 @@ port.onMessage.addListener((msg) => {
         sessionIDText.innerHTML = "Your Toonin ID is: \n" + msg.roomID;
         sessionIDText.style.visibility = "visible";
     }
+    else if(msg.type === "room creation fail") {
+        sessionIDText.innerHTML = "Room Creation Failed: \n" + msg.reason;
+        sessionIDText.style.visibility = "visible";
+        roomNameInput.disabled = false;
+    }
 });

@@ -7,14 +7,13 @@ var io = require("socket.io")(http);
 var vars = require("./vars");
 
 var rooms = {};
-var roomNameDict = {};
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 // reduced the gen room id length to 6 characters (2, 15) -> (2, 5)
-const genRoomID = (roomName) => {
+const genRoomID = () => {
   while (true) {
     const id =
       Math.random()
@@ -25,7 +24,6 @@ const genRoomID = (roomName) => {
         .substring(2, 5);
     if (!(id in rooms)) {
       rooms[id] = {};
-      roomNameDict[id] = roomName;
       return id;
     }
   }
@@ -34,12 +32,28 @@ const genRoomID = (roomName) => {
 //Socket create a new "room" and listens for other connections
 io.on("connection", socket => {
   socket.on("create room", (roomName) => {
+    var newRoomID = "";
     console.log("Received request to create new room");
-    const newRoomID = genRoomID(roomName);
-    socket.join(newRoomID, () => {
-      socket.emit("room created", newRoomID);
-      console.log(roomNameDict);
-    });
+    if(roomName.length > 0) {
+      if(roomName in rooms) {
+        socket.emit("room creation failed", "name already exists");
+      }
+      else { 
+        newRoomID = roomName;
+        rooms[newRoomID] = {};
+        socket.join(newRoomID, () => {
+          socket.emit("room created", newRoomID);
+          console.log(rooms);
+        });
+      }
+    }
+    else {
+      newRoomID = genRoomID();
+      socket.join(newRoomID, () => {
+        socket.emit("room created", newRoomID);
+      console.log(rooms);
+      });
+    }
   });
 
   socket.on("new peer", room => {

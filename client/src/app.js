@@ -29,6 +29,10 @@ export function init(vueDataRef, audioElement) {
     createAnswer = createAnswer.bind(this);
 }
 
+export function enablePlayback() {
+    this.$refs.audio.muted = false;
+}
+
 export function logMessage(msg) { console.log(msg); }
 
 export function checkstream(thisClass, roomID, vueDataRef) {
@@ -36,10 +40,10 @@ export function checkstream(thisClass, roomID, vueDataRef) {
     var ref = this || vueDataRef;
     var obj = {
         room: roomID || ref.room,
-        isPlaying: null,//this.isPlaying,
-        established: null,//this.established,
-        rtcConn: null,//this.rtcConn,
-        peerID: null//this.peerID
+        isPlaying: null,
+        established: null,
+        rtcConn: null,
+        peerID: null
     };
 
     fetch(ENDPOINT + obj.room)
@@ -80,7 +84,9 @@ export function checkStreamResult(result, obj) {
             //pause = 0;
             console.log(audioElem);
             audioElem.oncanplay = () => {
-                audioElem.play();
+                audioElem.play().catch((err) => {
+                    logMessage(err);
+                });
                 obj.isPlaying = audioElem.srcObject.active;
             }
         };
@@ -89,7 +95,9 @@ export function checkStreamResult(result, obj) {
 
             audioElem.srcObject = new MediaStream([event.track]);;
             audioElem.oncanplay = () => {
-                audioElem.play();
+                audioElem.play().catch((err) => {
+                    logMessage("playback error: " + err);
+                });
                 obj.isPlaying = audioElem.srcObject.active;
             }
             
