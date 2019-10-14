@@ -8,20 +8,103 @@ const constraints = {
 var tabID;
 var port;
 
+var play = false;
+var firstTime = true;
+
+var room;
+var rtcConn2 = null;
+var audioElement = document.createElement('audio');
+    audioElement.setAttribute("preload", "auto");
+    audioElement.load;
 chrome.runtime.onConnect.addListener(function (p) {
     port = p;
+    
     p.onMessage.addListener(function (msg) {
         if (msg.type == "init") {
             socket.emit("create room", msg.roomName);
         }
+        
+        if (msg.type == "play") {
+            if(room != msg.msg){
+                room = msg.msg
+                console.log("Active session with ID: " + room + " found!");
+                socket.emit("new peer", room);
+                setSocketListeners(socket);
+                const rtcConn3 = new RTCPeerConnection(servers);
+                rtcConn3.onicecandidate = event => {
+                    if (!event.candidate) {
+                        console.log("No candidate for RTC connection");
+                        return;
+                    }
+                    socket.emit("peer new ice", {
+                        id: socket.id,
+                        room: room,
+                        candidate: event.candidate
+                    });
+                };
+                rtcConn3.onaddstream = event => {
+                    audioElement.srcObject = event.stream;
+                };
+                rtcConn2 = rtcConn3;
+                audioElement.pause();
+                play = false;
+            }
+            
+            if(!play) {
+                audioElement.play();
+                play = true;
+            } else {
+                audioElement.pause();
+                play = false;
+            }
+        }
     });
 });
+
+
+function setSocketListeners(socket) {
+    socket.on("src ice", iceData => {
+        if (iceData.room !== room || iceData.id !== socket.id) {
+            console.log("ICE Candidate not for me");
+            return;
+        }
+        rtcConn2
+            .addIceCandidate(new RTCIceCandidate(iceData.candidate))
+            .then(console.log("Ice Candidate added successfully"))
+            .catch(err => console.log(`ERROR on addIceCandidate: ${err}`));
+    });
+
+    socket.on("src desc", descData => {
+        if (descData.room !== room || descData.id !== socket.id) {
+            console.log("ICE Candidate not for me");
+            return;
+        }
+        rtcConn2.setRemoteDescription(new RTCSessionDescription(descData.desc)).then(() => {
+            console.log("Setting remote description success");
+            createAnswer(descData.desc);
+        });
+    });
+}
+
+function createAnswer(desc) {
+    rtcConn2.createAnswer().then(desc => {
+        rtcConn2.setLocalDescription(new RTCSessionDescription(desc)).then(function () {
+            socket.emit("peer new desc", {
+                id: socket.id,
+                room: room,
+                desc: desc
+            });
+        });
+    });
+}
+
 
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo) {
     if(changeInfo.mutedInfo && tabId === tabID) {
         window.audio.muted = changeInfo.mutedInfo.muted;
     }
 });
+
 
 function getTabAudio() {
     chrome.tabCapture.capture(constraints, function (stream) {
@@ -47,11 +130,16 @@ function getTabAudio() {
 chrome.browserAction.onClicked.addListener(injectTooninScripts);
 
 function injectTooninScripts() {
-    console.log("Starting Toonin Script Injection");
-    loadAdapter(); // load webRTC adapter
+    if(firstTime){
+        firstTime = false;
+        loadAdapter(); // load webRTC adapter
+    } else {
+        injectAppScript();
+    }
 }
 
 function loadAdapter() {
+    console.log("Starting Toonin Script Injection");
     chrome.tabs.executeScript({
         file: "js/lib/adapter.js"
     }, loadSocketIO)
@@ -64,18 +152,17 @@ function loadSocketIO() {
 }
 
 function injectAppScript() {
-    chrome.tabs.executeScript({
-        file: "js/inject.js"
-    }, function () {
-        if (chrome.runtime.lastError) {
-            console.error(chrome.runtime.lastError.message);
-        } else console.log("All scripts successfully loaded");
-    });
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        var activeTab = tabs[0];
+        chrome.tabs.sendMessage(activeTab.id, {"message": "clicked_browser_action"});
+      });
 }
 
 "use strict";
 console.log("application script running");
+
 var socket = io("http://www.toonin.ml:8100");
+
 
 var peers = {};
 var localAudioStream;

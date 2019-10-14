@@ -8,7 +8,7 @@ const port = chrome.runtime.connect({
 
 var div = document.createElement('div');
 div.id = "tooninBox";
-div.style.display = "inline-block";
+div.style.display = "none";
 div.style.position = "absolute";
 div.style.top = '30px';
 div.style.right = '30px';
@@ -58,6 +58,8 @@ dragElement(document.getElementById(("tooninBox")));
 const shareButton = document.getElementById("btnShare");
 const sessionIDText = document.getElementById("roomID");
 const roomNameInput = document.getElementById("roomNameInput");
+const playButton = document.getElementById("play-it");
+const roomName = document.getElementById("roomid1");
 
 shareButton.onclick = () =>{
     var roomName = roomNameInput.value;
@@ -82,3 +84,21 @@ port.onMessage.addListener((msg) => {
         roomNameInput.disabled = false;
     }
 });
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    if (request.message === "clicked_browser_action") {
+        console.log("clicked the button")
+        if (div.style.display === "none") {
+            div.style.display = "block";
+          } else {
+            div.style.display = "none";
+          }
+    }
+  });
+
+playButton.onclick = () => {
+    port.postMessage({
+        type: "play",
+        msg: roomName.value
+    });
+}
