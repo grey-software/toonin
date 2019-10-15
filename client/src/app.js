@@ -1,6 +1,7 @@
 import io from "socket.io-client";
 
-const ENDPOINT = "http://www.toonin.ml:8100/";
+//const ENDPOINT = "http://www.toonin.ml:8100/";
+const ENDPOINT = "http://138.51.172.200:8100/";
 
 const servers = {
     iceServers: [

@@ -5,6 +5,7 @@ const constraints = {
     audio: true
 };
 
+// keep track of tab on which the extension is active
 var tabID;
 var port;
 
@@ -16,11 +17,14 @@ var rtcConn2 = null;
 var audioElement = document.createElement('audio');
     audioElement.setAttribute("preload", "auto");
     audioElement.load;
+
+
 chrome.runtime.onConnect.addListener(function (p) {
     port = p;
     
     p.onMessage.addListener(function (msg) {
         if (msg.type == "init") {
+            // optional parameter roomName.
             socket.emit("create room", msg.roomName);
         }
         
@@ -98,14 +102,18 @@ function createAnswer(desc) {
     });
 }
 
-
+/**
+ * allow user to mute/unmute the tab on which extension is running
+ */
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo) {
     if(changeInfo.mutedInfo && tabId === tabID) {
         window.audio.muted = changeInfo.mutedInfo.muted;
     }
 });
 
-
+/**
+ * capture user's tab audio for sharing with peers
+ */
 function getTabAudio() {
     chrome.tabCapture.capture(constraints, function (stream) {
         if (!stream) {
@@ -163,7 +171,6 @@ console.log("application script running");
 
 var socket = io("http://www.toonin.ml:8100");
 
-
 var peers = {};
 var localAudioStream;
 var roomID;
@@ -184,6 +191,9 @@ const offerOptions = {
     offerToReceiveAudio: 1
 };
 
+/**
+ * convert captured tab stream to a streamable form
+ */
 function getStreamableData() {
     var audioContext = new AudioContext();
     gainNode = audioContext.createGain();
@@ -193,11 +203,15 @@ function getStreamableData() {
     audioSourceNode.connect(remoteDestination);
 }
 
+/**
+ * Start sharing user's tab audio with the peer with "peerID"
+ * @param {string} peerID 
+ */
 function startShare(peerID) {
     console.log("Starting new connection for peer: " + peerID);
     const rtcConn = new RTCPeerConnection(servers);
-    getStreamableData(); // test function
-    // rtcConn.addStream(remoteDestination.stream);
+    getStreamableData();
+
     rtcConn.addTrack(remoteDestination.stream.getAudioTracks()[0]);
     peers[peerID].rtcConn = rtcConn;
     console.log(peers);
@@ -240,6 +254,7 @@ socket.on("room created", (newRoomID) => {
     getTabAudio();
 });
 
+// server unable to create a room
 socket.on("room creation failed", (reason) => {
     port.postMessage({
         type: "room creation fail",
@@ -247,6 +262,7 @@ socket.on("room creation failed", (reason) => {
     });
 })
 
+// new peer connection
 socket.on("peer joined", (peerData) => {
     console.log("New peer has joined the room");
     peers[peerData.id] = {
