@@ -1,7 +1,7 @@
 import io from "socket.io-client";
 
-//const ENDPOINT = "http://www.toonin.ml:8100/";
-const ENDPOINT = "http://138.51.172.200:8100/";
+const ENDPOINT = "http://www.toonin.ml:8100/";
+//const ENDPOINT = "http://138.51.172.200:8100/";
 
 const servers = {
     iceServers: [
@@ -17,9 +17,13 @@ const servers = {
 };
 
 var socket;
-var audioElem;
 
-export function init(vueDataRef, audioElement) {
+var incomingStream = null;
+var audioElem;
+var playBtn;
+
+export function init(vueDataRef, audioElement, playRef) {
+    playBtn = playRef;
     audioElem = audioElement;
     var key = window.location.pathname;
     if(key !== '/') {
@@ -32,6 +36,12 @@ export function init(vueDataRef, audioElement) {
 
 export function enablePlayback() {
     this.$refs.audio.muted = false;
+}
+
+export function manualPlay() {
+    logMessage('user played manually');
+    audioElem.srcObject = incomingStream;
+    audioElem.play();
 }
 
 export function logMessage(msg) { console.log(msg); }
@@ -94,14 +104,16 @@ export function checkStreamResult(result, obj) {
 
         rtcConn.ontrack = (event) => {
 
-            audioElem.srcObject = new MediaStream([event.track]);;
-            audioElem.oncanplay = () => {
-                audioElem.play().catch((err) => {
-                    logMessage("playback error: " + err);
-                });
-                obj.isPlaying = audioElem.srcObject.active;
+            logMessage('track added');
+            incomingStream = new MediaStream([event.track]);
+
+            try {
+                audioElem.srcObject = incomingStream;
+                audioElem.play();
             }
-            
+            catch(err) {
+                playBtn.$refs.link.hidden = false;
+            }
         }
         obj.established = true;
         obj.rtcConn = rtcConn;

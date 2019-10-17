@@ -29,16 +29,15 @@ const genRoomID = () => {
   }
 };
 
-//Socket create a new "room" and listens for other connections
-io.on("connection", socket => {
-  socket.on("create room", (roomName) => {
+function createRoom(socket, roomName) {
     var newRoomID = "";
     console.log("Received request to create new room");
-    if(roomName.length > 0) {
-      if(roomName in rooms) {
+    const hasCustomRoomName = roomName.length > 0;
+    if (hasCustomRoomName) {
+
+      if (roomName in rooms) {
         socket.emit("room creation failed", "name already exists");
-      }
-      else { 
+      } else {
         newRoomID = roomName;
         rooms[newRoomID] = {};
         socket.join(newRoomID, () => {
@@ -46,14 +45,22 @@ io.on("connection", socket => {
           console.log(rooms);
         });
       }
-    }
-    else {
+
+      // if no custom room name, generate a random id
+    } else {
       newRoomID = genRoomID();
       socket.join(newRoomID, () => {
         socket.emit("room created", newRoomID);
-      console.log(rooms);
+        console.log(rooms);
       });
     }
+}
+
+//Socket create a new "room" and listens for other connections
+io.on("connection", socket => {
+
+  socket.on("create room", (roomName) => {
+    createRoom(socket, roomName);
   });
 
   socket.on("new peer", room => {
@@ -88,7 +95,7 @@ io.on("connection", socket => {
 // clear rooms list through an http request with key as query
 app.get("/clearRooms", (req, res) => {
   var key = req.query.key;
-  if(key === vars.deleteKey) {
+  if (key === vars.deleteKey) {
     rooms = {};
     res.status(200);
     res.send("Success! Rooms list reset");
@@ -96,18 +103,6 @@ app.get("/clearRooms", (req, res) => {
   else {
     res.status(403);
     res.send("Request Failed. Incorrect Key");
-  }
-});
-
-app.get('/get-room-name', (req, res) => {
-  var id = req.query.id;
-  
-  if(id in roomNameDict) {
-    res.status(200);
-    res.json({ roomName: roomNameDict[id]});
-  }
-  else {
-    res.status(404);
   }
 });
 
