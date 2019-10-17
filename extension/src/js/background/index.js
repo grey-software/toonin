@@ -5,24 +5,117 @@ const constraints = {
     audio: true
 };
 
+// keep track of tab on which the extension is active
 var tabID;
 var port;
 
+var play = false;
+var firstTime = true;
+
+var room;
+var rtcConn2 = null;
+var audioElement = document.createElement('audio');
+    audioElement.setAttribute("preload", "auto");
+    audioElement.load;
+
+
 chrome.runtime.onConnect.addListener(function (p) {
     port = p;
+    
     p.onMessage.addListener(function (msg) {
         if (msg.type == "init") {
+            // optional parameter roomName.
             socket.emit("create room", msg.roomName);
         }
+        /*
+        if (msg.type == "play") {
+            if(room != msg.msg){
+                room = msg.msg
+                console.log("Active session with ID: " + room + " found!");
+                socket.emit("new peer", room);
+                setSocketListeners(socket);
+                const rtcConn3 = new RTCPeerConnection(servers);
+                rtcConn3.onicecandidate = event => {
+                    if (!event.candidate) {
+                        console.log("No candidate for RTC connection");
+                        return;
+                    }
+                    socket.emit("peer new ice", {
+                        id: socket.id,
+                        room: room,
+                        candidate: event.candidate
+                    });
+                };
+                rtcConn3.onaddstream = event => {
+                    audioElement.srcObject = event.stream;
+                };
+                rtcConn2 = rtcConn3;
+                audioElement.pause();
+                play = false;
+            }
+            
+            if(!play) {
+                audioElement.play();
+                play = true;
+            } else {
+                audioElement.pause();
+                play = false;
+            }
+        
+        }
+        */
     });
 });
 
+
+function setSocketListeners(socket) {
+    socket.on("src ice", iceData => {
+        if (iceData.room !== room || iceData.id !== socket.id) {
+            console.log("ICE Candidate not for me");
+            return;
+        }
+        rtcConn2
+            .addIceCandidate(new RTCIceCandidate(iceData.candidate))
+            .then(console.log("Ice Candidate added successfully"))
+            .catch(err => console.log(`ERROR on addIceCandidate: ${err}`));
+    });
+
+    socket.on("src desc", descData => {
+        if (descData.room !== room || descData.id !== socket.id) {
+            console.log("ICE Candidate not for me");
+            return;
+        }
+        rtcConn2.setRemoteDescription(new RTCSessionDescription(descData.desc)).then(() => {
+            console.log("Setting remote description success");
+            createAnswer(descData.desc);
+        });
+    });
+}
+
+function createAnswer(desc) {
+    rtcConn2.createAnswer().then(desc => {
+        rtcConn2.setLocalDescription(new RTCSessionDescription(desc)).then(function () {
+            socket.emit("peer new desc", {
+                id: socket.id,
+                room: room,
+                desc: desc
+            });
+        });
+    });
+}
+
+/**
+ * allow user to mute/unmute the tab on which extension is running
+ */
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo) {
     if(changeInfo.mutedInfo && tabId === tabID) {
         window.audio.muted = changeInfo.mutedInfo.muted;
     }
 });
 
+/**
+ * capture user's tab audio for sharing with peers
+ */
 function getTabAudio() {
     chrome.tabCapture.capture(constraints, function (stream) {
         if (!stream) {
@@ -47,11 +140,16 @@ function getTabAudio() {
 chrome.browserAction.onClicked.addListener(injectTooninScripts);
 
 function injectTooninScripts() {
-    console.log("Starting Toonin Script Injection");
-    loadAdapter(); // load webRTC adapter
+    if(firstTime){
+        firstTime = false;
+        loadAdapter(); // load webRTC adapter
+    } else {
+        injectAppScript();
+    }
 }
 
 function loadAdapter() {
+    console.log("Starting Toonin Script Injection");
     chrome.tabs.executeScript({
         file: "js/lib/adapter.js"
     }, loadSocketIO)
@@ -64,20 +162,16 @@ function loadSocketIO() {
 }
 
 function injectAppScript() {
-    chrome.tabs.executeScript({
-        file: "js/inject.js"
-    }, function () {
-        if (chrome.runtime.lastError) {
-            console.error(chrome.runtime.lastError.message);
-        } else console.log("All scripts successfully loaded");
-    });
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        var activeTab = tabs[0];
+        chrome.tabs.sendMessage(activeTab.id, {"message": "clicked_browser_action"});
+      });
 }
 
 "use strict";
 console.log("application script running");
-var socket = io("http://www.toonin.ml:8100");
-//var socket = io("http://138.51.162.214:8100");
 
+var socket = io("http://www.toonin.ml:8100");
 
 var peers = {};
 var localAudioStream;
@@ -99,6 +193,9 @@ const offerOptions = {
     offerToReceiveAudio: 1
 };
 
+/**
+ * convert captured tab stream to a streamable form
+ */
 function getStreamableData() {
     var audioContext = new AudioContext();
     gainNode = audioContext.createGain();
@@ -108,11 +205,15 @@ function getStreamableData() {
     audioSourceNode.connect(remoteDestination);
 }
 
+/**
+ * Start sharing user's tab audio with the peer with "peerID"
+ * @param {string} peerID 
+ */
 function startShare(peerID) {
     console.log("Starting new connection for peer: " + peerID);
     const rtcConn = new RTCPeerConnection(servers);
-    getStreamableData(); // test function
-    // rtcConn.addStream(remoteDestination.stream);
+    getStreamableData();
+
     rtcConn.addTrack(remoteDestination.stream.getAudioTracks()[0]);
     peers[peerID].rtcConn = rtcConn;
     console.log(peers);
@@ -155,6 +256,15 @@ socket.on("room created", (newRoomID) => {
     getTabAudio();
 });
 
+// server unable to create a room
+socket.on("room creation failed", (reason) => {
+    port.postMessage({
+        type: "room creation fail",
+        reason: reason
+    });
+})
+
+// new peer connection
 socket.on("peer joined", (peerData) => {
     console.log("New peer has joined the room");
     peers[peerData.id] = {
