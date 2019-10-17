@@ -12,14 +12,13 @@
         "persistent": true
     },
     "content_scripts": [{
+        "matches": ["<all_urls>"],
         "js": ["js/inject.js"]
     }],
     "permissions": [
         "activeTab",
         "storage",
-        "tabCapture",
-        "tabs",
-        "http://localhost/reloadX?id=*"
+        "tabCapture"
     ],
     "content_security_policy": "script-src 'self' https://cdnjs.cloudflare.com https://socket.io https://webrtc.github.io https://www.gstatic.com/ https://*.firebaseio.com https://www.googleapis.com; object-src 'self'"
 }
