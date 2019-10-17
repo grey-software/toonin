@@ -27,7 +27,7 @@ chrome.runtime.onConnect.addListener(function (p) {
             // optional parameter roomName.
             socket.emit("create room", msg.roomName);
         }
-        
+        /*
         if (msg.type == "play") {
             if(room != msg.msg){
                 room = msg.msg
@@ -61,7 +61,9 @@ chrome.runtime.onConnect.addListener(function (p) {
                 audioElement.pause();
                 play = false;
             }
+        
         }
+        */
     });
 });
 
