@@ -63,9 +63,12 @@ module.exports = {html: `<div>
         
         </a>
         <br>
-        <button class="mdl-button mdl-js-buttonton--fab mdl-button--fab mdl-button--colored" id="playRoom" style="padding: 4%; margin-left: 41%;">
-                <i class="material-icons">play_circle_filled</i>
-            </button>
+        <button class="mdl-button mdl-js-buttonton--fab mdl-button--fab mdl-button--colored" id="playRoom" style="padding: 4%; margin-left: 30%;">
+            <i class="material-icons">play_circle_filled</i>
+        </button>
+        <button class="mdl-button mdl-js-buttonton--fab mdl-button--fab mdl-button--colored" id="stopToonin" style="padding: 4%; margin-right: 30%;">
+            <i class="material-icons">stop</i>
+        </button>
         
     </div>
 </div>`}

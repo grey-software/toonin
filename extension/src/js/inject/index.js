@@ -63,7 +63,7 @@ const copyButton = document.getElementById("btnCopy");
 const roomNameInput = document.getElementById("roomNameInput");
 const playButton = document.getElementById("playRoom");
 const roomNameToonin = document.getElementById("tooninToRoom");
-
+const stopToonin = document.getElementById("stopToonin");
 
 shareButton.onclick = () =>{
     var roomName = roomNameInput.value;
@@ -73,6 +73,7 @@ shareButton.onclick = () =>{
     });
     roomNameInput.disabled = true;
     playButton.disabled = true;
+    stopToonin.disabled = true;
     roomNameToonin.disabled = true;
 };
 
@@ -126,5 +127,12 @@ playButton.onclick = () => {
         type: "play",
         roomName: roomNameToonin.value
     });
-    roomNameToonin.disabled;
+    roomNameToonin.disabled = true;
+}
+
+stopToonin.onclick = () => {
+    port.postMessage({
+        type: "stopToonin"
+    });
+    roomNameToonin.disabled = false;
 }
