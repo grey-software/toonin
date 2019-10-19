@@ -1,6 +1,7 @@
 import io from "socket.io-client";
 
 const ENDPOINT = "http://www.toonin.ml:8100/";
+//const ENDPOINT = "http://138.51.172.200:8100/";
 
 const servers = {
     iceServers: [
@@ -16,37 +17,55 @@ const servers = {
 };
 
 var socket;
-var audioElem;
 
-export function init(audioElement) {
+var incomingStream = null;
+var audioElem;
+var playBtn;
+
+export function init(vueDataRef, audioElement, playRef) {
+    playBtn = playRef;
     audioElem = audioElement;
+    var key = window.location.pathname;
+    if(key !== '/') {
+        checkstream(null, key.substr(1, key.length), vueDataRef);
+    }
+
     setSocketListeners = setSocketListeners.bind(this);
     createAnswer = createAnswer.bind(this);
 }
 
-export function toonin() {
-    return;
+export function enablePlayback() {
+    this.$refs.audio.muted = false;
+}
+
+export function manualPlay() {
+    logMessage('user played manually');
+    audioElem.srcObject = incomingStream;
+    audioElem.play();
 }
 
 export function logMessage(msg) { console.log(msg); }
 
-export function checkstream() {
+export function checkstream(thisClass, roomID, vueDataRef) {
+    
+    var ref = this || vueDataRef;
     var obj = {
-        room: this.room,
-        isPlaying: this.isPlaying,
-        established: this.established,
-        rtcConn: this.rtcConn,
-        peerID: this.peerID
+        room: roomID || ref.room,
+        isPlaying: null,
+        established: null,
+        rtcConn: null,
+        peerID: null
     };
-    fetch(ENDPOINT + this.room)
+
+    fetch(ENDPOINT + obj.room)
         .then(res => res.json())
         .then(res => checkStreamResult(res, obj))
         .then(() => {
-            this.room = obj.room,
-            this.isPlaying = obj.isPlaying,
-            this.established = obj.established,
-            this.rtcConn = obj.rtcConn,
-            this.peerID= obj.peerID
+            ref.room = obj.room,
+            ref.isPlaying = obj.isPlaying,
+            ref.established = obj.established,
+            ref.rtcConn = obj.rtcConn,
+            ref.peerID= obj.peerID;
         })
         .catch(err => logMessage(err));
 }
@@ -76,19 +95,25 @@ export function checkStreamResult(result, obj) {
             //pause = 0;
             console.log(audioElem);
             audioElem.oncanplay = () => {
-                audioElem.play();
+                audioElem.play().catch((err) => {
+                    logMessage(err);
+                });
                 obj.isPlaying = audioElem.srcObject.active;
             }
         };
 
         rtcConn.ontrack = (event) => {
 
-            audioElem.srcObject = new MediaStream([event.track]);;
-            audioElem.oncanplay = () => {
+            logMessage('track added');
+            incomingStream = new MediaStream([event.track]);
+
+            try {
+                audioElem.srcObject = incomingStream;
                 audioElem.play();
-                obj.isPlaying = audioElem.srcObject.active;
             }
-            
+            catch(err) {
+                playBtn.$refs.link.hidden = false;
+            }
         }
         obj.established = true;
         obj.rtcConn = rtcConn;
