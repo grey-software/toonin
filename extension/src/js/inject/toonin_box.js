@@ -36,7 +36,7 @@ module.exports = {html: `<div>
     }
 </style>
 
-<div class="demo-card-square mdl-card mdl-shadow--2dp">
+<div class="demo-card-square mdl-card mdl-shadow--2dp" style="height: 400px;">
     <div class="mdl-card__title mdl-card--expand">
         <h2 class="mdl-card__title-text">Toonin
 
@@ -55,7 +55,7 @@ module.exports = {html: `<div>
         <br>
         <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" id="btnCopy"> <i class="far fa-copy ic-share"></i> Copy ID </a>
         <br>
-        <p class="mdl-card__supporting-text room-id-text" id="roomID">
+        <p class="mdl-card__supporting-text room-id-text" style="padding: 1%; margin-left: 4%;" id="roomID">
         </p>
     </div>
 
