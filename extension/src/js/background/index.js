@@ -98,7 +98,6 @@ chrome.runtime.onConnect.addListener(function (p) {
             }
         
         }
-        
     });
 });
 

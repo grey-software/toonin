@@ -1,10 +1,12 @@
 import React, { Component } from "react";
 import "./App.css";
+import "./RoomInfo";
 import "typeface-roboto";
 import Button from "material-ui/Button";
 import TextField from "material-ui/TextField";
 import io from "socket.io-client";
 import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
+//import RoomInfo from "./RoomInfo";
 
 const ENDPOINT = "http://www.toonin.ml:8100/";
 
@@ -80,6 +82,8 @@ const servers = {
     }
   ]
 };
+
+
 class App extends Component {
     constructor(props) {
         super(props);
@@ -98,11 +102,19 @@ class App extends Component {
     }
 
     componentDidMount(){
-        this.createVisualization()
+        var key = window.location.pathname;
+        if(key !== '/') { 
+            this.checkStream(null, key.substr(1, key.length));
+            this.setState({ roomID: key.substr(1, key.length) });
+        }
+        this.createVisualization();
     }
 
     createVisualization() {
-            let context = new AudioContext();
+            // check for AudioContext Support
+            var availableContext = window.AudioContext || window.webkitAudioContext || false;
+            if(!availableContext) { return; }
+            let context = new availableContext();
             let analyser = context.createAnalyser();
             let canvas = this.refs.analyzerCanvas;
             canvas.width = window.innerWidth;
@@ -230,14 +242,24 @@ class App extends Component {
           <Button onClick={this.checkStream.bind(this)} style={btnStyle}>
             Toonin
           </Button>
+          <br></br><br></br><br></br>
+          
+          <RoomInfo roomID={this.state.roomID} ENDPOINT={ENDPOINT} successfulConn={this.state.established}></RoomInfo>
     </div>
 
       </div>
     );
   }
 
-  checkStream() {
-      fetch(ENDPOINT + this.state.roomID)
+  checkStream(thisClass, roomID) {
+      // override the this.state.room
+      // additional param roomID to allow user to connect by specifying the room id
+      // in the url
+      var searchID = this.state.roomID;
+      if(roomID) { searchID = roomID; }
+
+      console.log(searchID);
+      fetch(ENDPOINT + searchID)
           .then(res => res.json())
           .then(res => this.checkStreamResult(res))
           .catch(err => logMessage(err));
@@ -263,12 +285,14 @@ class App extends Component {
           };
           rtcConn.onaddstream = event => {
               logMessage("Stream added");
-              logMessage(event.stream);
+              //logMessage(event.stream);
               this.audio.srcObject = event.stream;
-	        //   this.audio.src = "https://p.scdn.co/mp3-preview/e4a8f30ca62b4d2a129cc4df76de66f43e12fa3f?cid=null";
-	          pause = 0;
-	          this.audio.play();
-              //this.createVisualization()
+              console.log(this.audio.srcObject);	
+              pause = 0;
+              this.audio.oncanplay = (event) => {
+                  this.audio.play(); // this throw error as it's not playable at the time its called.
+              };
+              console.log(this.audio.srcObject.active);
           };
           this.setState({
               established: true,

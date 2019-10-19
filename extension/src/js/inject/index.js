@@ -74,7 +74,6 @@ shareButton.onclick = () =>{
     roomNameInput.disabled = true;
     playButton.disabled = true;
     roomNameToonin.disabled = true;
-
 };
 
 port.onMessage.addListener((msg) => {
