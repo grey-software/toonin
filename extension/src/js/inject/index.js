@@ -15,6 +15,7 @@ div.style.right = '30px';
 div.style.zIndex = '10000';
 div.innerHTML = html;
 document.body.appendChild(div);
+var roomID;
 
 const dragElement= (elmnt) => {
     console.log("its being called");
@@ -57,13 +58,23 @@ dragElement(document.getElementById(("tooninBox")));
 
 const shareButton = document.getElementById("btnShare");
 const sessionIDText = document.getElementById("roomID");
-const playButton = document.getElementById("play-it");
-const roomName = document.getElementById("roomid1");
+
+const copyButton = document.getElementById("btnCopy");
+const roomNameInput = document.getElementById("roomNameInput");
+const playButton = document.getElementById("playRoom");
+const roomNameToonin = document.getElementById("tooninToRoom");
+
 
 shareButton.onclick = () =>{
+    var roomName = roomNameInput.value;
     port.postMessage({
-        type: "init"
+        type: "init",
+        roomName: roomName
     });
+    roomNameInput.disabled = true;
+    playButton.disabled = true;
+    roomNameToonin.disabled = true;
+
 };
 
 port.onMessage.addListener((msg) => {
@@ -71,10 +82,34 @@ port.onMessage.addListener((msg) => {
     if (msg.type == "audio") {
         if (msg.status == "ok") localAudio.src = msg.url;
     } else if (msg.type == "roomID") {
-        sessionIDText.innerHTML = "Your Toonin ID is: \n" + msg.roomID;
+        roomID=msg.roomID
+        sessionIDText.innerHTML = "Your Toonin ID is: \n" + roomID;
         sessionIDText.style.visibility = "visible";
     }
+    else if(msg.type === "room creation fail") {
+        sessionIDText.innerHTML = "Room Creation Failed: \n" + msg.reason;
+        sessionIDText.style.visibility = "visible";
+        roomNameInput.disabled = false;
+    }
 });
+
+copyButton.onclick = () => {
+    var str = roomID;
+    // Create new element
+    var el = document.createElement('textarea');
+    // Set value (string to be copied)
+    el.value = str;
+    // Set non-editable to avoid focus and move outside of view
+    el.setAttribute('readonly', '');
+    el.style = {position: 'absolute', left: '-9999px'};
+    document.body.appendChild(el);
+    // Select text inside element
+    el.select();
+    // Copy text to clipboard
+    document.execCommand('copy');
+    // Remove temporary element
+    document.body.removeChild(el);
+};
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.message === "clicked_browser_action") {
@@ -90,6 +125,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 playButton.onclick = () => {
     port.postMessage({
         type: "play",
-        msg: roomName.value
+        roomName: roomNameToonin.value
     });
+    roomNameToonin.disabled;
 }
