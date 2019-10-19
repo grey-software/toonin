@@ -64,6 +64,8 @@ const roomNameInput = document.getElementById("roomNameInput");
 const playButton = document.getElementById("play-it");
 const roomName = document.getElementById("roomid1");
 
+copyButton.disabled = true;
+
 
 shareButton.onclick = () =>{
     var roomName = roomNameInput.value;
@@ -72,6 +74,7 @@ shareButton.onclick = () =>{
         roomName: roomName
     });
     roomNameInput.disabled = true;
+    copyButton.disabled = false;
 };
 
 port.onMessage.addListener((msg) => {
