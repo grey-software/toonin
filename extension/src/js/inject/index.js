@@ -6,10 +6,9 @@ const port = chrome.runtime.connect({
     name: "toonin-extension"
 });
 
-
 var div = document.createElement('div');
 div.id = "tooninBox";
-div.style.display = "inline-block";
+div.style.display = "none";
 div.style.position = "absolute";
 div.style.top = '30px';
 div.style.right = '30px';
@@ -59,12 +58,20 @@ dragElement(document.getElementById(("tooninBox")));
 
 const shareButton = document.getElementById("btnShare");
 const sessionIDText = document.getElementById("roomID");
+
 const copyButton = document.getElementById("btnCopy");
+const roomNameInput = document.getElementById("roomNameInput");
+const playButton = document.getElementById("play-it");
+const roomName = document.getElementById("roomid1");
+
 
 shareButton.onclick = () =>{
+    var roomName = roomNameInput.value;
     port.postMessage({
-        type: "init"
+        type: "init",
+        roomName: roomName
     });
+    roomNameInput.disabled = true;
 };
 
 port.onMessage.addListener((msg) => {
@@ -75,6 +82,11 @@ port.onMessage.addListener((msg) => {
         roomID=msg.roomID
         sessionIDText.innerHTML = "Your Toonin ID is: \n" + roomID;
         sessionIDText.style.visibility = "visible";
+    }
+    else if(msg.type === "room creation fail") {
+        sessionIDText.innerHTML = "Room Creation Failed: \n" + msg.reason;
+        sessionIDText.style.visibility = "visible";
+        roomNameInput.disabled = false;
     }
 });
 
@@ -95,3 +107,22 @@ copyButton.onclick = () => {
     // Remove temporary element
     document.body.removeChild(el);
 };
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    if (request.message === "clicked_browser_action") {
+        console.log("clicked the button")
+        if (div.style.display === "none") {
+            div.style.display = "block";
+          } else {
+            div.style.display = "none";
+          }
+    }
+  });
+
+playButton.onclick = () => {
+    port.postMessage({
+        type: "play",
+        msg: roomName.value
+    });
+}
+

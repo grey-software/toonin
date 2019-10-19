@@ -6,7 +6,7 @@ var http = require("http").Server(app);
 var io = require("socket.io")(http);
 var vars = require("./vars");
 
-var rooms = {}; // changed rooms from const to var to allow resetting of the rooms list.
+var rooms = {};
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -29,13 +29,38 @@ const genRoomID = () => {
   }
 };
 
-io.on("connection", socket => {
-  socket.on("create room", () => {
+function createRoom(socket, roomName) {
+    var newRoomID = "";
     console.log("Received request to create new room");
-    const newRoomID = genRoomID();
-    socket.join(newRoomID, () => {
-      socket.emit("room created", newRoomID);
-    });
+    const hasCustomRoomName = roomName.length > 0;
+    if (hasCustomRoomName) {
+
+      if (roomName in rooms) {
+        socket.emit("room creation failed", "name already exists");
+      } else {
+        newRoomID = roomName;
+        rooms[newRoomID] = {};
+        socket.join(newRoomID, () => {
+          socket.emit("room created", newRoomID);
+          console.log(rooms);
+        });
+      }
+
+      // if no custom room name, generate a random id
+    } else {
+      newRoomID = genRoomID();
+      socket.join(newRoomID, () => {
+        socket.emit("room created", newRoomID);
+        console.log(rooms);
+      });
+    }
+}
+
+//Socket create a new "room" and listens for other connections
+io.on("connection", socket => {
+
+  socket.on("create room", (roomName) => {
+    createRoom(socket, roomName);
   });
 
   socket.on("new peer", room => {
@@ -70,7 +95,7 @@ io.on("connection", socket => {
 // clear rooms list through an http request with key as query
 app.get("/clearRooms", (req, res) => {
   var key = req.query.key;
-  if(key === vars.deleteKey) {
+  if (key === vars.deleteKey) {
     rooms = {};
     res.status(200);
     res.send("Success! Rooms list reset");

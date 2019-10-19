@@ -1,12 +1,13 @@
 import React, { Component } from "react";
 import "./App.css";
+import "./RoomInfo";
 import "typeface-roboto";
 import Button from "material-ui/Button";
 import TextField from "material-ui/TextField";
 import io from "socket.io-client";
 import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
+//import RoomInfo from "./RoomInfo";
 
-//const ENDPOINT = "http://toonin-backend-54633158.us-east-1.elb.amazonaws.com:8100/";
 const ENDPOINT = "http://www.toonin.ml:8100/";
 
 const btnStyle = {
@@ -50,7 +51,7 @@ var canvas, ctx, source, context, analyser, fbc_array, rads,
 	bar_height, react_x, react_y, intensity, rot, inputURL,
 	JSONPThing, JSONResponse, soundCloudTrackName, audio, pause,
     artist, title, img_url, isSeeking;
-    
+
     bars = 200;
     react_x = 0;
     react_y = 0;
@@ -81,6 +82,8 @@ const servers = {
     }
   ]
 };
+
+
 class App extends Component {
     constructor(props) {
         super(props);
@@ -93,18 +96,25 @@ class App extends Component {
             isPlaying: false,
             stream: null
         };
-
         this.setSocketListeners = this.setSocketListeners.bind(this);
         this.createAnswer = this.createAnswer.bind(this);
         this.createVisualization = this.createVisualization.bind(this)
     }
 
     componentDidMount(){
-        this.createVisualization()
+        var key = window.location.pathname;
+        if(key !== '/') { 
+            this.checkStream(null, key.substr(1, key.length));
+            this.setState({ roomID: key.substr(1, key.length) });
+        }
+        this.createVisualization();
     }
 
     createVisualization() {
-            let context = new AudioContext();
+            // check for AudioContext Support
+            var availableContext = window.AudioContext || window.webkitAudioContext || false;
+            if(!availableContext) { return; }
+            let context = new availableContext();
             let analyser = context.createAnalyser();
             let canvas = this.refs.analyzerCanvas;
             canvas.width = window.innerWidth;
@@ -182,7 +192,7 @@ class App extends Component {
             ctx.arc(center_x, center_y, radius + 2, 0, Math.PI * 2, false);
             ctx.fill();
 
-            // shockwave effect			
+            // shockwave effect
             shockwave += 60;
 
             ctx.lineWidth = 15;
@@ -200,14 +210,14 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        
+
           <div>
         <canvas
                 ref="analyzerCanvas"
                 id="analyzer"
                 >
 
-               
+
                 </canvas>
                 </div>
 
@@ -232,14 +242,24 @@ class App extends Component {
           <Button onClick={this.checkStream.bind(this)} style={btnStyle}>
             Toonin
           </Button>
+          <br></br><br></br><br></br>
+          
+          <RoomInfo roomID={this.state.roomID} ENDPOINT={ENDPOINT} successfulConn={this.state.established}></RoomInfo>
     </div>
-        
+
       </div>
     );
   }
 
-  checkStream() {
-      fetch(ENDPOINT + this.state.roomID)
+  checkStream(thisClass, roomID) {
+      // override the this.state.room
+      // additional param roomID to allow user to connect by specifying the room id
+      // in the url
+      var searchID = this.state.roomID;
+      if(roomID) { searchID = roomID; }
+
+      console.log(searchID);
+      fetch(ENDPOINT + searchID)
           .then(res => res.json())
           .then(res => this.checkStreamResult(res))
           .catch(err => logMessage(err));
@@ -265,12 +285,14 @@ class App extends Component {
           };
           rtcConn.onaddstream = event => {
               logMessage("Stream added");
-              logMessage(event.stream);
-              this.audio.srcObject = event.stream;	
-	        //   this.audio.src = "https://p.scdn.co/mp3-preview/e4a8f30ca62b4d2a129cc4df76de66f43e12fa3f?cid=null";
-	          pause = 0;
-	          this.audio.play();
-              //this.createVisualization()
+              //logMessage(event.stream);
+              this.audio.srcObject = event.stream;
+              console.log(this.audio.srcObject);	
+              pause = 0;
+              this.audio.oncanplay = (event) => {
+                  this.audio.play(); // this throw error as it's not playable at the time its called.
+              };
+              console.log(this.audio.srcObject.active);
           };
           this.setState({
               established: true,
@@ -330,7 +352,7 @@ class App extends Component {
       });
   }
   }
-  
+
 const logMessage = (message) => {
     console.log(message);
 }

@@ -1,3 +1,4 @@
+extension/build/
 # dependencies
 /node_modules
 **/node_modules
@@ -26,4 +27,3 @@ backend/cloud config/terraform.exe
 backend/cloud config/terraform.tfstate
 backend/cloud config/terraform.tfvars
 backend/cloud config/.terraform
-backend/vars.js
