@@ -61,10 +61,11 @@ const sessionIDText = document.getElementById("roomID");
 
 const copyButton = document.getElementById("btnCopy");
 const roomNameInput = document.getElementById("roomNameInput");
-const playButton = document.getElementById("play-it");
-const roomName = document.getElementById("roomid1");
 
 copyButton.disabled = true;
+const playButton = document.getElementById("playRoom");
+const roomNameToonin = document.getElementById("tooninToRoom");
+const stopToonin = document.getElementById("stopToonin");
 
 
 shareButton.onclick = () =>{
@@ -74,7 +75,11 @@ shareButton.onclick = () =>{
         roomName: roomName
     });
     roomNameInput.disabled = true;
+  
     copyButton.disabled = false;
+    playButton.disabled = true;
+    stopToonin.disabled = true;
+    roomNameToonin.disabled = true;
 };
 
 port.onMessage.addListener((msg) => {
@@ -125,7 +130,14 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 playButton.onclick = () => {
     port.postMessage({
         type: "play",
-        msg: roomName.value
+        roomName: roomNameToonin.value
     });
+    roomNameToonin.disabled = true;
 }
 
+stopToonin.onclick = () => {
+    port.postMessage({
+        type: "stopToonin"
+    });
+    roomNameToonin.disabled = false;
+}
