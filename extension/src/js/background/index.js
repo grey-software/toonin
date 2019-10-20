@@ -11,9 +11,10 @@ var port;
 
 var play = false;
 var firstTime = true;
+var incomingStream = null;
 
 var room;
-var rtcConn2 = null;
+var rtcConnIncoming = null;
 var audioElement = document.createElement('audio');
     audioElement.setAttribute("preload", "auto");
     audioElement.load;
@@ -27,15 +28,14 @@ chrome.runtime.onConnect.addListener(function (p) {
             // optional parameter roomName.
             socket.emit("create room", msg.roomName);
         }
-        /*
         if (msg.type == "play") {
-            if(room != msg.msg){
-                room = msg.msg
+            if(!room){
+                room = msg.roomName
                 console.log("Active session with ID: " + room + " found!");
                 socket.emit("new peer", room);
                 setSocketListeners(socket);
-                const rtcConn3 = new RTCPeerConnection(servers);
-                rtcConn3.onicecandidate = event => {
+                rtcConnIncoming = new RTCPeerConnection(servers);
+                rtcConnIncoming.onicecandidate = event => {
                     if (!event.candidate) {
                         console.log("No candidate for RTC connection");
                         return;
@@ -46,14 +46,49 @@ chrome.runtime.onConnect.addListener(function (p) {
                         candidate: event.candidate
                     });
                 };
-                rtcConn3.onaddstream = event => {
-                    audioElement.srcObject = event.stream;
-                };
-                rtcConn2 = rtcConn3;
+                rtcConnIncoming.ontrack = (event) => {
+                    incomingStream = new MediaStream([event.track]);
+        
+                    try {
+                        audioElement.srcObject = incomingStream;
+                    }
+                    catch(err) {
+                        console.log(err)
+                    }
+                }
                 audioElement.pause();
                 play = false;
             }
-            
+            if(room != msg.roomName){
+                console.log("changing room")
+                room = msg.roomName
+                socket.emit("new peer", room);
+                setSocketListeners(socket);
+                rtcConnIncoming = new RTCPeerConnection(servers);
+                rtcConnIncoming.onicecandidate = event => {
+                    if (!event.candidate) {
+                        console.log("No candidate for RTC connection");
+                        return;
+                    }
+                    socket.emit("peer new ice", {
+                        id: socket.id,
+                        room: room,
+                        candidate: event.candidate
+                    });
+                };
+                rtcConnIncoming.ontrack = (event) => {
+                    incomingStream = new MediaStream([event.track]);
+        
+                    try {
+                        audioElement.srcObject = incomingStream;
+                        audioElement.play();
+                        play = true;
+                    }
+                    catch(err) {
+                        console.log(err)
+                    }
+                }
+            }
             if(!play) {
                 audioElement.play();
                 play = true;
@@ -63,7 +98,12 @@ chrome.runtime.onConnect.addListener(function (p) {
             }
         
         }
-        */
+        if(msg.type == "stopToonin"){
+            incomingStream = null;
+            audioElement.srcObject = null;
+            play = false;
+            room=null;
+        }
     });
 });
 
@@ -74,7 +114,7 @@ function setSocketListeners(socket) {
             console.log("ICE Candidate not for me");
             return;
         }
-        rtcConn2
+        rtcConnIncoming
             .addIceCandidate(new RTCIceCandidate(iceData.candidate))
             .then(console.log("Ice Candidate added successfully"))
             .catch(err => console.log(`ERROR on addIceCandidate: ${err}`));
@@ -85,7 +125,7 @@ function setSocketListeners(socket) {
             console.log("ICE Candidate not for me");
             return;
         }
-        rtcConn2.setRemoteDescription(new RTCSessionDescription(descData.desc)).then(() => {
+        rtcConnIncoming.setRemoteDescription(new RTCSessionDescription(descData.desc)).then(() => {
             console.log("Setting remote description success");
             createAnswer(descData.desc);
         });
@@ -93,8 +133,8 @@ function setSocketListeners(socket) {
 }
 
 function createAnswer(desc) {
-    rtcConn2.createAnswer().then(desc => {
-        rtcConn2.setLocalDescription(new RTCSessionDescription(desc)).then(function () {
+    rtcConnIncoming.createAnswer().then(desc => {
+        rtcConnIncoming.setLocalDescription(new RTCSessionDescription(desc)).then(function () {
             socket.emit("peer new desc", {
                 id: socket.id,
                 room: room,
@@ -164,15 +204,15 @@ function loadSocketIO() {
 function injectAppScript() {
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         var activeTab = tabs[0];
+        if (activeTab) { tabID = activeTab.id; }
         chrome.tabs.sendMessage(activeTab.id, {"message": "clicked_browser_action"});
-      });
+    });
 }
 
 "use strict";
 console.log("application script running");
 
 var socket = io("http://www.toonin.ml:8100");
-//var socket = io("http://138.51.162.214:8100");
 
 var peers = {};
 var localAudioStream;
