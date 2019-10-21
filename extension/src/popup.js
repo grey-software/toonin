@@ -12,6 +12,17 @@ copyButton.disabled = true;
 const playButton = document.getElementById("playRoom");
 const roomNameToonin = document.getElementById("tooninToRoom");
 const stopToonin = document.getElementById("stopToonin");
+// mute control elements
+const muteBtn = document.getElementById("mute-btn");
+const muteStatus = document.getElementById("muted-notif");
+
+muteBtn.onclick = function() { 
+    muteStatus.hidden = !this.checked;
+    port.postMessage({
+        type: "toggleMute",
+        value: !this.checked
+    });
+}
 
 
 shareButton.onclick = () => {
@@ -28,12 +39,14 @@ shareButton.onclick = () => {
     roomNameToonin.disabled = true;
 };
 
+var roomID;
+
 port.onMessage.addListener((msg) => {
     console.log(msg);
     if (msg.type == "audio") {
         if (msg.status == "ok") localAudio.src = msg.url;
     } else if (msg.type == "roomID") {
-        roomID=msg.roomID
+        roomID = msg.roomID;
         sessionIDText.innerHTML = "Your Toonin ID is: \n" + roomID;
         sessionIDText.style.visibility = "visible";
     }
@@ -96,7 +109,10 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         playButton.disabled = true;
         stopToonin.disabled = true;
         roomNameToonin.disabled = true;
-        roomID=request.data.roomID
+        roomID=request.data.roomID;
+        console.log(request.data);
+        muteBtn.checked = request.data.muted;
+        muteStatus.hidden = !muteBtn.checked;
         sessionIDText.innerHTML = "Your Toonin ID is: \n" + roomID;
         sessionIDText.style.visibility = "visible";
     } 
@@ -107,6 +123,9 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         copyButton.disabled = true;
         playButton.disabled = false;
         stopToonin.disabled = false;
+        console.log(request.data);
+        muteBtn.checked = request.data.muted;
+        muteStatus.hidden = !muteBtn.checked;
         roomNameToonin.value = request.data.room;
         roomID=null;
         sessionIDText.style.visibility = "hidden";
@@ -118,6 +137,9 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         playButton.disabled = false;
         stopToonin.disabled = false;
         roomNameToonin.disabled = false;
+        console.log(request.data);
+        muteBtn.checked = request.data.muted;
+        muteStatus.hidden = !muteBtn.checked;
         roomID=null;
         sessionIDText.style.visibility = "hidden";
     }

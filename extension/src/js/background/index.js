@@ -8,8 +8,9 @@ const constraints = {
 // keep track of tab on which the extension is active
 var tabID;
 var port;
-// audio tag reference for volume control
-var audioTagRef = null;
+var audioTagRef;
+// last mute state
+var muteState;
 
 var play = false;
 var incomingStream = null;
@@ -104,6 +105,10 @@ chrome.runtime.onConnect.addListener(function (p) {
             play = false;
             room=null;
         }
+        if(msg.type == "toggleMute") {
+            localAudioStream.getAudioTracks()[0].enabled = Boolean(msg.value);
+            muteState = msg.value;
+        }
     });
 });
 
@@ -123,11 +128,12 @@ chrome.runtime.onMessage.addListener(
             "roomID": roomID,
             "tabID" : tabID,
             "playing" : play,
-            "room" : room
+            "room" : room,
+            "muted": muteState
         }
         chrome.runtime.sendMessage({"message": "extension_state_from_background", "data": data});
       }
-    });
+});
 
 function setSocketListeners(socket) {
     socket.on("src ice", iceData => {
@@ -195,7 +201,7 @@ function getTabAudio() {
         audioTagRef = window.audio; // save reference globally for volume control
         window.audio.srcObject = tabStream;
         window.audio.play();
-        localAudioStream = tabStream;
+        localAudioStream = tabStream; //.clone();
         console.log("Tab audio captured. Now sending url to injected content script");
     });
 }
