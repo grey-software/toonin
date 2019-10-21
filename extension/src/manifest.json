@@ -13,8 +13,7 @@
     },
     "content_scripts": [{
         "matches": ["<all_urls>"],
-        "js": ["js/inject.js"],
-        "css": ["css/mld.css"]
+        "js": ["js/inject.js"]
     }],
     "permissions": [
         "activeTab",

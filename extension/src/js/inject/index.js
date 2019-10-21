@@ -61,6 +61,8 @@ const sessionIDText = document.getElementById("roomID");
 
 const copyButton = document.getElementById("btnCopy");
 const roomNameInput = document.getElementById("roomNameInput");
+
+copyButton.disabled = true;
 const playButton = document.getElementById("playRoom");
 const roomNameToonin = document.getElementById("tooninToRoom");
 const stopToonin = document.getElementById("stopToonin");
@@ -76,6 +78,8 @@ shareButton.onclick = () =>{
         roomName: roomName
     });
     roomNameInput.disabled = true;
+  
+    copyButton.disabled = false;
     playButton.disabled = true;
     stopToonin.disabled = true;
     roomNameToonin.disabled = true;

@@ -1,6 +1,7 @@
 module.exports = {html: `<div>
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+<link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.blue-light_blue.min.css" />
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.12/css/all.css" integrity="sha384-G0fIWCsCzJIMAVNQPfjH08cyYaUtMwjJwqiRKxxE/rx96Uroj1BtIQ6MLJuheaO9"
     crossorigin="anonymous">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
@@ -114,8 +115,13 @@ module.exports = {html: `<div>
             Room Name <input type="text" id="roomNameInput" style="height: 80%; margin-left: 8px; padding: 4px;">
         </a>
         <br>
-        <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" id="btnCopy"> <i class="far fa-copy ic-share"></i> Copy ID </a>
-        <a class="mdl-card__supporting-text room-id-text" style="padding: 1%; margin-left: 1%;" id="roomID"></a>
+        <button id="btnCopy" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" style="padding: 1%; margin-left: 4%;">
+        Copy ID
+        <i class="far fa-copy ic-share"></i>
+        </button>
+        <br>
+        <p class="mdl-card__supporting-text room-id-text" style="padding: 1%; margin-left: 4%;" id="roomID">
+        </p>
         <br>
         <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" style="margin-top: 2%;">
         Toonin to <input type="text" id="tooninToRoom" style="height: 80%; margin-left: 8px; padding: 4px;">
