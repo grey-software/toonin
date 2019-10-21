@@ -10,7 +10,7 @@ var tabID;
 var port;
 var audioTagRef;
 // last mute state
-var muteState = false;
+var muteState;
 
 var play = false;
 var incomingStream = null;
@@ -107,7 +107,7 @@ chrome.runtime.onConnect.addListener(function (p) {
         }
         if(msg.type == "toggleMute") {
             localAudioStream.getAudioTracks()[0].enabled = Boolean(msg.value);
-            muteState = !msg.value;
+            muteState = msg.value;
         }
     });
 });
