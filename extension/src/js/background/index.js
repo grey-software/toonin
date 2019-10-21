@@ -12,15 +12,13 @@ var port;
 var audioTagRef = null;
 
 var play = false;
-var firstTime = true;
 var incomingStream = null;
 
-var room;
+var room = null;
 var rtcConnIncoming = null;
 var audioElement = document.createElement('audio');
     audioElement.setAttribute("preload", "auto");
     audioElement.load;
-
 
 chrome.runtime.onConnect.addListener(function (p) {
     port = p;
@@ -106,13 +104,31 @@ chrome.runtime.onConnect.addListener(function (p) {
             play = false;
             room=null;
         }
-        if(msg.type == "volumeChange") {
-            // testing volume change locally
-            audioTagRef.volume = Number(msg.volume) / 10.0;
-        }
     });
 });
 
+chrome.tabs.onRemoved.addListener(function(tabId, removed) {
+    if(tabId === tabID) {
+        peers = {};
+        localAudioStream=null;
+        roomID=null;
+        tabID=null;
+    }
+})
+
+chrome.runtime.onMessage.addListener(
+    function(request, sender, sendResponse) {
+      if( request.message === "extension_state" ) {
+        var data = {
+            "roomID": roomID,
+            "tabID" : tabID,
+            "playing" : play,
+            "room" : room
+        }
+        chrome.runtime.sendMessage({"message": "extension_state_from_background", "data": data});
+      }
+    }
+  );
 
 function setSocketListeners(socket) {
     socket.on("src ice", iceData => {
@@ -171,6 +187,7 @@ function getTabAudio() {
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
             var currTab = tabs[0];
             if (currTab) { tabID = currTab.id; }
+
         });
 
         let tracks = stream.getAudioTracks(); // MediaStreamTrack[], stream is MediaStream
@@ -181,38 +198,6 @@ function getTabAudio() {
         window.audio.play();
         localAudioStream = tabStream;
         console.log("Tab audio captured. Now sending url to injected content script");
-    });
-}
-
-chrome.browserAction.onClicked.addListener(injectTooninScripts);
-
-function injectTooninScripts() {
-    if(firstTime){
-        firstTime = false;
-        loadAdapter(); // load webRTC adapter
-    } else {
-        injectAppScript();
-    }
-}
-
-function loadAdapter() {
-    console.log("Starting Toonin Script Injection");
-    chrome.tabs.executeScript({
-        file: "js/lib/adapter.js"
-    }, loadSocketIO)
-}
-
-function loadSocketIO() {
-    chrome.tabs.executeScript({
-        file: "js/lib/socket.io.js"
-    }, injectAppScript)
-}
-
-function injectAppScript() {
-    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        var activeTab = tabs[0];
-        if (activeTab) { tabID = activeTab.id; }
-        chrome.tabs.sendMessage(activeTab.id, {"message": "clicked_browser_action"});
     });
 }
 

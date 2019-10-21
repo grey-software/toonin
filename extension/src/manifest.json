@@ -5,7 +5,8 @@
     "description": "Toonin to what your friends are listening to :)",
     "version": "0.1",
     "browser_action": {
-        "default_icon": "icon.png"
+        "default_icon": "icon.png",
+        "default_popup": "popup.html"
     },
     "background": {
         "scripts": ["js/lib/adapter.js", "js/lib/socket.io.js", "js/background.js"],
@@ -13,7 +14,8 @@
     },
     "content_scripts": [{
         "matches": ["<all_urls>"],
-        "js": ["js/inject.js"]
+        "js": ["js/inject.js"],
+        "persistent": true
     }],
     "permissions": [
         "activeTab",
