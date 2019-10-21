@@ -8,6 +8,8 @@ const constraints = {
 // keep track of tab on which the extension is active
 var tabID;
 var port;
+// audio tag reference for volume control
+var audioTagRef = null;
 
 var play = false;
 var firstTime = true;
@@ -104,6 +106,10 @@ chrome.runtime.onConnect.addListener(function (p) {
             play = false;
             room=null;
         }
+        if(msg.type == "volumeChange") {
+            // testing volume change locally
+            audioTagRef.volume = Number(msg.volume) / 10.0;
+        }
     });
 });
 
@@ -170,6 +176,7 @@ function getTabAudio() {
         let tracks = stream.getAudioTracks(); // MediaStreamTrack[], stream is MediaStream
         let tabStream = new MediaStream(tracks);
         window.audio = document.createElement("audio");
+        audioTagRef = window.audio; // save reference globally for volume control
         window.audio.srcObject = tabStream;
         window.audio.play();
         localAudioStream = tabStream;

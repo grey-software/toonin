@@ -33,9 +33,70 @@ module.exports = {html: `<div>
         margin: 0%;
         animation-play-state: paused;
     }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+      }
+      
+      .switch input { 
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        -webkit-transition: .4s;
+        transition: .4s;
+      }
+      
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        -webkit-transition: .4s;
+        transition: .4s;
+      }
+      
+      input:checked + .slider {
+        background-color: rgb(237, 24, 24);
+      }
+      
+      input:focus + .slider {
+        box-shadow: 0 0 1px #2196F3;
+      }
+      
+      input:checked + .slider:before {
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
+      }
+      
+      /* Rounded sliders */
+      .slider.round {
+        border-radius: 34px;
+      }
+      
+      .slider.round:before {
+        border-radius: 50%;
+      }
+
 </style>
 
-<div class="demo-card-square mdl-card mdl-shadow--2dp" style="height: 450px;">
+<div class="demo-card-square mdl-card mdl-shadow--2dp" style="height: 550px;">
     <div class="mdl-card__title mdl-card--expand">
         <h2 class="mdl-card__title-text">Toonin
 
@@ -43,7 +104,7 @@ module.exports = {html: `<div>
 
     </div>
 
-    <div class="mdl-card__actions mdl-card--border" style="height: 60%;">
+    <div class="mdl-card__actions mdl-card--border" style="height: 55%;">
         <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" id="btnShare">
             <i class="fas fa-music ic-share"></i>
             Start Sharing
@@ -54,9 +115,7 @@ module.exports = {html: `<div>
         </a>
         <br>
         <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" id="btnCopy"> <i class="far fa-copy ic-share"></i> Copy ID </a>
-        <br>
-        <p class="mdl-card__supporting-text room-id-text" style="padding: 1%; margin-left: 4%;" id="roomID">
-        </p>
+        <a class="mdl-card__supporting-text room-id-text" style="padding: 1%; margin-left: 1%;" id="roomID"></a>
         <br>
         <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" style="margin-top: 2%;">
         Toonin to <input type="text" id="tooninToRoom" style="height: 80%; margin-left: 8px; padding: 4px;">
@@ -69,6 +128,14 @@ module.exports = {html: `<div>
         <button class="mdl-button mdl-js-buttonton--fab mdl-button--fab mdl-button--colored" id="stopToonin" style="padding: 4%; margin-right: 30%;">
             <i class="material-icons">stop</i>
         </button>
+        <br>
+        
+        <a style="padding: 2%; margin-left: 4%;" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Mute Stream: </a>
+        <label class="switch">
+            <input type="checkbox">
+            <span class="slider round"></span>
+        </label>
+        <a id="muted-notif" style="margin-left: 1%; color: rgb(237, 24, 24);" hidden>Muted</a>
         
     </div>
 </div>`}

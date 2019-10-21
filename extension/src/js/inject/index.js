@@ -65,6 +65,10 @@ const playButton = document.getElementById("playRoom");
 const roomNameToonin = document.getElementById("tooninToRoom");
 const stopToonin = document.getElementById("stopToonin");
 
+function toggleMute(newVolume) {
+    port.postMessage({ type: "toggleMute" });
+}
+
 shareButton.onclick = () =>{
     var roomName = roomNameInput.value;
     port.postMessage({
