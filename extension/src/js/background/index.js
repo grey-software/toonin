@@ -114,7 +114,7 @@ chrome.tabs.onRemoved.addListener(function(tabId, removed) {
         roomID=null;
         tabID=null;
     }
-})
+});
 
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
@@ -127,8 +127,7 @@ chrome.runtime.onMessage.addListener(
         }
         chrome.runtime.sendMessage({"message": "extension_state_from_background", "data": data});
       }
-    }
-  );
+    });
 
 function setSocketListeners(socket) {
     socket.on("src ice", iceData => {
@@ -295,7 +294,7 @@ socket.on("room creation failed", (reason) => {
         type: "room creation fail",
         reason: reason
     });
-})
+});
 
 // new peer connection
 socket.on("peer joined", (peerData) => {
