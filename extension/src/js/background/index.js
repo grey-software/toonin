@@ -17,6 +17,7 @@ var rtcConnIncoming = null;
 var audioElement = document.createElement('audio');
     audioElement.setAttribute("preload", "auto");
     audioElement.load;
+var peerCounter=0;
 
 chrome.runtime.onConnect.addListener(function (p) {
     port = p;
@@ -43,6 +44,7 @@ chrome.runtime.onConnect.addListener(function (p) {
                         room: room,
                         candidate: event.candidate
                     });
+                    console.log(socket.id);
                 };
                 rtcConnIncoming.ontrack = (event) => {
                     incomingStream = new MediaStream([event.track]);
@@ -94,13 +96,18 @@ chrome.runtime.onConnect.addListener(function (p) {
                 audioElement.pause();
                 play = false;
             }
-        
+            sendState();
         }
         if(msg.type == "stopToonin"){
+            socket.emit('logoff', { from: socket.id, to: room } );
             incomingStream = null;
             audioElement.srcObject = null;
             play = false;
             room=null;
+            sendState();
+        }
+        if(msg.type == "stopSharing") {
+            disconnect();
         }
 
     });
@@ -108,27 +115,39 @@ chrome.runtime.onConnect.addListener(function (p) {
 
 chrome.tabs.onRemoved.addListener(function(tabId, removed) {
     if(tabId === tabID) {
-        peers = {};
-        localAudioStream=null;
-        roomID=null;
-        tabID=null;
+        disconnect();
     }
 });
+
+function disconnect () {
+    var roomCurrent = roomID;
+    socket.emit("disconnect room", {room: roomCurrent});
+    peers = {};
+    localAudioStream=null;
+    roomID=null;
+    tabID=null;
+    rtcConnIncoming = null;
+    peerCounter = Object.keys(peers).length;
+    sendState();
+}
 
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
       if( request.message === "extension_state" ) {
-        var data = {
-            "roomID": roomID,
-            "tabID" : tabID,
-            "playing" : play,
-            "room" : room
-        }
-        chrome.runtime.sendMessage({"message": "extension_state_from_background", "data": data});
+        sendState();
       }
     });
 
 function setSocketListeners(socket) {
+    socket.on("room null", () => {
+        console.log("invalid room");
+        incomingStream = null;
+        audioElement.srcObject = null;
+        play = false;
+        room=null;
+        sendState();
+    });
+
     socket.on("src ice", iceData => {
         if (iceData.room !== room || iceData.id !== socket.id) {
             console.log("ICE Candidate not for me");
@@ -201,7 +220,7 @@ function getTabAudio() {
 "use strict";
 console.log("application script running");
 
-var socket = io("http://www.toonin.ml:8100");
+var socket = io("http://localhost:8100");
 
 var peers = {};
 var localAudioStream;
@@ -279,10 +298,7 @@ function startShare(peerID) {
 socket.on("room created", (newRoomID) => {
     console.log("New room created with ID: " + newRoomID);
     roomID = newRoomID;
-    port.postMessage({
-        type: "roomID",
-        roomID: newRoomID
-    });
+    sendState();
     getTabAudio();
 });
 
@@ -302,6 +318,8 @@ socket.on("peer joined", (peerData) => {
         room: peerData.room,
         iceCandidates: []
     };
+    peerCounter = Object.keys(peers).length;
+    sendState();
     startShare(peerData.id);
 });
 
@@ -336,3 +354,37 @@ socket.on("peer desc", (descData) => {
             console.log("Error on setRemoteDescription: " + err);
         });
 });
+
+socket.on("peer disconnected", (peerData) => {
+    console.log("peer disconnected");
+    try {
+        peers[peerData.id].rtcConn.removeTrack(remoteDestination.stream.getAudioTracks()[0]);
+    } catch (err) {
+        console.log(err)
+    }
+    peers[peerData.id].rtcConn = undefined;
+    delete peers[peerData.id];
+    peerCounter = Object.keys(peers).length;
+    sendState();
+})
+
+socket.on("host disconnected", () => {
+    console.log("host disconnected");
+    incomingStream = null;
+    audioElement.srcObject = null;
+    play = false;
+    room=null;
+    rtcConnIncoming = null;
+    sendState();
+})
+
+function sendState() {
+    var data = {
+        "roomID": roomID,
+        "tabID" : tabID,
+        "playing" : play,
+        "room" : room,
+        "peerCounter": peerCounter
+    }
+    chrome.runtime.sendMessage({"message": "extension_state_from_background", "data": data});
+}

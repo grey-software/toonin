@@ -8,11 +8,13 @@ const sessionIDText = document.getElementById("roomID");
 const copyButton = document.getElementById("btnCopy");
 const roomNameInput = document.getElementById("roomNameInput");
 
-copyButton.disabled = true;
+copyButton.style.visibility="hidden";
 const playButton = document.getElementById("playRoom");
 const roomNameToonin = document.getElementById("tooninToRoom");
 const stopToonin = document.getElementById("stopToonin");
-
+const peerCounter = document.getElementById("peerCounter");
+const stopSharingButton = document.getElementById("btnShareStop");
+stopSharingButton.style.visibility="hidden";
 
 shareButton.onclick = () => {
     var roomName = roomNameInput.value;
@@ -20,12 +22,6 @@ shareButton.onclick = () => {
         type: "init",
         roomName: roomName
     });
-    roomNameInput.disabled = true;
-  
-    copyButton.disabled = false;
-    playButton.disabled = true;
-    stopToonin.disabled = true;
-    roomNameToonin.disabled = true;
 };
 
 port.onMessage.addListener((msg) => {
@@ -69,18 +65,18 @@ playButton.onclick = () => {
         type: "play",
         roomName: roomNameToonin.value
     });
-    roomNameToonin.disabled = true;
-    shareButton.disabled = true;
-    copyButton.disabled = true;
 }
 
 stopToonin.onclick = () => {
     port.postMessage({
         type: "stopToonin"
     });
-    roomNameToonin.disabled = false;
-    copyButton.disabled = false;
-    shareButton.disabled = false;
+}
+
+stopSharingButton.onclick = () => {
+    port.postMessage({
+        type: "stopSharing"
+    });
 }
 
 chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
@@ -91,35 +87,46 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.message === "extension_state_from_background" && request.data.roomID) {
         roomNameInput.disabled = true;
-        shareButton.disabled = true;
-        copyButton.disabled = false;
-        playButton.disabled = true;
-        stopToonin.disabled = true;
-        roomNameToonin.disabled = true;
+        shareButton.style.visibility= "hidden";
+        stopSharingButton.style.visibility="visible";
+        copyButton.style.visibility="visible";
+        playButton.style.visibility = "hidden";
+        stopToonin.style.visibility = "hidden";
+        roomNameToonin.style.visibility = "hidden";
         roomID=request.data.roomID
         sessionIDText.innerHTML = "Your Toonin ID is: \n" + roomID;
         sessionIDText.style.visibility = "visible";
+        peerCounter.style.visibility = "visible";
+        peerCounter.innerHTML = "You have " + request.data.peerCounter + " listeners.";
     } 
     else if (request.message === "extension_state_from_background" && !request.data.roomID && request.data.playing) {
         roomNameToonin.disabled = true;
-        roomNameInput.disabled = true;
-        shareButton.disabled = true; 
-        copyButton.disabled = true;
+        roomNameInput.style.visibility = "hidden";
+        shareButton.style.visibility= "hidden";
+        stopSharingButton.style.visibility="hidden";
+        copyButton.style.visibility = "hidden";
         playButton.disabled = false;
         stopToonin.disabled = false;
         roomNameToonin.value = request.data.room;
         roomID=null;
         sessionIDText.style.visibility = "hidden";
+        peerCounter.style.visibility = "visible";
+        peerCounter.innerHTML = "Tooned into room "+request.data.room;
     } 
     else if (request.message === "extension_state_from_background" && !request.data.roomID && !request.data.playing) {
-        roomNameInput.disabled = false;
-        shareButton.disabled = false;
-        copyButton.disabled = true;
+        roomNameInput.style.visibility = "visible";
+        shareButton.style.visibility= "visible";
+        stopSharingButton.style.visibility="hidden";
+        copyButton.style.visibility = "hidden";
         playButton.disabled = false;
-        stopToonin.disabled = false;
-        roomNameToonin.disabled = false;
+        stopToonin.disabled = true;
+        playButton.style.visibility = "visible";
+        stopToonin.style.visibility = "visible";
+        roomNameToonin.style.visibility = "visible";
         roomID=null;
         sessionIDText.style.visibility = "hidden";
+        peerCounter.style.visibility = "visible";
+        peerCounter.innerHTML = "Not Streaming";
     }
   });
 

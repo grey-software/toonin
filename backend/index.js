@@ -64,11 +64,17 @@ io.on("connection", socket => {
   });
 
   socket.on("new peer", room => {
-    socket.join(room, () => {
-      console.log("Peer connected successfully to room: " + room);
-      console.log(socket.id + " now in rooms ", socket.rooms);
-      socket.to(room).emit("peer joined", { room: room, id: socket.id });
-    });
+    if(rooms[room]){
+      socket.join(room, () => {
+        console.log("Peer connected successfully to room: " + room);
+        console.log(socket.id + " now in rooms ", socket.rooms);
+        socket.to(room).emit("peer joined", { room: room, id: socket.id });
+      });
+    } else {
+      console.log("invalid room");
+      socket.emit("room null");
+    }
+    
   });
 
   socket.on("src new ice", iceData => {
@@ -89,6 +95,18 @@ io.on("connection", socket => {
   socket.on("peer new desc", descData => {
     console.log(`Received answer description from peer: ${descData.id} in room: ${descData.room}`);
     socket.to(descData.room).emit("peer desc", descData);
+  });
+  // listener disconnects from room
+  socket.on("logoff", data => {
+    console.log(`peer logging off: ${data.from} in room: ${data.to}`);
+    socket.to(data.to).emit("peer disconnected", { id: data.from });
+  });
+  // host disconnects
+  socket.on("disconnect room", data => {
+    console.log(`host logging off: ${data.room}`);
+    socket.to(data.room).emit("host disconnected");
+    rooms[data.room] = undefined;
+    delete rooms[data.room];
   });
 });
 
