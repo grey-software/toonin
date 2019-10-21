@@ -227,7 +227,7 @@ function getTabAudio() {
 "use strict";
 console.log("application script running");
 
-var socket = io("http://localhost:8100");
+var socket = io("http://www.toonin.ml:8100");
 
 var peers = {};
 var localAudioStream;
