@@ -7,18 +7,25 @@ const sessionIDText = document.getElementById("roomID");
 
 const copyButton = document.getElementById("btnCopy");
 const roomNameInput = document.getElementById("roomNameInput");
-const playButton = document.getElementById("play-it");
-const roomName = document.getElementById("roomid1");
 
-var roomID;
+copyButton.disabled = true;
+const playButton = document.getElementById("playRoom");
+const roomNameToonin = document.getElementById("tooninToRoom");
+const stopToonin = document.getElementById("stopToonin");
+
+
 shareButton.onclick = () => {
-    console.log("start sharing clicked");
     var roomName = roomNameInput.value;
     port.postMessage({
         type: "init",
         roomName: roomName
     });
     roomNameInput.disabled = true;
+  
+    copyButton.disabled = false;
+    playButton.disabled = true;
+    stopToonin.disabled = true;
+    roomNameToonin.disabled = true;
 };
 
 port.onMessage.addListener((msg) => {
@@ -55,20 +62,65 @@ copyButton.onclick = () => {
     document.body.removeChild(el);
 };
 
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    if (request.message === "clicked_browser_action") {
-        console.log("clicked the button")
-        if (div.style.display === "none") {
-            div.style.display = "block";
-          } else {
-            div.style.display = "none";
-          }
-    }
-  });
+
 
 playButton.onclick = () => {
     port.postMessage({
         type: "play",
-        msg: roomName.value
+        roomName: roomNameToonin.value
     });
+    roomNameToonin.disabled = true;
+    shareButton.disabled = true;
+    copyButton.disabled = true;
 }
+
+stopToonin.onclick = () => {
+    port.postMessage({
+        type: "stopToonin"
+    });
+    roomNameToonin.disabled = false;
+    copyButton.disabled = false;
+    shareButton.disabled = false;
+}
+
+chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+    var activeTab = tabs[0];
+    chrome.tabs.sendMessage(activeTab.id, {"message": "clicked_extension"});
+});
+
+  chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    if (request.message === "extension_state_from_background" && request.data.roomID) {
+        roomNameInput.disabled = true;
+        shareButton.disabled = true;
+        copyButton.disabled = false;
+        playButton.disabled = true;
+        stopToonin.disabled = true;
+        roomNameToonin.disabled = true;
+        roomID=request.data.roomID
+        sessionIDText.innerHTML = "Your Toonin ID is: \n" + roomID;
+        sessionIDText.style.visibility = "visible";
+    } 
+    else if (request.message === "extension_state_from_background" && !request.data.roomID && request.data.playing) {
+        roomNameToonin.disabled = true;
+        roomNameInput.disabled = true;
+        shareButton.disabled = true; 
+        copyButton.disabled = true;
+        playButton.disabled = false;
+        stopToonin.disabled = false;
+        roomNameToonin.value = request.data.room;
+        roomID=null;
+        sessionIDText.style.visibility = "hidden";
+    } 
+    else if (request.message === "extension_state_from_background" && !request.data.roomID && !request.data.playing) {
+        roomNameInput.disabled = false;
+        shareButton.disabled = false;
+        copyButton.disabled = true;
+        playButton.disabled = false;
+        stopToonin.disabled = false;
+        roomNameToonin.disabled = false;
+        roomID=null;
+        sessionIDText.style.visibility = "hidden";
+    }
+  });
+
+  
