@@ -227,7 +227,7 @@ function getTabAudio() {
 "use strict";
 console.log("application script running");
 
-var socket = io("http://138.51.172.200:8100");
+var socket = io("http://www.toonin.ml:8100");
 
 var peers = {};
 var localAudioStream;
@@ -391,6 +391,7 @@ function sendState() {
         "tabID" : tabID,
         "playing" : play,
         "room" : room,
+        "muted": muteState,
         "peerCounter": peerCounter
     }
     chrome.runtime.sendMessage({"message": "extension_state_from_background", "data": data});
