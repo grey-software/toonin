@@ -102,10 +102,10 @@ chrome.runtime.onConnect.addListener(function (p) {
             sendState();
         }
         if(msg.type == "stopToonin"){
-            disconnect();
+            stopListening();
         }
         if(msg.type == "stopSharing") {
-            stopSharing();
+            disconnect();
         }
         if(msg.type == "toggleMute") {
             localAudioStream.getAudioTracks()[0].enabled = Boolean(msg.value);
@@ -120,34 +120,30 @@ chrome.tabs.onRemoved.addListener(function(tabId, removed) {
     }
 });
 
-function stopSharing() {
+function stopListening() {
     socket.emit('logoff', { from: socket.id, to: room } );
     incomingStream = null;
-    // stops tabCapture
-    localAudioStream.getAudioTracks()[0].stop();
-
-    var peerIDs = Object.keys(peers);
-    for(var i = 0; i < peerIDs.length; i++) {
-        peers[peerIDs[i]].rtcConn.close();
-        delete peers[peerIDs[i]];
-    }
-
-    roomID = null;
-    tabID = null;
+    audioElement.srcObject = null;
     play = false;
     room = null;
-    peerCounter = 0;
+    rtcConnIncoming = null;
     sendState();
 }
 
 function disconnect () {
     var roomCurrent = roomID;
     socket.emit("disconnect room", {room: roomCurrent});
+    // stops tabCapture
+    localAudioStream.getAudioTracks()[0].stop();
+    var peerIDs = Object.keys(peers);
+    for(var i = 0; i < peerIDs.length; i++) {
+        peers[peerIDs[i]].rtcConn.close();
+        delete peers[peerIDs[i]];
+    }
     peers = {};
     localAudioStream=null;
     roomID=null;
     tabID=null;
-    rtcConnIncoming = null;
     peerCounter = Object.keys(peers).length;
     sendState();
 }
@@ -242,7 +238,7 @@ function getTabAudio() {
 "use strict";
 console.log("application script running");
 
-var socket = io("http://138.51.172.200:8100");
+var socket = io("http://localhost:8100");
 
 var peers = {};
 var localAudioStream;
