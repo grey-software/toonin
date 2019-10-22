@@ -3,6 +3,7 @@ const port = chrome.runtime.connect({
 });
 
 const shareButton = document.getElementById("btnShare");
+const stopShareBtn = document.getElementById("btnShareStop");
 const sessionIDText = document.getElementById("roomID");
 
 const copyButton = document.getElementById("btnCopy");
@@ -15,6 +16,8 @@ const stopToonin = document.getElementById("stopToonin");
 // mute control elements
 const muteBtn = document.getElementById("mute-btn");
 const muteStatus = document.getElementById("muted-notif");
+// listener count
+const peerCounter = document.getElementById("peerCounter");
 
 muteBtn.onclick = function() { 
     muteStatus.hidden = !this.checked;
@@ -38,6 +41,10 @@ shareButton.onclick = () => {
     stopToonin.disabled = true;
     roomNameToonin.disabled = true;
 };
+
+stopShareBtn.onclick = () => {
+    port.postMessage({ type: 'stopSharing' });
+}
 
 var roomID;
 
@@ -115,6 +122,7 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         muteStatus.hidden = !muteBtn.checked;
         sessionIDText.innerHTML = "Your Toonin ID is: \n" + roomID;
         sessionIDText.style.visibility = "visible";
+        peerCounter.innerHTML = "You have " + request.data.peerCounter + " listeners";
     } 
     else if (request.message === "extension_state_from_background" && !request.data.roomID && request.data.playing) {
         roomNameToonin.disabled = true;
@@ -129,6 +137,7 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         roomNameToonin.value = request.data.room;
         roomID=null;
         sessionIDText.style.visibility = "hidden";
+        peerCounter.innerHTML = "You have " + request.data.peerCounter + " listeners";
     } 
     else if (request.message === "extension_state_from_background" && !request.data.roomID && !request.data.playing) {
         roomNameInput.disabled = false;
@@ -142,6 +151,7 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         muteStatus.hidden = !muteBtn.checked;
         roomID=null;
         sessionIDText.style.visibility = "hidden";
+        peerCounter.innerHTML = "You have " + request.data.peerCounter + " listeners";
     }
   });
 
