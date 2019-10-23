@@ -22,6 +22,12 @@ var incomingStream = null;
 var audioElem;
 var playBtn;
 
+/**
+ * 
+ * @param {any} vueDataRef Reference to the main vue object
+ * @param {HTMLAudioElement} audioElement reference to <audio> tag on page for playback
+ * @param {any} playRef <v-btn> for manual audio playback by the user, revealed when auto playback is not possible
+ */
 export function init(vueDataRef, audioElement, playRef) {
     playBtn = playRef;
     audioElem = audioElement;
@@ -38,14 +44,29 @@ export function enablePlayback() {
     this.$refs.audio.muted = false;
 }
 
+/**
+ * callback for <v-btn>.onclick for manual audio playback
+ */
 export function manualPlay() {
     logMessage('user played manually');
     audioElem.srcObject = incomingStream;
     audioElem.play();
 }
 
+/**
+ * 
+ * @param {any} msg log 'msg' to console
+ */
 export function logMessage(msg) { console.log(msg); }
 
+/**
+ * search for the room with 'roomID'. If room existsm, connect the user.
+ * else, do nothing. (In future, notify user of invalid id)
+ * 
+ * @param {any} thisClass 
+ * @param {String} roomID room id entered by the user
+ * @param {any} vueDataRef reference to the main vue object
+ */
 export function checkstream(thisClass, roomID, vueDataRef) {
     
     var ref = this || vueDataRef;
@@ -70,6 +91,13 @@ export function checkstream(thisClass, roomID, vueDataRef) {
         .catch(err => logMessage(err));
 }
 
+/**
+ * respond to the result sent by server after roomID search. if successful,
+ * connect the user to the room and play audio (update state as well), else do nothing
+ * 
+ * @param {String} result server response for the roomID provided by the user
+ * @param {Object} obj state variables for state management
+ */
 export function checkStreamResult(result, obj) {
     if (result === "SUCCESS") {
         logMessage("Active session with ID: " + obj.room + " found!");
@@ -110,6 +138,7 @@ export function checkStreamResult(result, obj) {
             try {
                 audioElem.srcObject = incomingStream;
                 audioElem.play();
+                obj.isPlaying = audioElem.srcObject.active;
             }
             catch(err) {
                 playBtn.$refs.link.hidden = false;
@@ -124,6 +153,13 @@ export function checkStreamResult(result, obj) {
     }
 }
 
+/**
+ * Initialize socket listeners necessary to establish communication 
+ * betweeen backend and the web app
+ * 
+ * @param {io} socket socket connection to the backend
+ * @param {Object} obj state variables for state management
+ */
 export function setSocketListeners(socket, obj) {
     socket.on("src ice", iceData => {
         logMessage(`Received new ICE Candidate from src for peer: ${iceData.id} in room: ${iceData.room}`);
@@ -152,6 +188,13 @@ export function setSocketListeners(socket, obj) {
     });
 }
 
+/**
+ * respond to the backend server with description 'desc'.
+ * This is called after receiving some msg from server.
+ * 
+ * @param {any} desc 
+ * @param {Object} obj state variables for state management
+ */
 export function createAnswer(desc, obj) {
     const roomID = obj.room;
     obj.rtcConn.createAnswer().then(desc => {
