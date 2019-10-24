@@ -230,7 +230,7 @@ function getTabAudio() {
         audioTagRef = window.audio; // save reference globally for volume control
         window.audio.srcObject = tabStream;
         window.audio.play();
-        localAudioStream = tabStream; //.clone();
+        localAudioStream = tabStream.clone();
         console.log("Tab audio captured. Now sending url to injected content script");
     });
 }
