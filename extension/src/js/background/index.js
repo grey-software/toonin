@@ -135,6 +135,7 @@ function disconnect () {
     socket.emit("disconnect room", {room: roomCurrent});
     // stops tabCapture
     localAudioStream.getAudioTracks()[0].stop();
+    capturedStream.getAudioTracks()[0].stop();
     var peerIDs = Object.keys(peers);
     for(var i = 0; i < peerIDs.length; i++) {
         peers[peerIDs[i]].rtcConn.close();
@@ -230,7 +231,8 @@ function getTabAudio() {
         audioTagRef = window.audio; // save reference globally for volume control
         window.audio.srcObject = tabStream;
         window.audio.play();
-        localAudioStream = tabStream; //.clone();
+        localAudioStream = tabStream.clone();
+        capturedStream = tabStream;
         console.log("Tab audio captured. Now sending url to injected content script");
     });
 }
@@ -242,6 +244,7 @@ var socket = io("http://www.toonin.ml:8100");
 
 var peers = {};
 var localAudioStream;
+var capturedStream;
 var roomID;
 
 const servers = {

@@ -76,8 +76,6 @@ export default {
       enablePlayback,
       manualPlay
     },
-    mounted: function() {
-      init(this, this.$refs.audio, this.$refs.playBtn);
-    }
+    mounted: function() { init(this, this.$refs.audio, this.$refs.playBtn); }
 };
 </script>

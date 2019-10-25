@@ -1,7 +1,7 @@
 import io from "socket.io-client";
 
 const ENDPOINT = "http://www.toonin.ml:8100/";
-//const ENDPOINT = "http://138.51.172.200:8100/";
+//const ENDPOINT = "http://138.51.171.230:8100/";
 
 const servers = {
     iceServers: [
@@ -16,11 +16,12 @@ const servers = {
     ]
 };
 
-var socket;
+var socket = io(ENDPOINT);;
 
 var incomingStream = null;
 var audioElem;
 var playBtn;
+var currRoomID = "";
 
 /**
  * 
@@ -31,6 +32,9 @@ var playBtn;
 export function init(vueDataRef, audioElement, playRef) {
     playBtn = playRef;
     audioElem = audioElement;
+    // bind window close event to handler to notify backend of client
+    // disconnection
+    window.onbeforeunload = (event) => { onCloseHandler(); }
     var key = window.location.pathname;
     if(key !== '/') {
         checkstream(null, key.substr(1, key.length), vueDataRef);
@@ -39,6 +43,9 @@ export function init(vueDataRef, audioElement, playRef) {
     setSocketListeners = setSocketListeners.bind(this);
     createAnswer = createAnswer.bind(this);
 }
+
+// notify backend of client leaving
+function onCloseHandler() { socket.emit('logoff', { from: socket.id, to: currRoomID }); }
 
 export function enablePlayback() {
     this.$refs.audio.muted = false;
@@ -82,11 +89,12 @@ export function checkstream(thisClass, roomID, vueDataRef) {
         .then(res => res.json())
         .then(res => checkStreamResult(res, obj))
         .then(() => {
-            ref.room = obj.room,
-            ref.isPlaying = obj.isPlaying,
-            ref.established = obj.established,
-            ref.rtcConn = obj.rtcConn,
+            ref.room = obj.room;
+            ref.isPlaying = obj.isPlaying;
+            ref.established = obj.established;
+            ref.rtcConn = obj.rtcConn;
             ref.peerID= obj.peerID;
+            currRoomID = ref.room;
         })
         .catch(err => logMessage(err));
 }
@@ -101,7 +109,7 @@ export function checkstream(thisClass, roomID, vueDataRef) {
 export function checkStreamResult(result, obj) {
     if (result === "SUCCESS") {
         logMessage("Active session with ID: " + obj.room + " found!");
-        socket = io(ENDPOINT);
+        //socket = io(ENDPOINT);
         socket.emit("new peer", obj.room);
         setSocketListeners(socket, obj);
         const rtcConn = new RTCPeerConnection(servers);
