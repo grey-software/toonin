@@ -147,6 +147,7 @@ export function checkStreamResult(result, obj) {
                 audioElem.srcObject = incomingStream;
                 audioElem.play();
                 obj.isPlaying = audioElem.srcObject.active;
+                playBtn.$refs.link.hidden = false;
             }
             catch(err) {
                 playBtn.$refs.link.hidden = false;
