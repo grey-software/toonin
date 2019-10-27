@@ -4,7 +4,7 @@ jobs:
     # pre-built images: https://circleci.com/docs/2.0/circleci-images/
     docker:
       - image: circleci/node:latest
-    working_directory: extension
+    working_directory: ~/project/extension
     steps:
       - checkout
       # Download and cache dependencies
@@ -28,7 +28,7 @@ jobs:
   Build-App:
     docker:
       - image: circleci/node:latest
-    working_directory: app
+    working_directory: ~/project/app
     steps:
       - checkout
       # Download and cache dependencies
