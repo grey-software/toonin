@@ -4,7 +4,6 @@ jobs:
     # pre-built images: https://circleci.com/docs/2.0/circleci-images/
     docker:
       - image: circleci/node:latest
-    working_directory: ~/project/extension
     steps:
       - checkout
       # Download and cache dependencies
@@ -16,7 +15,7 @@ jobs:
       - run:
           name: Installing extension dependencies
           command: |
-            npm i
+            npm --prefix ./extension install
       - save_cache:
           paths:
             - node_modules
@@ -24,11 +23,10 @@ jobs:
       - run:
           name: Building the extension
           command: |
-            npm run build
+             npm --prefix ./extension run build
   Build-App:
     docker:
       - image: circleci/node:latest
-    working_directory: ~/project/app
     steps:
       - checkout
       # Download and cache dependencies
@@ -40,7 +38,7 @@ jobs:
       - run:
           name: Installing app dependencies
           command: |
-            npm i
+            npm --prefix ./client install
       - save_cache:
           paths:
             - node_modules
@@ -48,7 +46,7 @@ jobs:
       - run:
           name: Building App
           command: |
-            npm run build
+            npm --prefix ./client run build
 workflows:
   version: 2
   Validate_Build:
