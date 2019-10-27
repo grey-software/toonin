@@ -1,0 +1,29 @@
+version: 2.1
+jobs:
+  Build-Extension:
+    # pre-built images: https://circleci.com/docs/2.0/circleci-images/
+    docker:
+      - image: circleci/node:latest
+    steps:
+      - checkout
+      - run:
+          name: Building the extension
+          command: |
+            cd extension
+            npm run build
+  Build-App:
+    docker:
+      - image: circleci/node:latest
+    steps:
+      - checkout
+      - run:
+          name: Building the app
+          command: |
+            cd client
+            npm run build
+workflows:
+ version: 2
+ Validate_Build:
+   jobs:
+     - Build-Extension
+     - Build-App
