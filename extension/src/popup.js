@@ -148,7 +148,7 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         muteBtn.checked = request.data.muted;
         muteStatus.hidden = !muteBtn.checked;
         sessionIDText.innerHTML = "Your Toonin ID is: \n" + roomID;
-        sessionIDText.style.display = "block";
+        roomDiv.style.display = "block";
         peerCounter.style.display = "block";
         peerCounter.innerHTML = "You have " + request.data.peerCounter + " listeners.";
         roomNameSpan.style.display = "none";
