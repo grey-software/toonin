@@ -4,22 +4,50 @@ jobs:
     # pre-built images: https://circleci.com/docs/2.0/circleci-images/
     docker:
       - image: circleci/node:latest
+    working_directory: extension
     steps:
       - checkout
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+      - run:
+          name: Installing extension dependencies
+          command: |
+            npm i
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
       - run:
           name: Building the extension
           command: |
-            cd extension
             npm run build
   Build-App:
     docker:
       - image: circleci/node:latest
+    working_directory: app
     steps:
       - checkout
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
       - run:
-          name: Building the app
+          name: Installing app dependencies
           command: |
-            cd client
+            npm i
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+      - run:
+          name: Building App
+          command: |
             npm run build
 workflows:
  version: 2
