@@ -50,8 +50,8 @@ jobs:
           command: |
             npm run build
 workflows:
- version: 2
- Validate_Build:
-   jobs:
-     - Build-Extension
-     - Build-App
+  version: 2
+  Validate_Build:
+    jobs:
+      - Build-Extension
+      - Build-App
