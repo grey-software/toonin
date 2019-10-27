@@ -142,16 +142,20 @@ export function checkStreamResult(result, obj) {
 
             logMessage('track added');
             incomingStream = new MediaStream([event.track]);
-
-            try {
-                audioElem.srcObject = incomingStream;
-                audioElem.play();
-                obj.isPlaying = audioElem.srcObject.active;
+            var _iOSDevice = !!navigator.platform.match(/iPhone|iPod|iPad/);
+            if(_iOSDevice) {
                 playBtn.$refs.link.hidden = false;
+            } else {
+                try {
+                    audioElem.srcObject = incomingStream;
+                    audioElem.play();
+                    obj.isPlaying = audioElem.srcObject.active;
+                }
+                catch(err) {
+                    playBtn.$refs.link.hidden = false;
+                }
             }
-            catch(err) {
-                playBtn.$refs.link.hidden = false;
-            }
+            
         }
         obj.established = true;
         obj.rtcConn = rtcConn;
