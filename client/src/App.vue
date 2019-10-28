@@ -5,6 +5,17 @@
       label="Connect" outlined rounded @keyup.enter="checkstream"/>
       <v-btn id="connect-btn" @click="checkstream" rounded>Toonin</v-btn><br><br>
       <v-btn ref="playBtn" @click="manualPlay" style="margin-left: 2%;" hidden rounded>Play</v-btn>
+      <v-timeline id="playbackTimeline" :dense="dense" :reverse="reverse" style="float: left; margin-top: 10%; margin-right: 0%;">
+        <v-timeline-item
+          :fill-dot="fillDot"
+          :hide-dot="hideDot"
+          :icon-color=" iconColor ? 'deep-orange' : ''"
+          :left="left"
+          :right="right"
+          :small="small"
+        >
+        </v-timeline-item>
+      </v-timeline>
       <div>
         <audio ref="audio"/>
       </div>
