@@ -103,11 +103,12 @@ export function checkstream() {
  */
 export function checkStreamResult(result) {
     if (result === "SUCCESS") {
+        updateState({ roomFound: true });
         logMessage("Active session with ID: " + state.room + " found!");
-        //socket = io(ENDPOINT);
         socket.emit("new peer", state.room);
         setSocketListeners(socket);
         const rtcConn = new RTCPeerConnection(servers);
+
         rtcConn.onicecandidate = event => {
             if (!event.candidate) {
                 logMessage("No candidate for RTC connection");
@@ -119,6 +120,20 @@ export function checkStreamResult(result) {
                 candidate: event.candidate
             });
         };
+
+        rtcConn.onconnectionstatechange = function() {
+            if(rtcConn.connectionState == 'connected') { updateState({ established: true }); }
+
+            if(rtcConn.connectionState == 'disconnected' || 
+            rtcConn.connectionState == 'failed') { 
+                updateState({ 
+                    established: false,
+                    isPlaying: false
+                });
+            }
+
+        }
+
         rtcConn.onaddstream = event => {
             logMessage("Stream added");
             logMessage(event.stream);
@@ -151,7 +166,6 @@ export function checkStreamResult(result) {
             }
         }
         updateState({
-            established: true,
             rtcConn: rtcConn,
             peerID: socket.id
         });
