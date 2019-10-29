@@ -22,5 +22,5 @@
         "storage",
         "tabCapture"
     ],
-    "content_security_policy": "script-src 'self' 'unsafe-eval' https://cdnjs.cloudflare.com https://socket.io https://webrtc.github.io https://www.gstatic.com/ https://*.firebaseio.com https://www.googleapis.com; object-src 'self'"
+    "content_security_policy": "script-src 'self' https://cdnjs.cloudflare.com https://socket.io https://webrtc.github.io https://www.gstatic.com/ https://*.firebaseio.com https://www.googleapis.com; object-src 'self'"
 }
