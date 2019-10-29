@@ -49,7 +49,6 @@ export function init(vueDataRef, audioElement, playRef) {
 function onCloseHandler() { socket.emit('logoff', { from: socket.id, to: state.room }); }
 
 function updateState(newState) {
-    console.log('inside updatestate');
     var alteredVars = Object.keys(newState);
     for(var i = 0; i < alteredVars.length; i++) {
         if(alteredVars[i] in state) {
@@ -57,13 +56,10 @@ function updateState(newState) {
         }
     }
 
-    console.log('state updated');
-    console.log(state);
+    console.log(alteredVars);
 }
 
-export function enablePlayback() {
-    this.$refs.audio.muted = false;
-}
+export function enablePlayback() { this.$refs.audio.muted = false; }
 
 /**
  * callback for <v-btn>.onclick for manual audio playback
@@ -101,6 +97,7 @@ export function checkstream() {
  * @param {String} result server response for the roomID provided by the user
  */
 export function checkStreamResult(result) {
+    
     if (result === "SUCCESS") {
         updateState({ roomFound: true });
         logMessage("Active session with ID: " + state.room + " found!");
@@ -121,13 +118,14 @@ export function checkStreamResult(result) {
         };
 
         rtcConn.onconnectionstatechange = function() {
-            if(rtcConn.connectionState == 'connected') { updateState({ established: true }); }
+            if(rtcConn.connectionState === 'connected') { updateState({ established: true }); }
 
             if(rtcConn.connectionState == 'disconnected' || 
             rtcConn.connectionState == 'failed') { 
                 updateState({ 
                     established: false,
-                    isPlaying: false
+                    isPlaying: false,
+                    roomFound: false
                 });
             }
 
@@ -143,7 +141,12 @@ export function checkStreamResult(result) {
                 audioElem.play().catch((err) => {
                     logMessage(err);
                 });
-                updateState({ isPlaying: audioElem.srcObject.active });
+                audioElem.onplay = () => {
+                    updateState({
+                        established: true,
+                        isPlaying: audioElem.srcObject.active 
+                    });
+                }
             }
         };
 
@@ -155,10 +158,13 @@ export function checkStreamResult(result) {
             try {
                 audioElem.srcObject = incomingStream;
                 audioElem.play();
-                updateState({ 
-                    isPlaying: audioElem.srcObject.active,
-                    stream: incomingStream
-                });
+                audioElem.onplay = () => {
+                    updateState({
+                        established: true,
+                        isPlaying: audioElem.srcObject.active,
+                        stream: incomingStream
+                    });
+                }
             }
             catch(err) {
                 playBtn.$refs.link.hidden = false;

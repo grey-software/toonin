@@ -5,7 +5,7 @@
       label="Connect" outlined rounded @keyup.enter="checkstream"/>
       <v-btn id="connect-btn" @click="checkstream" rounded>Toonin</v-btn><br><br>
       <v-btn ref="playBtn" @click="manualPlay" style="margin-left: 2%;" hidden rounded>Play</v-btn>
-      <div style="float: left; margin-top: 2%; margin-right: 0%;">
+      <div style="float: left; margin-top: 2%; margin-right: 0%;" id='timeline-container'>
         <a id="timelineHeader">Status</a>
 
         <v-timeline>
@@ -16,7 +16,7 @@
           </v-card>
         </v-timeline-item>
 
-        <v-timeline-item :color="established ? '#4CAF50' : '#F44336'" fill-dot>
+        <v-timeline-item :color="roomFound ? '#4CAF50' : '#F44336'" fill-dot>
           <v-card class="statusCard">
             <a class="statusCardLeftText">Room found</a>
           </v-card> 
@@ -60,9 +60,13 @@
     }
 
     img#logo {
-      height: 30%; 
-      margin-left: 17.5%; 
-      margin-top: 35%;
+      height: 20%; 
+      margin-left: 20.5%; 
+      margin-top: 10%;
+    }
+
+    div#timeline-container {
+      margin-left: 3%;
     }
   }
 
