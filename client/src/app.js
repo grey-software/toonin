@@ -21,7 +21,6 @@ var socket = io(ENDPOINT);;
 var incomingStream = null;
 var audioElem;
 var playBtn;
-var currRoomID = "";
 var state = null;
 
 /**
@@ -47,7 +46,7 @@ export function init(vueDataRef, audioElement, playRef) {
 }
 
 // notify backend of client leaving
-function onCloseHandler() { socket.emit('logoff', { from: socket.id, to: currRoomID }); }
+function onCloseHandler() { socket.emit('logoff', { from: socket.id, to: state.room }); }
 
 function updateState(newState) {
     console.log('inside updatestate');
