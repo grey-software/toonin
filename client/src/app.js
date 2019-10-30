@@ -48,6 +48,13 @@ export function init(vueDataRef, audioElement, playRef) {
 // notify backend of client leaving
 function onCloseHandler() { socket.emit('logoff', { from: socket.id, to: state.room }); }
 
+/**
+ * Update the program state variables with new values of the newState object.
+ * If a variable in newState is not part of the program state, it is ignored.
+ * 
+ * @param {Object} newState object with state variables and new values that will
+ *                          be updated
+ */
 function updateState(newState) {
     var alteredVars = Object.keys(newState);
     for(var i = 0; i < alteredVars.length; i++) {
@@ -55,8 +62,6 @@ function updateState(newState) {
             state[alteredVars[i]] = newState[alteredVars[i]];
         }
     }
-
-    console.log(alteredVars);
 }
 
 export function enablePlayback() { this.$refs.audio.muted = false; }
@@ -75,7 +80,7 @@ export function manualPlay() {
  * 
  * @param {any} msg log 'msg' to console
  */
-export function logMessage(msg) { return; }//console.log(msg); }
+export function logMessage(msg) { console.log(msg); }
 
 /**
  * search for the room with 'roomID'. If room exists, connect the user.
@@ -124,8 +129,7 @@ export function checkStreamResult(result) {
             rtcConn.connectionState == 'failed') { 
                 updateState({ 
                     established: false,
-                    isPlaying: false,
-                    roomFound: false
+                    isPlaying: false
                 });
             }
 
