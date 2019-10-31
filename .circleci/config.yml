@@ -1,0 +1,58 @@
+version: 2.1
+jobs:
+  Build-Extension:
+    # pre-built images: https://circleci.com/docs/2.0/circleci-images/
+    docker:
+      - image: circleci/node:latest
+    steps:
+      - checkout
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+      - run:
+          name: Installing extension dependencies
+          command: |
+            npm --prefix ./extension install
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+      - run:
+          name: Building the extension
+          command: |
+             npm --prefix ./extension run build
+  Build-App:
+    docker:
+      - image: circleci/node:latest
+    steps:
+      - checkout
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+      - run:
+          name: Installing app dependencies
+          command: |
+            npm --prefix ./client install
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+      - run:
+          name: Building App
+          command: |
+            npm --prefix ./client run build
+workflows:
+  version: 2
+  Validate_Build:
+    jobs:
+      - Build-Extension
+      - Build-App
+notify:
+  webhooks:
+    - url: https://outlook.office.com/webhook/04e18692-6efb-49e9-9028-139bf917ab16@78aac226-2f03-4b4d-9037-b46d56c55210/CircleCI/30437ffdcb3e400baa80214e81552edc/5b046f8c-07ba-4e2f-a006-653143830ede
