@@ -152,8 +152,6 @@ function disconnect () {
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
       if( request.message === "extension_state" ) {
-
-        console.log("hello");
         sendState();
       }
 });

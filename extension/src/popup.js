@@ -108,6 +108,9 @@ stopToonin.onclick = () => {
     port.postMessage({
         type: "stopToonin"
     });
+    hideElements();
+    createRoomBtn.style.display = "inline";
+    connectRoomBtn.style.display = "inline";
 }
 
 createRoomBtn.onclick= () => {
@@ -135,9 +138,6 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
 });
 
   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-      console.log(request);
-      console.log(sender);
-      console.log(sendResponse);
     if (request.message === "extension_state_from_background" && request.data.roomID) {
         roomNameSpan.style.display = "none";
         shareButton.style.display = "none";
@@ -157,6 +157,8 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         roomNameSpan.style.display = "none";
         btnShare.style.display = "none";
         backButton.style.display = "none";
+        createRoomBtn.style.display = "none";
+        connectRoomBtn.style.display = "none";
     }
     else if (request.message === "extension_state_from_background" && !request.data.roomID && request.data.playing) {
         roomNameSpan.style.display = "none";
@@ -171,14 +173,17 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         roomDiv.style.display = "block";
         peerCounter.style.display = "block";
         peerCounter.innerHTML = "Tooned into room "+request.data.room;
+        createRoomBtn.style.display = "none";
+        stopToonin.display = "block";
+        connectRoomBtn.style.display = "none";
+        playButton.style.display = "none";
+        backButton.style.display = "none";
     }
     else if (request.message === "extension_state_from_background" && !request.data.roomID && !request.data.playing) {
         // roomNameSpan.style.display = "block";
         // shareButton.style.display = "block";
         // stopSharingButton.style.display = "none";
         // copyButton.style.display = "none";
-        playButton.style.display = "none";
-        stopToonin.disabled = false;
         roomNameToonin.disabled = false;
         // playButton.style.display = "block";
         // stopToonin.style.display = "block";
@@ -188,8 +193,8 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         muteStatus.hidden = !muteBtn.checked;
         roomID=null;
         // sessionIDText.style.display = "none";
-        peerCounter.style.display = "block";
-        peerCounter.innerHTML = "Not Streaming";
+
+        roomDiv.style.display = "none";
 
     }
   });
