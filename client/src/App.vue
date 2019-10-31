@@ -10,34 +10,33 @@
 
         <v-timeline>
 
-        <v-timeline-item :color="room != '' ? '#4CAF50' : '#F44336'" fill-dot>
-          <v-card style="width: 250px;" class="statusCard">
-            <a class="statusCardRightText">Waiting</a>
-          </v-card>
-        </v-timeline-item>
+          <v-timeline-item :color="room != '' ? '#4CAF50' : '#F44336'" fill-dot>
+            <v-card style="width: 250px;" class="statusCard">
+              <a class="statusCardRightText">Waiting</a>
+            </v-card>
+          </v-timeline-item>
 
-        <v-timeline-item :color="roomFound ? '#4CAF50' : '#F44336'" fill-dot>
-          <v-card class="statusCard">
-            <a class="statusCardLeftText">Room found</a>
-          </v-card> 
-        </v-timeline-item>
+          <v-timeline-item :color="roomFound ? '#4CAF50' : '#F44336'" fill-dot>
+            <v-card class="statusCard">
+              <a class="statusCardLeftText">Room found</a>
+            </v-card> 
+          </v-timeline-item>
 
-        <v-timeline-item :color="established ? '#4CAF50' : '#F44336'" fill-dot >
-          <v-card class="statusCard">
-            <a class="statusCardRightText">Connected</a>
-          </v-card>  
-        </v-timeline-item>
+          <v-timeline-item :color="established ? '#4CAF50' : '#F44336'" fill-dot >
+            <v-card class="statusCard">
+              <a class="statusCardRightText">Connected</a>
+            </v-card>  
+          </v-timeline-item>
 
-        <v-timeline-item :color="isPlaying ? '#4CAF50' : '#F44336'" fill-dot >
-          <v-card class="statusCard">
-            <a class="statusCardLeftText">Playing</a>
-          </v-card>
-        </v-timeline-item>
+          <v-timeline-item :color="isPlaying ? '#4CAF50' : '#F44336'" fill-dot >
+            <v-card class="statusCard">
+              <a class="statusCardLeftText">Playing</a>
+            </v-card>
+          </v-timeline-item>
 
-      </v-timeline>
+        </v-timeline>
 
       </div>
-      
       
       <div>
         <audio ref="audio"/>
