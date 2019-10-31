@@ -7,7 +7,7 @@ const stopSharingButton = document.getElementById("btnShareStop");
 const backButton = document.getElementById("btnBack");
 const sessionIDText = document.getElementById("roomText");
 const roomDiv = document.getElementById("roomDiv");
-
+const newMessage = "";
 const connectRoomButton = document.getElementById("connectRoomBtn");
 const copyButton = document.getElementById("btnCopy");
 const roomNameInput = document.getElementById("roomNameInput");
@@ -135,6 +135,9 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
 });
 
   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+      console.log(request);
+      console.log(sender);
+      console.log(sendResponse);
     if (request.message === "extension_state_from_background" && request.data.roomID) {
         roomNameSpan.style.display = "none";
         shareButton.style.display = "none";
@@ -161,11 +164,11 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         stopSharingButton.style.display = "none";
         copyButton.style.display = "none";
         roomNameToonin.value = request.data.room;
-        muteSpan.style.display = "block";
+        muteSpan.style.display = "none";
         muteBtn.checked = request.data.muted;
         muteStatus.hidden = !muteBtn.checked;
         roomID=null;
-        roomDiv.style.display = "none";
+        roomDiv.style.display = "block";
         peerCounter.style.display = "block";
         peerCounter.innerHTML = "Tooned into room "+request.data.room;
     }
@@ -185,8 +188,8 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         muteStatus.hidden = !muteBtn.checked;
         roomID=null;
         // sessionIDText.style.display = "none";
-        // peerCounter.style.display = "none";
-        // peerCounter.innerHTML = "Not Streaming";
+        peerCounter.style.display = "block";
+        peerCounter.innerHTML = "Not Streaming";
 
     }
   });

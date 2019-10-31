@@ -24,7 +24,7 @@ var peerCounter=0;
 
 chrome.runtime.onConnect.addListener(function (p) {
     port = p;
-    
+
     p.onMessage.addListener(function (msg) {
         if (msg.type == "init") {
             // optional parameter roomName.
@@ -51,7 +51,7 @@ chrome.runtime.onConnect.addListener(function (p) {
                 };
                 rtcConnIncoming.ontrack = (event) => {
                     incomingStream = new MediaStream([event.track]);
-        
+
                     try {
                         audioElement.srcObject = incomingStream;
                     }
@@ -81,7 +81,7 @@ chrome.runtime.onConnect.addListener(function (p) {
                 };
                 rtcConnIncoming.ontrack = (event) => {
                     incomingStream = new MediaStream([event.track]);
-        
+
                     try {
                         audioElement.srcObject = incomingStream;
                         audioElement.play();
@@ -152,6 +152,8 @@ function disconnect () {
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
       if( request.message === "extension_state" ) {
+
+        console.log("hello");
         sendState();
       }
 });
@@ -277,7 +279,7 @@ function getStreamableData() {
 
 /**
  * Start sharing user's tab audio with the peer with "peerID"
- * @param {string} peerID 
+ * @param {string} peerID
  */
 function startShare(peerID) {
     console.log("Starting new connection for peer: " + peerID);
