@@ -22,6 +22,8 @@ const peerCounter = document.getElementById("peerCounter");
 const roomNameSpan = document.getElementById("roomNameSpan");
 const connectSpan = document.getElementById("connectSpan");
 const muteSpan = document.getElementById("muteSpan");
+const titleSpan = document.getElementById("titleOfPage");
+const titleText = document.getElementById("titleText");
 
 muteBtn.onclick = function() { 
     muteStatus.hidden = !this.checked;
@@ -116,6 +118,7 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         sessionIDText.style.visibility = "visible";
         peerCounter.style.visibility = "visible";
         peerCounter.innerHTML = "You have " + request.data.peerCounter + " listeners.";
+        titleText.innerHTML = "Currently streaming: " + request.data.title; 
     } 
     else if (request.message === "extension_state_from_background" && !request.data.roomID && request.data.playing) {
         roomNameSpan.style.visibility= "hidden";
@@ -134,6 +137,7 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         sessionIDText.style.visibility = "hidden";
         peerCounter.style.visibility = "visible";
         peerCounter.innerHTML = "Tooned into room "+request.data.room;
+        titleText.innerHTML = "Host is listening to: " + request.data.hostTitle;
     } 
     else if (request.message === "extension_state_from_background" && !request.data.roomID && !request.data.playing) {
         roomNameSpan.style.visibility= "visible";
@@ -153,6 +157,7 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         sessionIDText.style.visibility = "hidden";
         peerCounter.style.visibility = "visible";
         peerCounter.innerHTML = "Not Streaming";
+        titleText.innerHTML = "";
     }
   });
 

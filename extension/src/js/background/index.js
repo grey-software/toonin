@@ -21,6 +21,8 @@ var audioElement = document.createElement('audio');
     audioElement.setAttribute("preload", "auto");
     audioElement.load;
 var peerCounter=0;
+var title;
+var hostTitle;
 
 chrome.runtime.onConnect.addListener(function (p) {
     port = p;
@@ -29,6 +31,7 @@ chrome.runtime.onConnect.addListener(function (p) {
         if (msg.type == "init") {
             // optional parameter roomName.
             socket.emit("create room", msg.roomName);
+            addTitleListener();
         }
         if (msg.type == "play") {
             if(!room){
@@ -36,7 +39,7 @@ chrome.runtime.onConnect.addListener(function (p) {
                 console.log("Active session with ID: " + room + " found!");
                 socket.emit("new peer", room);
                 setSocketListeners(socket);
-                rtcConnIncoming = new RTCPeerConnection(servers);
+                rtcConnIncoming = new RTCPeerConnection(servers, { optional: [ { RtpDataChannels: true } ]});
                 rtcConnIncoming.onicecandidate = event => {
                     if (!event.candidate) {
                         console.log("No candidate for RTC connection");
@@ -49,6 +52,21 @@ chrome.runtime.onConnect.addListener(function (p) {
                     });
                     console.log(socket.id);
                 };
+                
+                rtcConnIncoming.ondatachannel = (event) => {
+                    var recieveChannel = event.channel;
+                    recieveChannel.onmessage = function(event) {
+                        try {
+                            var mediaDescription = JSON.parse(event.data);
+                            hostTitle = mediaDescription.title;
+                            console.log(hostTitle);
+                            sendState();
+                        } catch (err) {
+                            console.log(err);
+                        }
+                    }
+                }
+
                 rtcConnIncoming.ontrack = (event) => {
                     incomingStream = new MediaStream([event.track]);
         
@@ -68,6 +86,7 @@ chrome.runtime.onConnect.addListener(function (p) {
                 socket.emit("new peer", room);
                 setSocketListeners(socket);
                 rtcConnIncoming = new RTCPeerConnection(servers);
+                
                 rtcConnIncoming.onicecandidate = event => {
                     if (!event.candidate) {
                         console.log("No candidate for RTC connection");
@@ -79,6 +98,20 @@ chrome.runtime.onConnect.addListener(function (p) {
                         candidate: event.candidate
                     });
                 };
+
+                rtcConnIncoming.ondatachannel = (event) => {
+                    var recieveChannel = event.channel;
+                    recieveChannel.onmessage = function(event) {
+                        try {
+                            var mediaDescription = JSON.parse(event.data);
+                            hostTitle = mediaDescription.title;
+                            console.log(hostTitle);
+                        } catch (err) {
+                            console.log(err);
+                        }
+                    }
+                }
+
                 rtcConnIncoming.ontrack = (event) => {
                     incomingStream = new MediaStream([event.track]);
         
@@ -120,6 +153,17 @@ chrome.tabs.onRemoved.addListener(function(tabId, removed) {
     }
 });
 
+function addTitleListener() {
+    chrome.tabs.onUpdated.addListener(function(tabId, changeInfo) {
+        if(changeInfo.title && tabId === tabID) {
+            console.log(changeInfo.title);
+            title = changeInfo.title;
+            sendMediaDescription();
+            sendState();
+        }
+    });
+}
+
 function stopListening() {
     socket.emit('logoff', { from: socket.id, to: room } );
     incomingStream = null;
@@ -153,6 +197,7 @@ chrome.runtime.onMessage.addListener(
       if( request.message === "extension_state" ) {
         sendState();
       }
+      
 });
 
 function setSocketListeners(socket) {
@@ -220,8 +265,7 @@ function getTabAudio() {
         }
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
             var currTab = tabs[0];
-            if (currTab) { tabID = currTab.id; }
-
+            if (currTab) { tabID = currTab.id; title = currTab.title;}
         });
 
         let tracks = stream.getAudioTracks(); // MediaStreamTrack[], stream is MediaStream
@@ -278,12 +322,17 @@ function getStreamableData() {
  */
 function startShare(peerID) {
     console.log("Starting new connection for peer: " + peerID);
-    const rtcConn = new RTCPeerConnection(servers);
+    const rtcConn = new RTCPeerConnection(servers, { optional: [ { RtpDataChannels: true } ]});
+    
+
+
     getStreamableData();
 
     rtcConn.addTrack(remoteDestination.stream.getAudioTracks()[0]);
     peers[peerID].rtcConn = rtcConn;
-    console.log(peers);
+    peers[peerID].dataChannel = peers[peerID].rtcConn.createDataChannel('mediaDescription');
+    
+    // console.log(peers);
     peers[peerID].rtcConn.onicecandidate = function (event) {
         if (!event.candidate) {
             console.log("No candidate for RTC connection");
@@ -308,6 +357,25 @@ function startShare(peerID) {
             });
         });
     });
+
+    peers[peerID].dataChannel.addEventListener("open", (event) => {
+        console.log("sending title to new peer");
+        peers[peerID].dataChannel.send(JSON.stringify({"title": title}));
+    });
+}
+
+// Sends media meta information over a rtc data channel to a connected listener
+function sendMediaDescription() {
+    console.log("sending new title to all peers");
+    Object.keys(peers).forEach(function (peer) {
+        
+        var dc = peers[peer].dataChannel;
+        if (dc.readyState === 'open') {
+            var data = JSON.stringify({"title": title});
+            dc.send(data);
+        }
+    });
+    
 }
 
 /* **************** *
@@ -403,7 +471,9 @@ function sendState() {
         "playing" : play,
         "room" : room,
         "muted": muteState,
-        "peerCounter": peerCounter
+        "peerCounter": peerCounter,
+        "hostTitle": hostTitle,
+        "title" : title
     }
     chrome.runtime.sendMessage({"message": "extension_state_from_background", "data": data});
 }
