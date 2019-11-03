@@ -179,6 +179,7 @@ function disconnect () {
     socket.emit("disconnect room", {room: roomCurrent});
     // stops tabCapture
     localAudioStream.getAudioTracks()[0].stop();
+    capturedStream.getAudioTracks()[0].stop();
     var peerIDs = Object.keys(peers);
     for(var i = 0; i < peerIDs.length; i++) {
         peers[peerIDs[i]].rtcConn.close();
@@ -263,10 +264,6 @@ function getTabAudio() {
             console.error("Error starting tab capture: " + (chrome.runtime.lastError.message || "UNKNOWN"));
             return;
         }
-        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-            var currTab = tabs[0];
-            if (currTab) { tabID = currTab.id; title = currTab.title;}
-        });
 
         let tracks = stream.getAudioTracks(); // MediaStreamTrack[], stream is MediaStream
         let tabStream = new MediaStream(tracks);
@@ -274,9 +271,16 @@ function getTabAudio() {
         audioTagRef = window.audio; // save reference globally for volume control
         window.audio.srcObject = tabStream;
         window.audio.play();
-        localAudioStream = tabStream; //.clone();
+        localAudioStream = tabStream.clone();
+        capturedStream = tabStream;
         console.log("Tab audio captured. Now sending url to injected content script");
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+            var currTab = tabs[0];
+            if (currTab) { tabID = currTab.id; title = currTab.title; sendState();}
+        });
+        
     });
+    
 }
 
 "use strict";
@@ -286,6 +290,7 @@ var socket = io("http://www.toonin.ml:8100");
 
 var peers = {};
 var localAudioStream;
+var capturedStream;
 var roomID;
 
 const servers = {
@@ -384,7 +389,6 @@ function sendMediaDescription() {
 socket.on("room created", (newRoomID) => {
     console.log("New room created with ID: " + newRoomID);
     roomID = newRoomID;
-    sendState();
     getTabAudio();
 });
 

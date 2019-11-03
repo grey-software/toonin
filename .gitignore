@@ -7,7 +7,7 @@ extension/build/
 /coverage
 
 # production
-/build
+/extension/build
 /app/build
 
 
