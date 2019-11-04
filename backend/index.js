@@ -145,6 +145,10 @@ app.get("/", (req, res) => {
   console.log(rooms);
 });
 
+http.listen(8100, () => {
+  console.log("Signalling server started on port 8100");
+});
+
 https.listen(8443, () => {
-  console.log('Listening...')
+  console.log('https listening on 8443');
 })
