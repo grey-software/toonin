@@ -21,6 +21,10 @@
         .ic-share {
             margin-right: 4px;
         }
+
+        .mdl-button {
+            padding:0;
+        }
         .spinner {
             font-size: 50px;
             font-family: sans-serif;
@@ -118,8 +122,8 @@
                 Create Room <input type="text" id="roomNameInput" style="height: 80%; width:50%">
             </span>
 
-            <span class="blueTooninColor flexItem">
-                <button id="btnShare" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" style="padding:0%">
+            <span class="blueTooninColor flexItem" id="btnShare">
+                <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" style="padding:0%">
                     <i class="fas fa-music ic-share"></i>
                     Start Sharing
                 </button>

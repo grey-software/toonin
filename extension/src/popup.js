@@ -129,8 +129,8 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         btnShare.style.display = "none";
     }
     else if (request.message === "extension_state_from_background" && !request.data.roomID && request.data.playing) {
-        roomNameSpan.style.display = "flex";
-        shareButton.style.display = "flex";
+        roomNameSpan.style.display = "none";
+        shareButton.style.display = "none";
         stopSharingButton.style.display = "none";
         copyButton.style.display = "none";
         roomNameToonin.value = request.data.room;
@@ -170,6 +170,9 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
       roomDiv.style.display = "flex";
       connectSpan.style.display = "flex";
       playButton.style.display = "flex";
+      shareButton.alignItems = "center";
+      sessionIDText= "";
+      sessionIDText.style.display = "none";
   }
   function hideElements() {
       muteBtn.style.display = "none";
