@@ -4,11 +4,9 @@ const port = chrome.runtime.connect({
 
 const shareButton = document.getElementById("btnShare");
 const stopSharingButton = document.getElementById("btnShareStop");
-const backButton = document.getElementById("btnBack");
 const sessionIDText = document.getElementById("roomText");
 const roomDiv = document.getElementById("roomDiv");
 const newMessage = "";
-const connectRoomButton = document.getElementById("connectRoomBtn");
 const copyButton = document.getElementById("btnCopy");
 const roomNameInput = document.getElementById("roomNameInput");
 
@@ -34,12 +32,6 @@ muteBtn.onclick = function() {
     });
 }
 
-backButton.onclick = () => {
-    createRoomBtn.style.display = "inline";
-    connectRoomBtn.style.display = "inline";
-    hideElements();
-};
-
 shareButton.onclick = () => {
     var roomName = roomNameInput.value;
     port.postMessage({
@@ -51,8 +43,7 @@ shareButton.onclick = () => {
 stopSharingButton.onclick = () => {
     port.postMessage({ type: 'stopSharing' });
     hideElements();
-    createRoomBtn.style.display = "inline";
-    connectRoomBtn.style.display = "inline";
+    homePage();
 }
 
 var roomID;
@@ -100,8 +91,8 @@ playButton.onclick = () => {
         roomName: roomNameToonin.value
     });
     connectSpan.style.display = "none";
-    playButton.style.display = "none;"
-    stopToonin.style.display = "block";
+    playButton.style.display = "flex;"
+    stopToonin.style.display = "flex";
 }
 
 stopToonin.onclick = () => {
@@ -109,27 +100,7 @@ stopToonin.onclick = () => {
         type: "stopToonin"
     });
     hideElements();
-    createRoomBtn.style.display = "inline";
-    connectRoomBtn.style.display = "inline";
-}
-
-createRoomBtn.onclick= () => {
-    createRoomBtn.style.display = "none";
-    connectRoomBtn.style.display = "none";
-    shareButton.style.display = "block";
-    roomNameSpan.style.display = "block";
-    btnBack.style.display = "block";
-
-}
-
-connectRoomBtn.onclick= () => {
-    createRoomBtn.style.display = "none";
-    connectRoomBtn.style.display = "none";
-    roomNameToonin.style.display = "block";
-    btnBack.style.display = "block";
-    playButton.style.display = "block";
-    connectSpan.style.display = "inline-flex";
-
+    homePage();
 }
 
 chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
@@ -156,13 +127,10 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         peerCounter.innerHTML = "You have " + request.data.peerCounter + " listeners.";
         roomNameSpan.style.display = "none";
         btnShare.style.display = "none";
-        backButton.style.display = "none";
-        createRoomBtn.style.display = "none";
-        connectRoomBtn.style.display = "none";
     }
     else if (request.message === "extension_state_from_background" && !request.data.roomID && request.data.playing) {
-        roomNameSpan.style.display = "none";
-        shareButton.style.display = "none";
+        roomNameSpan.style.display = "flex";
+        shareButton.style.display = "flex";
         stopSharingButton.style.display = "none";
         copyButton.style.display = "none";
         roomNameToonin.value = request.data.room;
@@ -170,14 +138,11 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         muteBtn.checked = request.data.muted;
         muteStatus.hidden = !muteBtn.checked;
         roomID=null;
-        roomDiv.style.display = "block";
+        roomDiv.style.display = "flex";
         peerCounter.style.display = "block";
         peerCounter.innerHTML = "Tooned into room "+request.data.room;
-        createRoomBtn.style.display = "none";
         stopToonin.display = "block";
-        connectRoomBtn.style.display = "none";
         playButton.style.display = "none";
-        backButton.style.display = "none";
     }
     else if (request.message === "extension_state_from_background" && !request.data.roomID && !request.data.playing) {
         // roomNameSpan.style.display = "block";
@@ -199,13 +164,15 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
     }
   });
 
+  function homePage() {
+      roomNameSpan.style.display = "flex";
+      shareButton.style.display = "flex";
+      roomDiv.style.display = "flex";
+      connectSpan.style.display = "flex";
+      playButton.style.display = "flex";
+  }
   function hideElements() {
-      backButton.style.display = "none";
-      shareButton.style.display = "none";
       muteBtn.style.display = "none";
-      roomNameSpan.style.display = "none";
-      connectSpan.style.display = "none";
-      playButton.style.display = "none";
       stopToonin.style.display = "none";
       muteSpan.style.display = "none";
       stopSharingButton.style.display = "none";

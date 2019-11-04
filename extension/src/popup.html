@@ -65,7 +65,18 @@
             -webkit-transition: .4s;
             transition: .4s;
         }
+        .blueTooninColor {
+            color:rgb(33,150,243);
+        }
 
+        .textSpan {
+            height:36px;
+        }
+        .flexItem {
+            display:flex;
+            align-items: center;
+            padding:0px;
+        }
         input:checked + .slider {
             background-color: rgb(237, 24, 24);
         }
@@ -96,60 +107,58 @@
                 </h2>
             </div>
             <div class="mdl-card__actions mdl-card--border">
-                <button id="createRoomBtn" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" style="padding: 1%; margin-left: 4%;">
-                    Create a Room
-                </button>
-                <button id="connectRoomBtn" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" style="padding: 1%; margin-left: 4%;">
-                    Connect
-                </button>
-
-                <button id="btnBack" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" style="padding: 1%; margin-left: 4%;">
-                    Back
-                </button>
-
-                <button id="btnShareStop" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" style="padding: 1%; margin-left: 4%;">
+            <span class="flexItem" id="stopSharingSpan">
+                <button id="btnShareStop" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" style="">
                     <i class="fas fa-music ic-share"></i>
                     Stop Sharing
                 </button>
+            </span>
+            <span class="blueTooninColor flexItem textSpan"
+                style="justify-content:space-between;" id="roomNameSpan">
+                Create Room <input type="text" id="roomNameInput" style="height: 80%; width:50%">
+            </span>
 
-                <span class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"
-                style="margin-top: 2%; margin-left: -3%; padding: 0%;" id="roomNameSpan">
-                Room Name <input type="text" id="roomNameInput" style="height: 80%; margin-left: 8px;
-                padding: 4px; width: 50%;">
-                </span>
-
-                <button id="btnShare" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" style="padding: 1%; margin-left: 4%;">
+            <span class="blueTooninColor flexItem">
+                <button id="btnShare" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" style="padding:0%">
                     <i class="fas fa-music ic-share"></i>
                     Start Sharing
                 </button>
-                <button id="btnCopy" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" style="padding: 1%; margin-left: 4%;">
+            </span>
+            <span class="flexItem">
+                <button id="btnCopy" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" style="">
                     Copy ID
                     <i class="far fa-copy ic-share"></i>
                 </button>
-                <div style=" margin: 0%; padding-top: 3%; margin-right: 6%;" id="roomDiv">
-                    <p class="mdl-card__supporting-text room-id-text" style="padding: 1%; margin-left: 4%;" id="roomText">
+            </span>
+            <span class="flexItem" id="roomDiv">
+                    <p class="room-id-text" style="" id="roomText">
                     </p>
-                </div>
-
-                <p class="mdl-card__supporting-text" style="padding: 1%; margin-left: 4%;" id="peerCounter">
+            </span>
+            <span class="flexItem" id="roomDiv">
+                <p class="" style="" id="peerCounter">
                 </p>
+            </span>
+                <hr>
+            <span class="blueTooninColor flexItem textSpan" id="connectSpan" style="padding:0%;justify-content:space-between;">
+                <p>
+                    Connect
+                </p>
+                <input type="text" id="tooninToRoom" style="height:80%; width:60%">
+            </span>
 
-                <span class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" style="margin-top: 2%; margin-left: -4%; padding-top: 5px;" id="connectSpan">
-                Connect <input type="text" id="tooninToRoom" style="height: 80%; margin-left: 8px; padding: 4px; width: 50%">
-                </span>
-
-
-                <button id="playRoom" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" style="padding: 1%; margin-left: 4%;">
+            <span class="flexItem" id="playRoom" style="padding:0%;justify-content:space-between;">
+                <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" style="padding:0%">
                     <i class="fas fa-music ic-share"></i>
-                    Play
+                    Toonin
                 </button>
-                <button id="stopToonin" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" style="padding: 1%; margin-left: 4%;">
+            </span>
+                <button id="stopToonin" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect flexItem" >
                     <i class="fas fa-music ic-share"></i>
                     Stop
                 </button>
 
-                <span id="muteSpan">
-                    <a style="padding: 2%; margin-left: 4%;" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Mute Stream: </a>
+                <span id="muteSpan" class="flexItem ">
+                    <a style="" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Mute Stream: </a>
                     <label class="switch">
                         <input type="checkbox" id="mute-btn">
                         <span class="slider round"></span>
