@@ -1,31 +1,32 @@
 import opus from './opus';
-var remoteDestination, audioSourceNode, gainNode;
 
+// used by client.
+var remoteDestination, audioSourceNode, gainNode;
 const constraints = {
     audio: true
 };
-
-// keep track of tab on which the extension is active
+// keep track of tab on which the extension is active.
 var tabID;
 var port;
-var audioContext 
-var audioTagRef;
+var audioContext; 
+var peerCounter=0;
+var title;
+var tabmuted = false;
 // last mute state
 var muteState = false;
 
-var play = false;
-var incomingStream = null;
-
+// used by host
+var hostTitle;
 var room = null;
 var rtcConnIncoming = null;
 var audioElement = document.createElement('audio');
     audioElement.setAttribute("preload", "auto");
     audioElement.load;
-var peerCounter=0;
-var title;
-var hostTitle;
+var incomingStream = null;
+var play = false;
+// used by Gain Node
 var volume=1;
-var tabmuted = false;
+
 chrome.runtime.onConnect.addListener(function (p) {
     port = p;
     
@@ -266,8 +267,8 @@ function createAnswer(desc) {
 /**
  * allow user to mute/unmute the tab on which extension is running
  */
-chrome.tabs.onUpdated.addListener(function(tabId, changeInfo) {
-    if(changeInfo.mutedInfo && tabId === tabID) {
+chrome.tabs.onUpdated.addListener(function(currentTab, changeInfo) {
+    if(changeInfo.mutedInfo && currentTab === tabID) {
         if(changeInfo.mutedInfo.muted){
             tabmuted=true;
             gainNode.gain.value=0;
@@ -292,13 +293,6 @@ function getTabAudio() {
 
         let tracks = stream.getAudioTracks(); // MediaStreamTrack[], stream is MediaStream
         localAudioStream = new MediaStream(tracks);
-        // window.audio = document.createElement("audio");
-        // audioTagRef = window.audio; // save reference globally for volume control
-        // window.audio.srcObject = tabStream;
-        // window.audio.play();
-        
-        // localAudioStream = tabStream;
-        // capturedStream = tabStream;
 
         audioContext = new AudioContext();
         gainNode = audioContext.createGain();
@@ -326,7 +320,6 @@ var socket = io("http://www.toonin.ml:8100");
 
 var peers = {};
 var localAudioStream;
-var capturedStream;
 var roomID;
 
 const servers = {
