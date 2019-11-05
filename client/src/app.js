@@ -65,7 +65,18 @@ function updateState(newState) {
         }
     }
     
-    titleTag.innerText = 'Playing: ' + state.streamTitle;
+    if(state.streamTitle.length > 0) {
+        titleTag.innerText = 'Playing: ' + state.streamTitle;
+        if(state.streamTitle.length <= 41) {
+            titleTag.classList.remove('title-text');
+            titleTag.classList.add('title-text-no-animation');
+        }
+        else {
+            titleTag.classList.remove('title-text-no-animation');
+            titleTag.classList.add('title-text');
+        }
+    }
+    
 }
 
 export function enablePlayback() { this.$refs.audio.muted = false; }

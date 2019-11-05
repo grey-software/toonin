@@ -4,13 +4,13 @@
       <v-text-field style="color: white;" v-model="room" :autofocus="true" placeholder="Room Key" 
       label="Connect" outlined rounded @keyup.enter="checkstream"/>
 
-      <div style="padding: 5%; float: right; margin-top: -10%; margin-left: 2%;">
-          <a style="font-size: 130%; font-weight: 300;" ref="title">
-          </a>
+      <div class="title-container">
+          <a class="title-text" style="font-size: 130%; font-weight: 300;" ref="title"></a>
       </div>
 
       <v-btn id="connect-btn" @click="checkstream" rounded>Toonin</v-btn><br><br>
       <v-btn ref="playBtn" @click="manualPlay" style="margin-left: 2%;" hidden rounded>Play</v-btn>
+
       <div style="float: left; margin-top: 2%; margin-right: 0%;" id='timeline-container'>
         <a id="timelineHeader">Status</a>
 
@@ -72,6 +72,23 @@
     div#timeline-container {
       margin-left: 3%;
     }
+
+    div.title-container {
+      padding: 5%; 
+      float: right; 
+      margin-top: -23%; 
+      margin-left: 5%;
+      width: 50%;
+      margin-right: 2%;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    a.title-text {
+      display: inline-block;
+      padding-left: 100%;
+      animation: title-text 15s linear infinite;
+    }
   }
 
   #v-content {
@@ -87,22 +104,44 @@
       width: 25%;
   }
 
+  .title-container {
+    padding: 5%; 
+    float: right; 
+    margin-top: -10%; 
+    margin-left: 5%;
+    width: 30%;
+    margin-right: 42%;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .title-text {
+    display: inline-block;
+    padding-left: 100%;
+    animation: title-text 12s linear infinite;
+  }
+
+  .title-text-no-animation {
+    display: inline-block;
+  }
+
+  @keyframes title-text {
+    0% {
+      transform: translate(0, 0);
+    }
+    100% {
+      transform: translate(-100%, 0);
+    }
+  }
+
   #connect-btn {
-      margin-left: 1.5%;
+    margin-left: 1.5%;
   }
 
   #logo {
-      height: 35%; 
-      margin-left: 15%; 
-      margin-top: 6%;
-  }
-
-  #title-card {
-    margin-top: -5.75%; 
-    width: 40%; 
-    border-radius: 20px;
-    border-top-left-radius: 20px;
-    border-bottom-right-radius: 20px;
+    height: 35%; 
+    margin-left: 15%; 
+    margin-top: 6%;
   }
 
   .statusCard {
