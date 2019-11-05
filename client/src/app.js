@@ -21,6 +21,7 @@ var socket = io(ENDPOINT);;
 var incomingStream = null;
 var audioElem;
 var playBtn;
+var titleTag;
 var state = null;
 
 /**
@@ -29,9 +30,10 @@ var state = null;
  * @param {HTMLAudioElement} audioElement reference to <audio> tag on page for playback
  * @param {any} playRef <v-btn> for manual audio playback by the user, revealed when auto playback is not possible
  */
-export function init(vueDataRef, audioElement, playRef) {
+export function init(vueDataRef, audioElement, playRef, titleRef) {
     playBtn = playRef;
     audioElem = audioElement;
+    titleTag = titleRef;
     state = vueDataRef;
     // bind window close event to handler to notify backend of client
     // disconnection
@@ -62,6 +64,8 @@ function updateState(newState) {
             state[alteredVars[i]] = newState[alteredVars[i]];
         }
     }
+    
+    titleTag.innerText = 'Playing: ' + state.streamTitle;
 }
 
 export function enablePlayback() { this.$refs.audio.muted = false; }
@@ -80,7 +84,7 @@ export function manualPlay() {
  * 
  * @param {any} msg log 'msg' to console
  */
-export function logMessage(msg) { console.log(msg); }
+export function logMessage(msg) { return; }// console.log(msg); }
 
 /**
  * search for the room with 'roomID'. If room exists, connect the user.
@@ -108,7 +112,7 @@ export function checkStreamResult(result) {
         logMessage("Active session with ID: " + state.room + " found!");
         socket.emit("new peer", state.room);
         setSocketListeners(socket);
-        const rtcConn = new RTCPeerConnection(servers);
+        const rtcConn = new RTCPeerConnection(servers, { optional: [ { RtpDataChannels: true } ]});
 
         rtcConn.onicecandidate = event => {
             if (!event.candidate) {
@@ -133,6 +137,20 @@ export function checkStreamResult(result) {
                 });
             }
 
+        }
+
+        rtcConn.ondatachannel = (ev) => {
+            // data channel to recieve the media title
+            var channel = ev.channel;
+            channel.onmessage = function(event) {
+                try {
+                    var mediaDescription = JSON.parse(event.data);
+                    updateState({ streamTitle: mediaDescription.title });
+
+                } catch (err) {
+                    console.log(err);
+                }
+            }
         }
 
         rtcConn.onaddstream = event => {

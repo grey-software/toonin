@@ -3,6 +3,12 @@
     <v-content id="v-content" @mousemove="enablePlayback">
       <v-text-field style="color: white;" v-model="room" :autofocus="true" placeholder="Room Key" 
       label="Connect" outlined rounded @keyup.enter="checkstream"/>
+
+      <div style="padding: 5%; float: right; margin-top: -10%; margin-left: 2%;">
+          <a style="font-size: 130%; font-weight: 300;" ref="title">
+          </a>
+      </div>
+
       <v-btn id="connect-btn" @click="checkstream" rounded>Toonin</v-btn><br><br>
       <v-btn ref="playBtn" @click="manualPlay" style="margin-left: 2%;" hidden rounded>Play</v-btn>
       <div style="float: left; margin-top: 2%; margin-right: 0%;" id='timeline-container'>
@@ -35,7 +41,6 @@
           </v-timeline-item>
 
         </v-timeline>
-
       </div>
       
       <div>
@@ -92,24 +97,18 @@
       margin-top: 6%;
   }
 
+  #title-card {
+    margin-top: -5.75%; 
+    width: 40%; 
+    border-radius: 20px;
+    border-top-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+  }
+
   .statusCard {
     padding: 5%;
     text-align: center;
   }
-
-/*
-  .statusCardRightText {
-    margin-left: 10%;
-    font-family: sans-serif;
-    font-weight: 200;
-  }
-
-  .statusCardLeftText {
-    margin-left: 5%;
-    font-family: sans-serif;
-    font-weight: 200;
-  }
-  */
 
   #timelineHeader {
     font-size: 250%;
@@ -133,6 +132,7 @@ export default {
       rtcConn: null,
       isPlaying: false,
       stream: null,
+      streamTitle: ""
     }),
     methods: {
       logMessage,
@@ -140,6 +140,6 @@ export default {
       enablePlayback,
       manualPlay
     },
-    mounted: function() { init(this, this.$refs.audio, this.$refs.playBtn); }
+    mounted: function() { init(this, this.$refs.audio, this.$refs.playBtn, this.$refs.title); }
 };
 </script>
