@@ -65,18 +65,6 @@ function updateState(newState) {
         }
     }
     
-    if(state.streamTitle.length > 0) {
-        titleTag.innerText = 'Playing: ' + state.streamTitle;
-        if(state.streamTitle.length <= 41) {
-            titleTag.classList.remove('title-text');
-            titleTag.classList.add('title-text-no-animation');
-        }
-        else {
-            titleTag.classList.remove('title-text-no-animation');
-            titleTag.classList.add('title-text');
-        }
-    }
-    
 }
 
 export function enablePlayback() { this.$refs.audio.muted = false; }
@@ -138,7 +126,9 @@ export function checkStreamResult(result) {
         };
 
         rtcConn.onconnectionstatechange = function() {
-            if(rtcConn.connectionState === 'connected') { updateState({ established: true }); }
+            if(rtcConn.connectionState === 'connected') { 
+                updateState({ established: true }); 
+            }
 
             if(rtcConn.connectionState == 'disconnected' || 
             rtcConn.connectionState == 'failed') { 
@@ -158,26 +148,37 @@ export function checkStreamResult(result) {
                     var mediaDescription = JSON.parse(event.data);
                     updateState({ streamTitle: mediaDescription.title });
 
+                    if(state.streamTitle.length > 0) {
+                        titleTag.innerText = 'Playing: ' + state.streamTitle;
+                        if(state.streamTitle.length <= 41) {
+                            titleTag.classList.remove('title-text');
+                            titleTag.classList.add('title-text-no-animation');
+                        }
+                        else {
+                            titleTag.classList.remove('title-text-no-animation');
+                            titleTag.classList.add('title-text');
+                        }
+                    }
                 } catch (err) {
                     console.log(err);
                 }
             }
         }
 
+
         rtcConn.onaddstream = event => {
             logMessage("Stream added");
-            logMessage(event.stream);
-            audioElem.srcObject = event.stream;	
-            //pause = 0;
-            console.log(audioElem);
+            incomingStream = event.stream;
             audioElem.oncanplay = () => {
+                audioElem.srcObject = incomingStream;
                 audioElem.play().catch((err) => {
                     logMessage(err);
                 });
                 audioElem.onplay = () => {
                     updateState({
                         established: true,
-                        isPlaying: audioElem.srcObject.active 
+                        isPlaying: audioElem.srcObject.active,
+                        stream: incomingStream
                     });
                 }
             }
