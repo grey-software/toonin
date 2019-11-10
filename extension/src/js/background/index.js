@@ -24,6 +24,7 @@ var audioElement = document.createElement('audio');
     audioElement.load;
 var incomingStream = null;
 var play = false;
+var sender;
 // used by Gain Node
 var volume=1;
 
@@ -144,8 +145,18 @@ chrome.runtime.onConnect.addListener(function (p) {
             disconnect();
         }
         if(msg.type == "toggleMute") {
-            localAudioStream.getAudioTracks()[0].enabled = Boolean(msg.value);
             muteState = !msg.value;
+            if(muteState){
+                Object.keys(peers).forEach(function (peer) {
+                    var rc = peers[peer].rtcConn;
+                    rc.removeTrack(rc.getSenders()[0]);
+                });
+            } else {
+                Object.keys(peers).forEach(function (peer) {
+                    var rc = peers[peer].rtcConn;
+                    rc.getSenders()[0].replaceTrack(remoteDestination.stream.getAudioTracks()[0]);
+                });
+            }
         }
         if(msg.type == "volume") {
             changeVolume(msg.value);
@@ -339,13 +350,6 @@ const offerOptions = {
 };
 
 /**
- * convert captured tab stream to a streamable form
- */
-function getStreamableData() {
-    
-}
-
-/**
  * Start sharing user's tab audio with the peer with "peerID"
  * @param {string} peerID 
  */
@@ -353,10 +357,6 @@ function startShare(peerID) {
     console.log("Starting new connection for peer: " + peerID);
     const rtcConn = new RTCPeerConnection(servers, { optional: [ { RtpDataChannels: true } ]});
     
-
-
-    getStreamableData();
-
     rtcConn.addTrack(remoteDestination.stream.getAudioTracks()[0]);
     peers[peerID].rtcConn = rtcConn;
     peers[peerID].dataChannel = peers[peerID].rtcConn.createDataChannel('mediaDescription');
