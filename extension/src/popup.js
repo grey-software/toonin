@@ -24,7 +24,8 @@ const connectSpan = document.getElementById("connectSpan");
 const muteSpan = document.getElementById("muteSpan");
 const titleSpan = document.getElementById("titleOfPage");
 const titleText = document.getElementById("titleText");
-
+const volume = document.getElementById("volume");
+volume.style.visibility = "hidden";
 muteBtn.onclick = function() { 
     muteStatus.hidden = !this.checked;
     port.postMessage({
@@ -33,6 +34,12 @@ muteBtn.onclick = function() {
     });
 }
 
+volume.onchange = (event) => {
+    port.postMessage({
+        type: "volume",
+        value: event.target.value
+    });
+}
 
 shareButton.onclick = () => {
     var roomName = roomNameInput.value;
@@ -119,6 +126,9 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         peerCounter.style.visibility = "visible";
         peerCounter.innerHTML = "You have " + request.data.peerCounter + " listeners.";
         titleText.innerHTML = "Currently streaming: " + request.data.title; 
+        volume.value = request.data.volume * 100;
+        volume.disabled=request.data.tabMute;
+        volume.style.visibility = "visible";
     } 
     else if (request.message === "extension_state_from_background" && !request.data.roomID && request.data.playing) {
         roomNameSpan.style.visibility= "hidden";
@@ -138,6 +148,7 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         peerCounter.style.visibility = "visible";
         peerCounter.innerHTML = "Tooned into room "+request.data.room;
         titleText.innerHTML = "Host is listening to: " + request.data.hostTitle;
+        volume.style.visibility = "visible";
     } 
     else if (request.message === "extension_state_from_background" && !request.data.roomID && !request.data.playing) {
         roomNameSpan.style.visibility= "visible";
@@ -158,6 +169,7 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         peerCounter.style.visibility = "visible";
         peerCounter.innerHTML = "Not Streaming";
         titleText.innerHTML = "";
+        volume.style.visibility = "hidden";
     }
   });
 
