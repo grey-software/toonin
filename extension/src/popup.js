@@ -118,7 +118,7 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         stopToonin.style.display = "none";
         connectSpan.style.display = "none";
         roomID=request.data.roomID;
-        muteSpan.style.display = "block";
+        muteSpan.style.display = "flex";
         muteBtn.checked = request.data.muted;
         muteStatus.hidden = !muteBtn.checked;
         sessionIDText.innerHTML = "Your Toonin ID is: \n" + roomID;
@@ -171,7 +171,7 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
       connectSpan.style.display = "flex";
       playButton.style.display = "flex";
       shareButton.alignItems = "center";
-      sessionIDText= "";
+      sessionIDText.innerHTML= "";
       sessionIDText.style.display = "none";
   }
   function hideElements() {
