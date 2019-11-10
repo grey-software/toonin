@@ -23,6 +23,8 @@ const peerCounter = document.getElementById("peerCounter");
 const roomNameSpan = document.getElementById("roomNameSpan");
 const connectSpan = document.getElementById("connectSpan");
 const muteSpan = document.getElementById("muteSpan");
+const titleSpan = document.getElementById("titleOfPage");
+const titleText = document.getElementById("titleText");
 
 muteBtn.onclick = function() {
     muteStatus.hidden = !this.checked;
@@ -127,6 +129,7 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         peerCounter.innerHTML = "You have " + request.data.peerCounter + " listeners.";
         roomNameSpan.style.display = "none";
         btnShare.style.display = "none";
+        titleText.innerHTML = "Currently streaming: " + request.data.title;
     }
     else if (request.message === "extension_state_from_background" && !request.data.roomID && request.data.playing) {
         roomNameSpan.style.display = "none";
@@ -143,8 +146,8 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         peerCounter.innerHTML = "Tooned into room "+request.data.room;
         stopToonin.display = "block";
         playButton.style.display = "none";
-    }
-    else if (request.message === "extension_state_from_background" && !request.data.roomID && !request.data.playing) {
+        titleText.innerHTML = "Host is listening to: " + request.data.hostTitle;
+    } else if (request.message === "extension_state_from_background" && !request.data.roomID && !request.data.playing) {
         // roomNameSpan.style.display = "block";
         // shareButton.style.display = "block";
         // stopSharingButton.style.display = "none";
@@ -157,10 +160,8 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         muteBtn.checked = request.data.muted;
         muteStatus.hidden = !muteBtn.checked;
         roomID=null;
-        // sessionIDText.style.display = "none";
-
         roomDiv.style.display = "none";
-
+        titleText.innerHTML = "";
     }
   });
 
