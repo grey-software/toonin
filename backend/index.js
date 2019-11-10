@@ -5,6 +5,7 @@ app.use(cors());
 var http = require("http").Server(app);
 var io = require("socket.io")(http);
 var vars = require("./vars");
+var networkTree = require("./networkTree");
 
 var rooms = {};
 
@@ -65,14 +66,17 @@ io.on("connection", socket => {
 
   socket.on("new peer", room => {
     if(rooms[room]){
+      // TODO: instead of joining directly, send pool of hosts. Wait for client
+      // to evaluate hosts and connect. Then register the connection in the
+      // network tree
       socket.join(room, () => {
         console.log("Peer connected successfully to room: " + room);
         console.log(socket.id + " now in rooms ", socket.rooms);
         socket.to(room).emit("peer joined", { room: room, id: socket.id });
       });
     } else {
-      console.log("invalid room");
-      socket.emit("room null");
+        console.log("invalid room");
+        socket.emit("room null");
     }
     
   });
