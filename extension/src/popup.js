@@ -26,7 +26,6 @@ const muteSpan = document.getElementById("muteSpan");
 const titleSpan = document.getElementById("titleOfPage");
 const titleText = document.getElementById("titleText");
 const volume = document.getElementById("volume");
-volume.style.display = "none";
 muteBtn.onclick = function() {
     muteStatus.hidden = !this.checked;
     port.postMessage({
@@ -140,7 +139,6 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         peerCounter.innerHTML = "You have " + request.data.peerCounter + " listeners.";
         volume.value = request.data.volume * 100;
         volume.disabled=request.data.tabMute;
-        volume.style.visibility = "visible";
         roomNameSpan.style.display = "none";
         btnShare.style.display = "none";
         titleText.innerHTML = "Currently streaming: " + request.data.title;
@@ -161,7 +159,6 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         stopToonin.display = "block";
         playButton.style.display = "none";
         titleText.innerHTML = "Host is listening to: " + request.data.hostTitle;
-        volume.style.display = "block";
     } else if (request.message === "extension_state_from_background" && !request.data.roomID && !request.data.playing) {
         roomNameToonin.disabled = false;
         // playButton.style.display = "block";
@@ -173,7 +170,6 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         roomID=null;
         roomDiv.style.display = "none";
         titleText.innerHTML = "";
-        volume.style.display = "none";
     }
   });
 

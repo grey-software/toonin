@@ -8,7 +8,7 @@ const constraints = {
 // keep track of tab on which the extension is active.
 var tabID;
 var port;
-var audioContext; 
+var audioContext;
 var peerCounter=0;
 var title;
 var tabmuted = false;
@@ -56,7 +56,7 @@ chrome.runtime.onConnect.addListener(function (p) {
                     });
                     console.log(socket.id);
                 };
-                
+
                 rtcConnIncoming.ondatachannel = (event) => {
                     var recieveChannel = event.channel;
                     recieveChannel.onmessage = function(event) {
@@ -90,7 +90,7 @@ chrome.runtime.onConnect.addListener(function (p) {
                 socket.emit("new peer", room);
                 setSocketListeners(socket);
                 rtcConnIncoming = new RTCPeerConnection(servers);
-                
+
                 rtcConnIncoming.onicecandidate = event => {
                     if (!event.candidate) {
                         console.log("No candidate for RTC connection");
@@ -219,7 +219,7 @@ function changeVolume(value) {
     } else if (rtcConnIncoming) {
         audioElement.volume = volume;
     }
-    
+
 }
 
 chrome.runtime.onMessage.addListener(
@@ -227,7 +227,7 @@ chrome.runtime.onMessage.addListener(
       if( request.message === "extension_state" ) {
         sendState();
       }
-      
+
 });
 
 function setSocketListeners(socket) {
@@ -319,15 +319,15 @@ function getTabAudio() {
             var currTab = tabs[0];
             if (currTab) { tabID = currTab.id; title = currTab.title; sendState();}
         });
-        
+
     });
-    
+
 }
 
 "use strict";
 console.log("application script running");
 
-var socket = io("https://www.toonin.ml:8443", {secure: true});
+var socket = io("http://www.toonin.ml:8100", {secure: true});
 
 var peers = {};
 var localAudioStream;
@@ -356,11 +356,11 @@ const offerOptions = {
 function startShare(peerID) {
     console.log("Starting new connection for peer: " + peerID);
     const rtcConn = new RTCPeerConnection(servers, { optional: [ { RtpDataChannels: true } ]});
-    
+
     rtcConn.addTrack(remoteDestination.stream.getAudioTracks()[0]);
     peers[peerID].rtcConn = rtcConn;
     peers[peerID].dataChannel = peers[peerID].rtcConn.createDataChannel('mediaDescription');
-    
+
     // console.log(peers);
     peers[peerID].rtcConn.onicecandidate = function (event) {
         if (!event.candidate) {
@@ -397,14 +397,14 @@ function startShare(peerID) {
 function sendMediaDescription() {
     console.log("sending new title to all peers");
     Object.keys(peers).forEach(function (peer) {
-        
+
         var dc = peers[peer].dataChannel;
         if (dc.readyState === 'open') {
             var data = JSON.stringify({"title": title});
             dc.send(data);
         }
     });
-    
+
 }
 
 /* **************** *
