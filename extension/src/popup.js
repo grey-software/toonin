@@ -160,6 +160,7 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         stopToonin.style.display = "block";
         playButton.style.display = "none";
         titleText.innerHTML = "Host is listening to: " + request.data.hostTitle;
+        volume.style.display = "block";
     } else if (request.message === "extension_state_from_background" && !request.data.roomID && !request.data.playing) {
         roomNameToonin.disabled = false;
         // playButton.style.display = "block";
