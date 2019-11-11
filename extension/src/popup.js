@@ -103,6 +103,7 @@ stopToonin.onclick = () => {
     });
     hideElements();
     homePage();
+    titleText.innerHTML = "";
 }
 
 chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
