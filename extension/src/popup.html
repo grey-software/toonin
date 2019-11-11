@@ -172,14 +172,15 @@
                     <i class="fas fa-music ic-share"></i>
                     Stop
                 </button>
-
                 <span id="muteSpan" class="flexItem" style="justify-content: space-evenly;">
                     <a style="" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Mute Stream: </a>
+                <input class="mdl-slider mdl-js-slider" id="volume" type="range" min="0" max="100" value="100" style="vertical-align: middle; background-color: #E30425"/>
                     <label class="switch">
                         <input type="checkbox" id="mute-btn">
                         <span class="slider round"></span>
                     </label>
                     <a id="muted-notif" style="margin-left: 1%; color: rgb(237, 24, 24);" hidden>Muted</a>
+
                 </span>
             </div>
         </div>
