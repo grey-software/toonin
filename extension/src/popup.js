@@ -142,6 +142,7 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         roomNameSpan.style.display = "none";
         btnShare.style.display = "none";
         titleText.innerHTML = "Currently streaming: " + request.data.title;
+        volume.style.display = "block";
     }
     else if (request.message === "extension_state_from_background" && !request.data.roomID && request.data.playing) {
         roomNameSpan.style.display = "none";
@@ -156,7 +157,7 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         roomDiv.style.display = "flex";
         peerCounter.style.display = "block";
         peerCounter.innerHTML = "Tooned into room "+request.data.room;
-        stopToonin.display = "block";
+        stopToonin.style.display = "block";
         playButton.style.display = "none";
         titleText.innerHTML = "Host is listening to: " + request.data.hostTitle;
     } else if (request.message === "extension_state_from_background" && !request.data.roomID && !request.data.playing) {
@@ -182,6 +183,7 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
       shareButton.alignItems = "center";
       sessionIDText.innerHTML= "";
       sessionIDText.style.display = "none";
+      volume.stlyle.display = "none";
   }
   function hideElements() {
       muteBtn.style.display = "none";
@@ -191,5 +193,6 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
       copyButton.style.display = "none";
       peerCounter.style.display = "none";
       roomDiv.style.display = "none";
+      volume.style.display = "none";
   }
   hideElements();
