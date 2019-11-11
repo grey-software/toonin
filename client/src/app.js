@@ -16,6 +16,10 @@ const servers = {
     ]
 };
 
+const SUCCESSFUL_CONNECTION = "connected";
+const DISCONNECTED = "disconnected";
+const FAILED_CONNECTION = "failed";
+
 var socket = io(ENDPOINT);;
 
 var incomingStream = null;
@@ -83,7 +87,7 @@ export function manualPlay() {
  * 
  * @param {any} msg log 'msg' to console
  */
-export function logMessage(msg) { return; }// console.log(msg); }
+export function logMessage(msg) { console.log(msg); }
 
 /**
  * search for the room with 'roomID'. If room exists, connect the user.
@@ -125,45 +129,9 @@ export function checkStreamResult(result) {
             });
         };
 
-        rtcConn.onconnectionstatechange = function() {
-            if(rtcConn.connectionState === 'connected') { 
-                updateState({ established: true }); 
-            }
+        rtcConn.onconnectionstatechange = function() { handleConnectionStateChange(rtcConn); }
 
-            if(rtcConn.connectionState == 'disconnected' || 
-            rtcConn.connectionState == 'failed') { 
-                updateState({ 
-                    established: false,
-                    isPlaying: false
-                });
-            }
-
-        }
-
-        rtcConn.ondatachannel = (ev) => {
-            // data channel to recieve the media title
-            var channel = ev.channel;
-            channel.onmessage = function(event) {
-                try {
-                    var mediaDescription = JSON.parse(event.data);
-                    updateState({ streamTitle: mediaDescription.title });
-
-                    if(state.streamTitle.length > 0) {
-                        titleTag.innerText = 'Playing: ' + state.streamTitle;
-                        if(state.streamTitle.length <= 41) {
-                            titleTag.classList.remove('title-text');
-                            titleTag.classList.add('title-text-no-animation');
-                        }
-                        else {
-                            titleTag.classList.remove('title-text-no-animation');
-                            titleTag.classList.add('title-text');
-                        }
-                    }
-                } catch (err) {
-                    console.log(err);
-                }
-            }
-        }
+        rtcConn.ondatachannel = setMediaDiscription;
 
 
         rtcConn.onaddstream = event => {
@@ -214,6 +182,45 @@ export function checkStreamResult(result) {
             room: "",
             established: false
         })
+    }
+}
+
+function handleConnectionStateChange(rtcConn) {
+    if(rtcConn.connectionState === SUCCESSFUL_CONNECTION) { 
+        updateState({ established: true }); 
+    }
+
+    if(rtcConn.connectionState == DISCONNECTED || 
+    rtcConn.connectionState == FAILED_CONNECTION) {
+        updateState({ 
+            established: false,
+            isPlaying: false
+        });
+    }
+}
+
+function setMediaDiscription(ev) {
+    // data channel to recieve the media title
+    var channel = ev.channel;
+    channel.onmessage = function(event) {
+        try {
+            var mediaDescription = JSON.parse(event.data);
+            updateState({ streamTitle: mediaDescription.title });
+
+            if(state.streamTitle.length > 0) {
+                titleTag.innerText = 'Playing: ' + state.streamTitle;
+                if(state.streamTitle.length <= 41) {
+                    titleTag.classList.remove('title-text');
+                    titleTag.classList.add('title-text-no-animation');
+                }
+                else {
+                    titleTag.classList.remove('title-text-no-animation');
+                    titleTag.classList.add('title-text');
+                }
+            }
+        } catch (err) {
+            console.log(err);
+        }
     }
 }
 
