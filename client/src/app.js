@@ -161,8 +161,8 @@ export function checkStreamResult(result) {
             var _iOSDevice = !!navigator.platform.match(/iPhone|iPod|iPad/);
             if(_iOSDevice) {
                 try {
+                    playBtn.$refs.link.hidden = false;
                     audioElem.srcObject = incomingStream;
-                    audioElem.play();
                     audioElem.onplay = () => {
                         updateState({
                             established: true,
