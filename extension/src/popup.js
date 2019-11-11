@@ -46,6 +46,7 @@ stopSharingButton.onclick = () => {
     port.postMessage({ type: 'stopSharing' });
     hideElements();
     homePage();
+    titleText.innerHTML = "";
 }
 
 var roomID;
