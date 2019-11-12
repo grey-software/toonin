@@ -16,9 +16,9 @@ const servers = {
     ]
 };
 
-const SUCCESSFUL_CONNECTION = "connected";
+const SUCCESSFUL = "connected";
 const DISCONNECTED = "disconnected";
-const FAILED_CONNECTION = "failed";
+const FAILED = "failed";
 
 var socket = io(ENDPOINT);;
 
@@ -129,9 +129,21 @@ export function checkStreamResult(result) {
             });
         };
 
-        rtcConn.onconnectionstatechange = function() { handleConnectionStateChange(rtcConn); }
+        rtcConn.onconnectionstatechange = (ev) => {
+            if(rtcConn.connectionState === SUCCESSFUL) { 
+                updateState({ established: true }); 
+            }
+        
+            if(rtcConn.connectionState == DISCONNECTED || 
+            rtcConn.connectionState == FAILED) {
+                updateState({ 
+                    established: false,
+                    isPlaying: false
+                });
+            }
+        }
 
-        rtcConn.ondatachannel = setMediaDiscription;
+        rtcConn.ondatachannel = onDataChannelMsg;
 
 
         rtcConn.onaddstream = event => {
@@ -185,23 +197,9 @@ export function checkStreamResult(result) {
     }
 }
 
-function handleConnectionStateChange(rtcConn) {
-    if(rtcConn.connectionState === SUCCESSFUL_CONNECTION) { 
-        updateState({ established: true }); 
-    }
-
-    if(rtcConn.connectionState == DISCONNECTED || 
-    rtcConn.connectionState == FAILED_CONNECTION) {
-        updateState({ 
-            established: false,
-            isPlaying: false
-        });
-    }
-}
-
-function setMediaDiscription(ev) {
+function onDataChannelMsg(messageEvent) {
     // data channel to recieve the media title
-    var channel = ev.channel;
+    var channel = messageEvent.channel;
     channel.onmessage = function(event) {
         try {
             var mediaDescription = JSON.parse(event.data);
