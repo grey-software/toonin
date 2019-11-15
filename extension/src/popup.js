@@ -4,13 +4,14 @@ const port = chrome.runtime.connect({
 
 const shareButton = document.getElementById("btnShare");
 const stopSharingButton = document.getElementById("btnShareStop");
-const sessionIDText = document.getElementById("roomID");
-
+const sessionIDText = document.getElementById("roomText");
+const roomDiv = document.getElementById("roomDiv");
+const newMessage = "";
 const copyButton = document.getElementById("btnCopy");
 const roomNameInput = document.getElementById("roomNameInput");
 
-copyButton.style.visibility="hidden";
-stopSharingButton.style.visibility="hidden";
+copyButton.style.display = "none";
+stopSharingButton.style.display = "none";
 const playButton = document.getElementById("playRoom");
 const roomNameToonin = document.getElementById("tooninToRoom");
 const stopToonin = document.getElementById("stopToonin");
@@ -22,8 +23,10 @@ const peerCounter = document.getElementById("peerCounter");
 const roomNameSpan = document.getElementById("roomNameSpan");
 const connectSpan = document.getElementById("connectSpan");
 const muteSpan = document.getElementById("muteSpan");
-
-muteBtn.onclick = function() { 
+const titleSpan = document.getElementById("titleOfPage");
+const titleText = document.getElementById("titleText");
+const volume = document.getElementById("volume");
+muteBtn.onclick = function() {
     muteStatus.hidden = !this.checked;
     port.postMessage({
         type: "toggleMute",
@@ -31,6 +34,13 @@ muteBtn.onclick = function() {
     });
 }
 
+
+volume.onchange = (event) => {
+    port.postMessage({
+        type: "volume",
+        value: event.target.value
+    });
+}
 
 shareButton.onclick = () => {
     var roomName = roomNameInput.value;
@@ -42,6 +52,9 @@ shareButton.onclick = () => {
 
 stopSharingButton.onclick = () => {
     port.postMessage({ type: 'stopSharing' });
+    hideElements();
+    homePage();
+    titleText.innerHTML = "";
 }
 
 var roomID;
@@ -52,12 +65,14 @@ port.onMessage.addListener((msg) => {
         if (msg.status == "ok") localAudio.src = msg.url;
     } else if (msg.type == "roomID") {
         roomID = msg.roomID;
-        sessionIDText.innerHTML = "Your Toonin ID is: \n" + roomID;
-        sessionIDText.style.visibility = "visible";
+
+        Text.innerHTML = "Your Toonin ID is: \n" + roomID;
+        sessionIDText.style.display = "block";
     }
     else if(msg.type === "room creation fail") {
         sessionIDText.innerHTML = "Room Creation Failed: \n" + msg.reason;
-        sessionIDText.style.visibility = "visible";
+        roomDiv.style.display ="block";
+        console.log("failed");
     }
 });
 
@@ -86,12 +101,18 @@ playButton.onclick = () => {
         type: "play",
         roomName: roomNameToonin.value
     });
+    connectSpan.style.display = "none";
+    playButton.style.display = "flex;"
+    stopToonin.style.display = "flex";
 }
 
 stopToonin.onclick = () => {
     port.postMessage({
         type: "stopToonin"
     });
+    hideElements();
+    homePage();
+    titleText.innerHTML = "";
 }
 
 chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
@@ -101,59 +122,78 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
 
   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.message === "extension_state_from_background" && request.data.roomID) {
-        roomNameSpan.style.visibility= "hidden";
-        shareButton.style.visibility= "hidden";
-        stopSharingButton.style.visibility="visible";
-        copyButton.style.visibility="visible";
-        playButton.style.visibility = "hidden";
-        stopToonin.style.visibility = "hidden";
-        connectSpan.style.visibility = "hidden";
+        roomNameSpan.style.display = "none";
+        shareButton.style.display = "none";
+        stopSharingButton.style.display = "block";
+        copyButton.style.display = "block";
+        playButton.style.display = "none";
+        stopToonin.style.display = "none";
+        connectSpan.style.display = "none";
         roomID=request.data.roomID;
-        muteSpan.style.visibility = "visible";
+        muteSpan.style.display = "flex";
         muteBtn.checked = request.data.muted;
         muteStatus.hidden = !muteBtn.checked;
         sessionIDText.innerHTML = "Your Toonin ID is: \n" + roomID;
-        sessionIDText.style.visibility = "visible";
-        peerCounter.style.visibility = "visible";
+        roomDiv.style.display = "block";
+        peerCounter.style.display = "block";
         peerCounter.innerHTML = "You have " + request.data.peerCounter + " listeners.";
-    } 
+        volume.value = request.data.volume * 100;
+        volume.disabled=request.data.tabMute;
+        roomNameSpan.style.display = "none";
+        btnShare.style.display = "none";
+        titleText.innerHTML = "Currently streaming: " + request.data.title;
+        volume.style.display = "block";
+    }
     else if (request.message === "extension_state_from_background" && !request.data.roomID && request.data.playing) {
-        roomNameSpan.style.visibility= "hidden";
-        connectSpan.style.visibility = "visible";
-        shareButton.style.visibility= "hidden";
-        stopSharingButton.style.visibility="hidden";
-        copyButton.style.visibility = "hidden";
-        playButton.disabled = false;
-        stopToonin.disabled = false;
-        roomNameToonin.disabled = true;
+        roomNameSpan.style.display = "none";
+        shareButton.style.display = "none";
+        stopSharingButton.style.display = "none";
+        copyButton.style.display = "none";
         roomNameToonin.value = request.data.room;
-        muteSpan.style.visibility = "hidden";
+        muteSpan.style.display = "none";
         muteBtn.checked = request.data.muted;
         muteStatus.hidden = !muteBtn.checked;
         roomID=null;
-        sessionIDText.style.visibility = "hidden";
-        peerCounter.style.visibility = "visible";
+        roomDiv.style.display = "flex";
+        peerCounter.style.display = "block";
         peerCounter.innerHTML = "Tooned into room "+request.data.room;
-    } 
-    else if (request.message === "extension_state_from_background" && !request.data.roomID && !request.data.playing) {
-        roomNameSpan.style.visibility= "visible";
-        shareButton.style.visibility= "visible";
-        stopSharingButton.style.visibility="hidden";
-        copyButton.style.visibility = "hidden";
-        playButton.disabled = false;
-        stopToonin.disabled = true;
+        stopToonin.style.display = "block";
+        playButton.style.display = "none";
+        titleText.innerHTML = "Host is listening to: " + request.data.hostTitle;
+        volume.style.display = "block";
+    } else if (request.message === "extension_state_from_background" && !request.data.roomID && !request.data.playing) {
         roomNameToonin.disabled = false;
-        playButton.style.visibility = "visible";
-        stopToonin.style.visibility = "visible";
-        connectSpan.style.visibility = "visible";
-        muteSpan.style.visibility = "hidden";
+        // playButton.style.display = "block";
+        // stopToonin.style.display = "block";
+        // connectSpan.style.display = "block";
+        // muteSpan.style.display = "none";
         muteBtn.checked = request.data.muted;
         muteStatus.hidden = !muteBtn.checked;
         roomID=null;
-        sessionIDText.style.visibility = "hidden";
-        peerCounter.style.visibility = "visible";
-        peerCounter.innerHTML = "Not Streaming";
+        roomDiv.style.display = "none";
+        titleText.innerHTML = "";
     }
   });
 
-  
+  function homePage() {
+      roomNameSpan.style.display = "flex";
+      shareButton.style.display = "flex";
+      roomDiv.style.display = "flex";
+      connectSpan.style.display = "flex";
+      playButton.style.display = "flex";
+      shareButton.alignItems = "center";
+      sessionIDText.innerHTML= "";
+      sessionIDText.style.display = "none";
+      volume.stlyle.display = "none";
+  }
+  function hideElements() {
+      muteBtn.style.display = "none";
+      stopToonin.style.display = "none";
+      muteSpan.style.display = "none";
+      stopSharingButton.style.display = "none";
+      copyButton.style.display = "none";
+      peerCounter.style.display = "none";
+      roomDiv.style.display = "none";
+      volume.style.display = "none";
+  }
+  hideElements();

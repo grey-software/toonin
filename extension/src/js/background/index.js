@@ -1,34 +1,41 @@
 import opus from './opus';
-var remoteDestination, audioSourceNode, gainNode;
 
+// used by client.
+var remoteDestination, audioSourceNode, gainNode;
 const constraints = {
     audio: true
 };
-
-// keep track of tab on which the extension is active
+// keep track of tab on which the extension is active.
 var tabID;
 var port;
-var audioTagRef;
+var audioContext;
+var peerCounter=0;
+var title;
+var tabmuted = false;
 // last mute state
 var muteState = false;
 
-var play = false;
-var incomingStream = null;
-
+// used by host
+var hostTitle;
 var room = null;
 var rtcConnIncoming = null;
 var audioElement = document.createElement('audio');
     audioElement.setAttribute("preload", "auto");
     audioElement.load;
-var peerCounter=0;
+var incomingStream = null;
+var play = false;
+var sender;
+// used by Gain Node
+var volume=1;
 
 chrome.runtime.onConnect.addListener(function (p) {
     port = p;
-    
+
     p.onMessage.addListener(function (msg) {
         if (msg.type == "init") {
             // optional parameter roomName.
             socket.emit("create room", msg.roomName);
+            addTitleListener();
         }
         if (msg.type == "play") {
             if(!room){
@@ -36,7 +43,7 @@ chrome.runtime.onConnect.addListener(function (p) {
                 console.log("Active session with ID: " + room + " found!");
                 socket.emit("new peer", room);
                 setSocketListeners(socket);
-                rtcConnIncoming = new RTCPeerConnection(servers);
+                rtcConnIncoming = new RTCPeerConnection(servers, { optional: [ { RtpDataChannels: true } ]});
                 rtcConnIncoming.onicecandidate = event => {
                     if (!event.candidate) {
                         console.log("No candidate for RTC connection");
@@ -49,9 +56,24 @@ chrome.runtime.onConnect.addListener(function (p) {
                     });
                     console.log(socket.id);
                 };
+
+                rtcConnIncoming.ondatachannel = (event) => {
+                    var recieveChannel = event.channel;
+                    recieveChannel.onmessage = function(event) {
+                        try {
+                            var mediaDescription = JSON.parse(event.data);
+                            hostTitle = mediaDescription.title;
+                            console.log(hostTitle);
+                            sendState();
+                        } catch (err) {
+                            console.log(err);
+                        }
+                    }
+                }
+
                 rtcConnIncoming.ontrack = (event) => {
                     incomingStream = new MediaStream([event.track]);
-        
+
                     try {
                         audioElement.srcObject = incomingStream;
                     }
@@ -68,6 +90,7 @@ chrome.runtime.onConnect.addListener(function (p) {
                 socket.emit("new peer", room);
                 setSocketListeners(socket);
                 rtcConnIncoming = new RTCPeerConnection(servers);
+
                 rtcConnIncoming.onicecandidate = event => {
                     if (!event.candidate) {
                         console.log("No candidate for RTC connection");
@@ -79,9 +102,23 @@ chrome.runtime.onConnect.addListener(function (p) {
                         candidate: event.candidate
                     });
                 };
+
+                rtcConnIncoming.ondatachannel = (event) => {
+                    var recieveChannel = event.channel;
+                    recieveChannel.onmessage = function(event) {
+                        try {
+                            var mediaDescription = JSON.parse(event.data);
+                            hostTitle = mediaDescription.title;
+                            console.log(hostTitle);
+                        } catch (err) {
+                            console.log(err);
+                        }
+                    }
+                }
+
                 rtcConnIncoming.ontrack = (event) => {
                     incomingStream = new MediaStream([event.track]);
-        
+
                     try {
                         audioElement.srcObject = incomingStream;
                         audioElement.play();
@@ -108,8 +145,21 @@ chrome.runtime.onConnect.addListener(function (p) {
             disconnect();
         }
         if(msg.type == "toggleMute") {
-            localAudioStream.getAudioTracks()[0].enabled = Boolean(msg.value);
             muteState = !msg.value;
+            if(muteState){
+                Object.keys(peers).forEach(function (peer) {
+                    var rc = peers[peer].rtcConn;
+                    rc.removeTrack(rc.getSenders()[0]);
+                });
+            } else {
+                Object.keys(peers).forEach(function (peer) {
+                    var rc = peers[peer].rtcConn;
+                    rc.getSenders()[0].replaceTrack(remoteDestination.stream.getAudioTracks()[0]);
+                });
+            }
+        }
+        if(msg.type == "volume") {
+            changeVolume(msg.value);
         }
     });
 });
@@ -119,6 +169,17 @@ chrome.tabs.onRemoved.addListener(function(tabId, removed) {
         disconnect();
     }
 });
+
+function addTitleListener() {
+    chrome.tabs.onUpdated.addListener(function(tabId, changeInfo) {
+        if(changeInfo.title && tabId === tabID) {
+            console.log(changeInfo.title);
+            title = changeInfo.title;
+            sendMediaDescription();
+            sendState();
+        }
+    });
+}
 
 function stopListening() {
     socket.emit('logoff', { from: socket.id, to: room } );
@@ -135,7 +196,6 @@ function disconnect () {
     socket.emit("disconnect room", {room: roomCurrent});
     // stops tabCapture
     localAudioStream.getAudioTracks()[0].stop();
-    capturedStream.getAudioTracks()[0].stop();
     var peerIDs = Object.keys(peers);
     for(var i = 0; i < peerIDs.length; i++) {
         peers[peerIDs[i]].rtcConn.close();
@@ -149,11 +209,25 @@ function disconnect () {
     sendState();
 }
 
+// sets the volume
+function changeVolume(value) {
+    var fraction = parseInt(value, 10) / parseInt(100, 10);
+    volume = fraction * fraction;
+    console.log(fraction);
+    if(!tabmuted && !rtcConnIncoming) {
+        gainNode.gain.value = volume;
+    } else if (rtcConnIncoming) {
+        audioElement.volume = volume;
+    }
+
+}
+
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
       if( request.message === "extension_state" ) {
         sendState();
       }
+
 });
 
 function setSocketListeners(socket) {
@@ -204,9 +278,17 @@ function createAnswer(desc) {
 /**
  * allow user to mute/unmute the tab on which extension is running
  */
-chrome.tabs.onUpdated.addListener(function(tabId, changeInfo) {
-    if(changeInfo.mutedInfo && tabId === tabID) {
-        window.audio.muted = changeInfo.mutedInfo.muted;
+chrome.tabs.onUpdated.addListener(function(currentTab, changeInfo) {
+    if(changeInfo.mutedInfo && currentTab === tabID) {
+        if(changeInfo.mutedInfo.muted){
+            tabmuted=true;
+            gainNode.gain.value=0;
+        } else{
+            tabmuted=false;
+            gainNode.gain.value=volume;
+        }
+        sendState();
+        // window.audio.muted = changeInfo.mutedInfo.muted;
     }
 });
 
@@ -219,32 +301,36 @@ function getTabAudio() {
             console.error("Error starting tab capture: " + (chrome.runtime.lastError.message || "UNKNOWN"));
             return;
         }
-        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-            var currTab = tabs[0];
-            if (currTab) { tabID = currTab.id; }
-
-        });
 
         let tracks = stream.getAudioTracks(); // MediaStreamTrack[], stream is MediaStream
-        let tabStream = new MediaStream(tracks);
-        window.audio = document.createElement("audio");
-        audioTagRef = window.audio; // save reference globally for volume control
-        window.audio.srcObject = tabStream;
-        window.audio.play();
-        localAudioStream = tabStream.clone();
-        capturedStream = tabStream;
+        localAudioStream = new MediaStream(tracks);
+
+        audioContext = new AudioContext();
+        gainNode = audioContext.createGain();
+        gainNode.connect(audioContext.destination);
+        audioSourceNode = audioContext.createMediaStreamSource(localAudioStream); // of type MediaStreamAudioSourceNode
+        audioSourceNode.connect(gainNode);
+        gainNode.gain.value = 1;
+        remoteDestination = audioContext.createMediaStreamDestination();
+        audioSourceNode.connect(remoteDestination);
+
         console.log("Tab audio captured. Now sending url to injected content script");
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+            var currTab = tabs[0];
+            if (currTab) { tabID = currTab.id; title = currTab.title; sendState();}
+        });
+
     });
+
 }
 
 "use strict";
 console.log("application script running");
 
-var socket = io("http://www.toonin.ml:8100");
+var socket = io("http://www.toonin.ml:8100", {secure: true});
 
 var peers = {};
 var localAudioStream;
-var capturedStream;
 var roomID;
 
 const servers = {
@@ -264,29 +350,18 @@ const offerOptions = {
 };
 
 /**
- * convert captured tab stream to a streamable form
- */
-function getStreamableData() {
-    var audioContext = new AudioContext();
-    gainNode = audioContext.createGain();
-	gainNode.connect(audioContext.destination);
-    audioSourceNode = audioContext.createMediaStreamSource(localAudioStream); // of type MediaStreamAudioSourceNode
-    remoteDestination = audioContext.createMediaStreamDestination();
-    audioSourceNode.connect(remoteDestination);
-}
-
-/**
  * Start sharing user's tab audio with the peer with "peerID"
- * @param {string} peerID 
+ * @param {string} peerID
  */
 function startShare(peerID) {
     console.log("Starting new connection for peer: " + peerID);
-    const rtcConn = new RTCPeerConnection(servers);
-    getStreamableData();
+    const rtcConn = new RTCPeerConnection(servers, { optional: [ { RtpDataChannels: true } ]});
 
     rtcConn.addTrack(remoteDestination.stream.getAudioTracks()[0]);
     peers[peerID].rtcConn = rtcConn;
-    console.log(peers);
+    peers[peerID].dataChannel = peers[peerID].rtcConn.createDataChannel('mediaDescription');
+
+    // console.log(peers);
     peers[peerID].rtcConn.onicecandidate = function (event) {
         if (!event.candidate) {
             console.log("No candidate for RTC connection");
@@ -311,6 +386,25 @@ function startShare(peerID) {
             });
         });
     });
+
+    peers[peerID].dataChannel.addEventListener("open", (event) => {
+        console.log("sending title to new peer");
+        peers[peerID].dataChannel.send(JSON.stringify({ "title": title }));
+    });
+}
+
+// Sends media meta information over a rtc data channel to a connected listener
+function sendMediaDescription() {
+    console.log("sending new title to all peers");
+    Object.keys(peers).forEach(function (peer) {
+
+        var dc = peers[peer].dataChannel;
+        if (dc.readyState === 'open') {
+            var data = JSON.stringify({"title": title});
+            dc.send(data);
+        }
+    });
+
 }
 
 /* **************** *
@@ -319,7 +413,6 @@ function startShare(peerID) {
 socket.on("room created", (newRoomID) => {
     console.log("New room created with ID: " + newRoomID);
     roomID = newRoomID;
-    sendState();
     getTabAudio();
 });
 
@@ -403,10 +496,14 @@ function sendState() {
     var data = {
         "roomID": roomID,
         "tabID" : tabID,
-        "playing" : play,
+        "playing" : audioElement.srcObject,
         "room" : room,
         "muted": muteState,
-        "peerCounter": peerCounter
+        "peerCounter": peerCounter,
+        "hostTitle": hostTitle,
+        "title" : title,
+        "volume": volume,
+        "tabMute":tabmuted
     }
     chrome.runtime.sendMessage({"message": "extension_state_from_background", "data": data});
 }
