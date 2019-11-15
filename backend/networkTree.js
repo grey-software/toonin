@@ -99,4 +99,4 @@ class networkTree {
     }
 }
 
-var n = new networkTree('123');
+module.exports.networkTree = networkTree;

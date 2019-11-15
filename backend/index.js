@@ -10,16 +10,17 @@ var https = require('https').createServer({
 }, app);
 var io = require("socket.io")(https);
 var vars = require("./vars");
-var networkTree = require("./networkTree");
+var networkTree = require("./networkTree").networkTree;
 
 var rooms = {};
+const MAX_CLIENTS_PER_HOST = 8;
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 // reduced the gen room id length to 6 characters (2, 15) -> (2, 5)
-const genRoomID = () => {
+const genRoomID = (socketID) => {
   while (true) {
     const id =
       Math.random()
@@ -29,23 +30,29 @@ const genRoomID = () => {
         .toString(36)
         .substring(2, 5);
     if (!(id in rooms)) {
-      rooms[id] = {};
+      rooms[id] = new networkTree(socketID, MAX_CLIENTS_PER_HOST);
       return id;
     }
   }
 };
 
+/**
+ * 
+ * @param {SocketIO.Socket} socket 
+ * @param {string} roomName 
+ */
 function createRoom(socket, roomName) {
     var newRoomID = "";
     console.log("Received request to create new room");
     const hasCustomRoomName = roomName.length > 0;
+
     if (hasCustomRoomName) {
 
       if (roomName in rooms) {
         socket.emit("room creation failed", "name already exists");
       } else {
         newRoomID = roomName;
-        rooms[newRoomID] = {};
+        rooms[newRoomID] = new networkTree(socket.id, MAX_CLIENTS_PER_HOST);
         socket.join(newRoomID, () => {
           socket.emit("room created", newRoomID);
           console.log(rooms);
@@ -54,12 +61,13 @@ function createRoom(socket, roomName) {
 
       // if no custom room name, generate a random id
     } else {
-      newRoomID = genRoomID();
+      newRoomID = genRoomID(socket.id);
       socket.join(newRoomID, () => {
         socket.emit("room created", newRoomID);
         console.log(rooms);
       });
     }
+
 }
 
 //Socket create a new "room" and listens for other connections
