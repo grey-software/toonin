@@ -19,6 +19,8 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function generateSocketRoom(socketID, roomName) { return socketID + '-' + roomName; }
+
 // reduced the gen room id length to 6 characters (2, 15) -> (2, 5)
 const genRoomID = (socketID) => {
   while (true) {
@@ -53,7 +55,7 @@ function createRoom(socket, roomName) {
       } else {
         newRoomID = roomName;
         rooms[newRoomID] = new networkTree(socket.id, MAX_CLIENTS_PER_HOST);
-        socket.join(newRoomID, () => {
+        socket.join(generateSocketRoom(socket.id, newRoomID), () => {
           socket.emit("room created", newRoomID);
           console.log(rooms);
         });
@@ -62,7 +64,7 @@ function createRoom(socket, roomName) {
       // if no custom room name, generate a random id
     } else {
       newRoomID = genRoomID(socket.id);
-      socket.join(newRoomID, () => {
+      socket.join(generateSocketRoom(socket.id, newRoomID), () => {
         socket.emit("room created", newRoomID);
         console.log(rooms);
       });
@@ -79,19 +81,31 @@ io.on("connection", socket => {
 
   socket.on("new peer", room => {
     if(rooms[room]){
-      // TODO: instead of joining directly, send pool of hosts. Wait for client
-      // to evaluate hosts and connect. Then register the connection in the
-      // network tree
-      socket.join(room, () => {
-        console.log("Peer connected successfully to room: " + room);
-        console.log(socket.id + " now in rooms ", socket.rooms);
-        socket.to(room).emit("peer joined", { room: room, id: socket.id });
-      });
+
+      var potentialHosts = rooms[room].getConnectableNodes();
+      socket.emit("host pool", { potentialHosts: potentialHosts });
+      // socket.join(room, () => {
+      //   console.log("Peer connected successfully to room: " + room);
+      //   console.log(socket.id + " now in rooms ", socket.rooms);
+      //   socket.to(room).emit("peer joined", { room: room, id: socket.id });
+      // });
     } else {
         console.log("invalid room");
         socket.emit("room null");
     }
     
+  });
+
+  socket.on("host eval res", (res) => {
+    if(res.evalResult.hostFound) {
+      var room = res.evalResult.targetRoom;
+      socket.join(generateSocketRoom(res.evalResult.selectedHost, room), () => {
+        console.log("Peer connected successfully to room: " + room);
+        console.log(socket.id + " now in rooms ", socket.rooms);
+        // it works till here. now need to figure out how to establish actual connection and add node to tree
+        socket.to(room).emit("peer joined", { room: room, id: socket.id });
+      });
+    }
   });
 
   socket.on("src new ice", iceData => {

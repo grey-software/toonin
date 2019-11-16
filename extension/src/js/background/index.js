@@ -373,7 +373,7 @@ function startShare(peerID) {
             room: roomID,
             candidate: event.candidate
         });
-    };
+    }
 
     rtcConn.createOffer(offerOptions).then((desc) => {
         opus.preferOpus(desc.sdp);

@@ -55,7 +55,7 @@ class networkTree {
     }
 
     /**
-     * @returns {Array} array of possible hosts in order of preference
+     * @returns {networkNode[]} array of possible hosts in order of preference
      */
     getConnectableNodes() {
         if(this.subNodes.length === 0) { return [this.node]; }

@@ -1,7 +1,6 @@
 import io from "socket.io-client";
 
-const ENDPOINT = "http://www.toonin.ml:8100/";
-//const ENDPOINT = "http://138.51.171.230:8100/";
+const ENDPOINT = "https://toonin.ml:8443/";
 
 const servers = {
     iceServers: [
@@ -20,7 +19,8 @@ const SUCCESSFUL = "connected";
 const DISCONNECTED = "disconnected";
 const FAILED = "failed";
 
-var socket = io(ENDPOINT);;
+//var socket = io(ENDPOINT);;
+var socket = io(ENDPOINT, { secure: true });
 
 var incomingStream = null;
 var audioElem;
@@ -68,7 +68,6 @@ function updateState(newState) {
             state[alteredVars[i]] = newState[alteredVars[i]];
         }
     }
-    
 }
 
 export function enablePlayback() { this.$refs.audio.muted = false; }
@@ -95,7 +94,6 @@ export function logMessage(msg) { console.log(msg); }
  * 
  */
 export function checkstream() {
-
     fetch(ENDPOINT + state.room)
         .then(res => res.json())
         .then(res => checkStreamResult(res))
@@ -109,7 +107,7 @@ export function checkstream() {
  * @param {String} result server response for the roomID provided by the user
  */
 export function checkStreamResult(result) {
-    
+    logMessage("result: " + result);
     if (result === "SUCCESS") {
         updateState({ roomFound: true });
         logMessage("Active session with ID: " + state.room + " found!");
@@ -130,6 +128,10 @@ export function checkStreamResult(result) {
             established: false
         })
     }
+}
+
+function evaluateHosts(hostPool) {
+    return { hostFound: true, selectedHost: hostPool[0], targetRoom: state.room };
 }
 
 /**
@@ -235,7 +237,7 @@ function attachRTCliteners(rtcConn) {
 }
 
 /**
- * Initialize socket listeners necessary to establish communication 
+ * Initialize socket listeners necessary to establish communication
  * betweeen backend and the web app
  * 
  * @param {io} socket socket connection to the backend
@@ -265,6 +267,15 @@ function setSocketListeners(socket) {
             logMessage("Setting remote description success");
             createAnswer(descData.desc);
         });
+    });
+
+    socket.on("host pool", (hostPool) => {
+        logMessage("recieved host pool to evaluate");
+        var evalResult = evaluateHosts(hostPool.potentialHosts);
+        if(evalResult.hostFound) {
+            logMessage("sending eval result");
+            socket.emit("host eval res", { evalResult: evalResult });
+        }
     });
 }
 
