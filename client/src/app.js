@@ -107,7 +107,7 @@ export function checkstream() {
  * @param {String} result server response for the roomID provided by the user
  */
 export function checkStreamResult(result) {
-    logMessage("result: " + result);
+    
     if (result === "SUCCESS") {
         updateState({ roomFound: true });
         logMessage("Active session with ID: " + state.room + " found!");
@@ -131,7 +131,7 @@ export function checkStreamResult(result) {
 }
 
 function evaluateHosts(hostPool) {
-    return { hostFound: true, selectedHost: hostPool[0], targetRoom: state.room };
+    return { hostFound: true, selectedHost: hostPool[0].socketID };
 }
 
 /**

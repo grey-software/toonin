@@ -55,7 +55,7 @@ function createRoom(socket, roomName) {
       } else {
         newRoomID = roomName;
         rooms[newRoomID] = new networkTree(socket.id, MAX_CLIENTS_PER_HOST);
-        socket.join(generateSocketRoom(socket.id, newRoomID), () => {
+        socket.join(socket.id, () => {
           socket.emit("room created", newRoomID);
           console.log(rooms);
         });
@@ -64,7 +64,7 @@ function createRoom(socket, roomName) {
       // if no custom room name, generate a random id
     } else {
       newRoomID = genRoomID(socket.id);
-      socket.join(generateSocketRoom(socket.id, newRoomID), () => {
+      socket.join(socket.id, () => {
         socket.emit("room created", newRoomID);
         console.log(rooms);
       });
@@ -77,6 +77,7 @@ io.on("connection", socket => {
 
   socket.on("create room", (roomName) => {
     createRoom(socket, roomName);
+    console.log(socket.rooms);
   });
 
   socket.on("new peer", room => {
@@ -98,11 +99,13 @@ io.on("connection", socket => {
 
   socket.on("host eval res", (res) => {
     if(res.evalResult.hostFound) {
-      var room = res.evalResult.targetRoom;
-      socket.join(generateSocketRoom(res.evalResult.selectedHost, room), () => {
+
+      var room = res.evalResult.selectedHost;
+
+      socket.join(room, () => {
         console.log("Peer connected successfully to room: " + room);
-        console.log(socket.id + " now in rooms ", socket.rooms);
-        // it works till here. now need to figure out how to establish actual connection and add node to tree
+        // console.log(socket.id + " now in rooms ", socket.rooms);
+
         socket.to(room).emit("peer joined", { room: room, id: socket.id });
       });
     }
