@@ -389,7 +389,7 @@ function startShare(peerID) {
 
     peers[peerID].dataChannel.addEventListener("open", (event) => {
         console.log("sending title to new peer");
-        peers[peerID].dataChannel.send(JSON.stringify({"title": title}));
+        peers[peerID].dataChannel.send(JSON.stringify({ "title": title }));
     });
 }
 
