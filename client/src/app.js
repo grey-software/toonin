@@ -16,11 +16,16 @@ const servers = {
     ]
 };
 
+const SUCCESSFUL = "connected";
+const DISCONNECTED = "disconnected";
+const FAILED = "failed";
+
 var socket = io(ENDPOINT);;
 
 var incomingStream = null;
 var audioElem;
 var playBtn;
+var titleTag;
 var state = null;
 
 /**
@@ -29,9 +34,10 @@ var state = null;
  * @param {HTMLAudioElement} audioElement reference to <audio> tag on page for playback
  * @param {any} playRef <v-btn> for manual audio playback by the user, revealed when auto playback is not possible
  */
-export function init(vueDataRef, audioElement, playRef) {
+export function init(vueDataRef, audioElement, playRef, titleRef) {
     playBtn = playRef;
     audioElem = audioElement;
+    titleTag = titleRef;
     state = vueDataRef;
     // bind window close event to handler to notify backend of client
     // disconnection
@@ -62,6 +68,7 @@ function updateState(newState) {
             state[alteredVars[i]] = newState[alteredVars[i]];
         }
     }
+    
 }
 
 export function enablePlayback() { this.$refs.audio.muted = false; }
@@ -108,90 +115,10 @@ export function checkStreamResult(result) {
         logMessage("Active session with ID: " + state.room + " found!");
         socket.emit("new peer", state.room);
         setSocketListeners(socket);
-        const rtcConn = new RTCPeerConnection(servers);
 
-        rtcConn.onicecandidate = event => {
-            if (!event.candidate) {
-                logMessage("No candidate for RTC connection");
-                return;
-            }
-            socket.emit("peer new ice", {
-                id: socket.id,
-                room: state.room,
-                candidate: event.candidate
-            });
-        };
-
-        rtcConn.onconnectionstatechange = function() {
-            if(rtcConn.connectionState === 'connected') { updateState({ established: true }); }
-
-            if(rtcConn.connectionState == 'disconnected' || 
-            rtcConn.connectionState == 'failed') { 
-                updateState({ 
-                    established: false,
-                    isPlaying: false
-                });
-            }
-
-        }
-
-        rtcConn.onaddstream = event => {
-            logMessage("Stream added");
-            logMessage(event.stream);
-            audioElem.srcObject = event.stream;	
-            //pause = 0;
-            console.log(audioElem);
-            audioElem.oncanplay = () => {
-                audioElem.play().catch((err) => {
-                    logMessage(err);
-                });
-                audioElem.onplay = () => {
-                    updateState({
-                        established: true,
-                        isPlaying: audioElem.srcObject.active 
-                    });
-                }
-            }
-        };
-
-        rtcConn.ontrack = (event) => {
-
-            logMessage('track added');
-            incomingStream = new MediaStream([event.track]);
-            var _iOSDevice = !!navigator.platform.match(/iPhone|iPod|iPad|Macintosh|MacIntel/);
-            if(_iOSDevice) {
-                try {
-                    playBtn.$refs.link.hidden = false;
-                    audioElem.srcObject = incomingStream;
-                    audioElem.onplay = () => {
-                        updateState({
-                            established: true,
-                            isPlaying: audioElem.srcObject.active,
-                            stream: incomingStream
-                        });
-                    }
-                }
-                catch(err) {
-                    playBtn.$refs.link.hidden = false;
-                }
-            } else {
-                try {
-                    audioElem.srcObject = incomingStream;
-                    audioElem.play();
-                    audioElem.onplay = () => {
-                        updateState({
-                            established: true,
-                            isPlaying: audioElem.srcObject.active,
-                            stream: incomingStream
-                        });
-                    }
-                }
-                catch(err) {
-                    playBtn.$refs.link.hidden = false;
-                }
-            }
-            
-        }
+        const rtcConn = new RTCPeerConnection(servers, { optional: [ { RtpDataChannels: true } ]});
+        attachRTCliteners(rtcConn);
+        
         updateState({
             rtcConn: rtcConn,
             peerID: socket.id
@@ -206,12 +133,128 @@ export function checkStreamResult(result) {
 }
 
 /**
+ * Callback for onmessage event for webRTC data channel
+ * @param {event} messageEvent webRTC data channel message event
+ */
+function onDataChannelMsg(messageEvent) {
+    // data channel to recieve the media title
+    try {
+        var mediaDescription = JSON.parse(messageEvent.data);
+        updateState({ streamTitle: mediaDescription.title });
+
+        if(state.streamTitle.length > 0) {
+            titleTag.innerText = 'Playing: ' + state.streamTitle;
+            if(state.streamTitle.length <= 41) {
+                titleTag.classList.remove('title-text');
+                titleTag.classList.add('title-text-no-animation');
+            }
+            else {
+                titleTag.classList.remove('title-text-no-animation');
+                titleTag.classList.add('title-text');
+            }
+        }
+    } catch (err) { logMessage(err); }
+}
+
+/**
+ * attach listeners for webRTC peer connection events
+ * @param {RTCPeerConnection} rtcConn RTCPeerConnection object to attach listeners to
+ */
+function attachRTCliteners(rtcConn) {
+    rtcConn.onicecandidate = event => {
+        if (!event.candidate) {
+            logMessage("No candidate for RTC connection");
+            return;
+        }
+        socket.emit("peer new ice", {
+            id: socket.id,
+            room: state.room,
+            candidate: event.candidate
+        });
+    }
+
+    rtcConn.onconnectionstatechange = (ev) => {
+        if(rtcConn.connectionState === SUCCESSFUL) { 
+            updateState({ established: true }); 
+        }
+    
+        if(rtcConn.connectionState == DISCONNECTED || 
+        rtcConn.connectionState == FAILED) {
+            updateState({ 
+                established: false,
+                isPlaying: false
+            });
+        }
+    }
+
+    rtcConn.ondatachannel = (event) => {
+        var channel = event.channel;
+        channel.onmessage = onDataChannelMsg;
+    }
+    //onDataChannelMsg;
+
+
+    rtcConn.onaddstream = event => {
+        logMessage("Stream added");
+        incomingStream = event.stream;
+        audioElem.oncanplay = () => {
+            audioElem.srcObject = incomingStream;
+            audioElem.play().catch((err) => {
+                logMessage(err);
+            });
+            audioElem.onplay = () => {
+                updateState({
+                    established: true,
+                    isPlaying: audioElem.srcObject.active,
+                    stream: incomingStream
+                });
+            }
+        }
+    }
+
+    rtcConn.ontrack = (event) => {
+
+        logMessage('track added');
+        incomingStream = new MediaStream([event.track]);
+        var _iOSDevice = !!navigator.platform.match(/iPhone|iPod|iPad|Macintosh|MacIntel/);
+        if(_iOSDevice) {
+            playBtn.$refs.link.hidden = false;
+            audioElem.srcObject = incomingStream;
+            audioElem.onplay = () => {
+                updateState({
+                    established: true,
+                    isPlaying: audioElem.srcObject.active,
+                    stream: incomingStream
+                });
+            }
+        } else {
+
+            try {
+                audioElem.srcObject = incomingStream;
+                audioElem.onplay = () => {
+                    updateState({
+                        established: true,
+                        isPlaying: audioElem.srcObject.active,
+                        stream: incomingStream
+                    });
+                }
+
+                audioElem.play();
+            }
+            catch(err) { playBtn.$refs.link.hidden = false; }
+        }
+
+    }
+}
+
+
+/**
  * Initialize socket listeners necessary to establish communication 
  * betweeen backend and the web app
  * 
  * @param {io} socket socket connection to the backend
  */
-export function setSocketListeners(socket) {
+function setSocketListeners(socket) {
     socket.on("src ice", iceData => {
         logMessage(`Received new ICE Candidate from src for peer: ${iceData.id} in room: ${iceData.room}`);
         logMessage(`I have id: ${socket.id} and room: ${state.room}`);
@@ -245,7 +288,7 @@ export function setSocketListeners(socket) {
  * 
  * @param {any} desc 
  */
-export function createAnswer(desc) {
+function createAnswer(desc) {
     const roomID = state.room;
     state.rtcConn.createAnswer().then(desc => {
         //preferOpus(desc.sdp);

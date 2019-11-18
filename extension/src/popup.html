@@ -7,12 +7,12 @@
             crossorigin="anonymous">
         <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     </head>
-    <body>
+    <body style="height: 0;">
         <!-- Square card -->
 <style>
         .demo-card-square.mdl-card {
-            width: 320px;
-            height: 320px;
+            width: 270px;
+            height: 270px;
         }
         .demo-card-square>.mdl-card__title {
             background: url("https://image.ibb.co/fRYLty/bg.png") center / cover;
@@ -21,9 +21,9 @@
         .ic-share {
             margin-right: 4px;
         }
-        .room-id-text {
-            visibility: hidden;
-            margin: 0%;
+
+        .mdl-button {
+            padding:0;
         }
         .spinner {
             font-size: 50px;
@@ -39,13 +39,13 @@
             width: 60px;
             height: 34px;
         }
-      
-        .switch input { 
+
+        .switch input {
             opacity: 0;
             width: 0;
             height: 0;
         }
-      
+
         .slider {
             position: absolute;
             cursor: pointer;
@@ -57,7 +57,7 @@
             -webkit-transition: .4s;
             transition: .4s;
         }
-      
+
         .slider:before {
             position: absolute;
             content: "";
@@ -69,94 +69,122 @@
             -webkit-transition: .4s;
             transition: .4s;
         }
-      
+        .blueTooninColor {
+            color:rgb(33,150,243);
+        }
+
+        .textSpan {
+            height:36px;
+        }
+        .flexItem {
+            display:flex;
+            align-items: center;
+            padding:0px;
+        }
+
+        input {
+            border-radius:28px;
+            border-color:grey;
+            border-style:solid;
+            padding:10px;
+            border-width:1px;
+        }
         input:checked + .slider {
             background-color: rgb(237, 24, 24);
         }
-        
+
         input:focus + .slider {
             box-shadow: 0 0 1px #2196F3;
         }
-        
+
         input:checked + .slider:before {
             -webkit-transform: translateX(26px);
             -ms-transform: translateX(26px);
             transform: translateX(26px);
         }
-        
+
         /* Rounded sliders */
         .slider.round {
             border-radius: 34px;
         }
-        
+
         .slider.round:before {
             border-radius: 50%;
         }
 
     </style>
-        <div class="demo-card-square mdl-card mdl-shadow--2dp" style="height: 750px;">
+        <div class="demo-card-square mdl-card mdl-shadow--2dp" style="height: 450px;">
             <div class="mdl-card__title mdl-card--expand">
                 <h2 class="mdl-card__title-text">Toonin
                 </h2>
             </div>
-            <div class="mdl-card__actions mdl-card--border" style="height: 60%;">
-                
-                <button id="btnShare" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" style="padding: 1%; margin-left: 4%;">
-                    <i class="fas fa-music ic-share"></i>
-                    Start Sharing
-                </button>
-                <button id="btnShareStop" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" style="padding: 1%; margin-left: 4%;">
+            <div class="mdl-card__actions mdl-card--border">
+            <span class="flexItem" id="stopSharingSpan">
+                <button id="btnShareStop" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" style="">
                     <i class="fas fa-music ic-share"></i>
                     Stop Sharing
                 </button>
-                <br>
-                <span class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" 
+            </span>
+            <span class="blueTooninColor flexItem textSpan"
+                style="justify-content:space-between;" id="roomNameSpan">
+                Create Room <input type="text" id="roomNameInput" style="height: 80%; width:50%">
+            </span>
 
-                style="margin-top: 2%; margin-left: -3%; padding: 0%;" id="roomNameSpan">
-                Room Name <input type="text" id="roomNameInput" style="height: 80%; margin-left: 8px; 
-                padding: 4px; width: 50%;">
-                </span>
-                <span id="titleOfPage">
-                    <p class="mdl-card__supporting-text" style="padding: 1%; margin-left: 4%;" id="titleText">
-                    </p>
-                </span>
-                <br>
-                <button id="btnCopy" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" style="padding: 1%; margin-left: 4%;">
+            <span class="blueTooninColor flexItem" id="btnShare">
+                <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" style="padding:0%">
+                    <i class="fas fa-music ic-share"></i>
+                    Start Sharing
+                </button>
+            </span>
+            <span class="flexItem">
+                <button id="btnCopy" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" style="">
                     Copy ID
                     <i class="far fa-copy ic-share"></i>
                 </button>
-                <div style="width: 60%; margin: 0%; float: right; padding-top: 3%; margin-right: 6%;">
-                    <p class="mdl-card__supporting-text room-id-text" style="padding: 1%; margin-left: 4%;" id="roomID">
-                    </p>
-                </div>
-                <br>
-                <p class="mdl-card__supporting-text" style="padding: 1%; margin-left: 4%;" id="peerCounter">
+            </span>
+            <span id="titleOfPage" class="flexItem">
+                <p class="room-id-text" style="" id="titleText">
                 </p>
-                <br>
-                <span class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" style="margin-top: 2%; margin-left: -4%;" id="connectSpan">
-                Connect <input type="text" id="tooninToRoom" style="height: 80%; margin-left: 8px; padding: 4px; width: 50%">
-                </span>
-                <br>
-                <button class="mdl-button mdl-js-buttonton--fab mdl-button--fab mdl-button--colored" id="playRoom" style="padding: 4%; margin-left: 30%;">
-                    <i class="material-icons">play_circle_filled</i>
+            </span>
+            <span class="flexItem" id="roomDiv">
+                    <p class="room-id-text" style="" id="roomText">
+                    </p>
+            </span>
+            <span class="flexItem" id="roomDiv">
+                <p class="" style="" id="peerCounter">
+                </p>
+            </span>
+
+            <span class="blueTooninColor flexItem textSpan" id="connectSpan" style="padding:0%;justify-content:space-between; align-items:end;">
+                <p>
+                    Connect
+                </p>
+                <input type="text" id="tooninToRoom" style="height:80%; width:60%">
+            </span>
+
+            <span class="flexItem" id="playRoom" style="padding:0%;justify-content:space-between;">
+                <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" style="padding:0%">
+                    <i class="fas fa-music ic-share"></i>
+                    Toonin
                 </button>
-                <button class="mdl-button mdl-js-buttonton--fab mdl-button--fab mdl-button--colored" id="stopToonin" style="padding: 4%; margin-right: 30%;">
-                    <i class="material-icons">stop</i>
+            </span>
+                <button id="stopToonin" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect flexItem" >
+                    <i class="fas fa-music ic-share"></i>
+                    Stop
                 </button>
-                <br>
+
                 <input class="mdl-slider mdl-js-slider" id="volume" type="range" min="0" max="100" value="100" style="vertical-align: middle; background-color: #E30425"/>
-                <span id="muteSpan">
-                    <a style="padding: 2%; margin-left: 4%;" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Mute Stream: </a>
+                <span id="muteSpan" class="flexItem" style="justify-content: space-evenly;">
+                    <a style="" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Mute Stream: </a>
                     <label class="switch">
                         <input type="checkbox" id="mute-btn">
                         <span class="slider round"></span>
                     </label>
                     <a id="muted-notif" style="margin-left: 1%; color: rgb(237, 24, 24);" hidden>Muted</a>
-                    
+
                 </span>
             </div>
         </div>
     </body>
     <script src="popup.js"></script>
 </html>
-
