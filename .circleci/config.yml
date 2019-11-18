@@ -5,6 +5,7 @@ jobs:
     docker:
       - image: circleci/node:latest
     steps:
+      - run: mkdir -p /tmp/workspace
       - checkout
       # Download and cache dependencies
       - restore_cache:
@@ -24,6 +25,16 @@ jobs:
           name: Building the extension
           command: |
              npm --prefix ./extension run build
+      - run:
+          name: Compress extension for storage
+          command: zip -r /tmp/workspace/extension.zip ./extension/build
+      - store_artifacts:
+          path: /tmp/workspace/extension.zip
+          destination: extension
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - extension.zip
   Build-App:
     docker:
       - image: circleci/node:latest
@@ -47,12 +58,27 @@ jobs:
           name: Building App
           command: |
             npm --prefix ./client run build
+  publish-github-release:
+    docker:
+      - image: cibuilds/github:0.10
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: "Publish Release on GitHub"
+          command: |
+            VERSION=0.1.2
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete 1.0.0 /tmp/workspace/extension.zip
 workflows:
   version: 2
   Validate_Build:
     jobs:
       - Build-Extension
       - Build-App
+      - publish-github-release:
+          requires:
+            - Build-Extension
 notify:
   webhooks:
     - url: https://outlook.office.com/webhook/04e18692-6efb-49e9-9028-139bf917ab16@78aac226-2f03-4b4d-9037-b46d56c55210/CircleCI/30437ffdcb3e400baa80214e81552edc/5b046f8c-07ba-4e2f-a006-653143830ede
