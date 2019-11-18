@@ -199,9 +199,6 @@ function attachRTCliteners(rtcConn) {
         incomingStream = event.stream;
         audioElem.oncanplay = () => {
             audioElem.srcObject = incomingStream;
-            audioElem.play().catch((err) => {
-                logMessage(err);
-            });
             audioElem.onplay = () => {
                 updateState({
                     established: true,
@@ -209,6 +206,9 @@ function attachRTCliteners(rtcConn) {
                     stream: incomingStream
                 });
             }
+            
+            audioElem.play().catch = (err) => { playBtn.$refs.link.hidden = false; }
+            
         }
     }
 
@@ -216,10 +216,10 @@ function attachRTCliteners(rtcConn) {
 
         logMessage('track added');
         incomingStream = new MediaStream([event.track]);
-
-        try {
+        var _iOSDevice = !!navigator.platform.match(/iPhone|iPod|iPad|Macintosh|MacIntel/);
+        if(_iOSDevice) {
+            playBtn.$refs.link.hidden = false;
             audioElem.srcObject = incomingStream;
-            audioElem.play();
             audioElem.onplay = () => {
                 updateState({
                     established: true,
@@ -227,12 +227,22 @@ function attachRTCliteners(rtcConn) {
                     stream: incomingStream
                 });
             }
+        } else {
+            audioElem.srcObject = incomingStream;
+            audioElem.onplay = () => {
+                updateState({
+                    established: true,
+                    isPlaying: audioElem.srcObject.active,
+                    stream: incomingStream
+                });
+            }
+
+            audioElem.play().catch = (err) => { playBtn.$refs.link.hidden = false; }
         }
-        catch(err) {
-            playBtn.$refs.link.hidden = false;
-        }
+
     }
 }
+
 
 /**
  * Initialize socket listeners necessary to establish communication 
