@@ -199,9 +199,6 @@ function attachRTCliteners(rtcConn) {
         incomingStream = event.stream;
         audioElem.oncanplay = () => {
             audioElem.srcObject = incomingStream;
-            audioElem.play().catch((err) => {
-                logMessage(err);
-            });
             audioElem.onplay = () => {
                 updateState({
                     established: true,
@@ -209,6 +206,9 @@ function attachRTCliteners(rtcConn) {
                     stream: incomingStream
                 });
             }
+            
+            audioElem.play().catch = (err) => { playBtn.$refs.link.hidden = false; }
+            
         }
     }
 
@@ -228,20 +228,16 @@ function attachRTCliteners(rtcConn) {
                 });
             }
         } else {
-
-            try {
-                audioElem.srcObject = incomingStream;
-                audioElem.onplay = () => {
-                    updateState({
-                        established: true,
-                        isPlaying: audioElem.srcObject.active,
-                        stream: incomingStream
-                    });
-                }
-
-                audioElem.play();
+            audioElem.srcObject = incomingStream;
+            audioElem.onplay = () => {
+                updateState({
+                    established: true,
+                    isPlaying: audioElem.srcObject.active,
+                    stream: incomingStream
+                });
             }
-            catch(err) { playBtn.$refs.link.hidden = false; }
+
+            audioElem.play().catch = (err) => { playBtn.$refs.link.hidden = false; }
         }
 
     }
