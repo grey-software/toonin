@@ -26,7 +26,9 @@ resource "aws_launch_configuration" "toonin_backend_config" {
               aws configure set default_region_name "us-east-1"
               aws s3 cp s3://toonin-server-src/backend.zip ./backend.zip
               unzip backend.zip
+              sudo iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 443 -j REDIRECT --to-port 3000
               sudo iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 3000
+              sudo iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 8443 -j REDIRECT --to-port 8100
               NODE_ENV=production node index.js & disown
               cd /home/app
               aws s3 cp s3://toonin-server-src/app.zip ./app.zip
@@ -67,16 +69,25 @@ resource "aws_elb" "toonin-backend-elb" {
 
   listener {
     lb_port = 80
-    lb_protocol = "http"
+    lb_protocol = "tcp"
     instance_port = 80
-    instance_protocol = "http"
+    instance_protocol = "tcp"
   }
 
   listener {
-    lb_port = 8100
-    lb_protocol = "http"
-    instance_port = 8100
-    instance_protocol = "http"
+    lb_port = 8443
+    lb_protocol = "ssl"
+    instance_port = 8443
+    instance_protocol = "tcp"
+    ssl_certificate_id = "arn:aws:acm:us-east-1:208677296787:certificate/8b528dba-a50d-439b-b948-3f17f02ec1de"
+  }
+
+  listener {
+    lb_port = 443
+    lb_protocol = "ssl"
+    instance_port = 443
+    instance_protocol = "tcp"
+    ssl_certificate_id = "arn:aws:acm:us-east-1:208677296787:certificate/8b528dba-a50d-439b-b948-3f17f02ec1de"
   }
   
   health_check {
@@ -84,7 +95,7 @@ resource "aws_elb" "toonin-backend-elb" {
     unhealthy_threshold = 2
     timeout = 3
     interval = 10
-    target = "HTTP:80/"
+    target = "HTTP:443/"
   }
 }
 
@@ -94,22 +105,8 @@ resource "aws_security_group" "toonin_rules" {
   vpc_id      = "${aws_default_vpc.default.id}"
 
   ingress {
-      from_port   = 8100
-      to_port     = 8100
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-      from_port   = 8100
-      to_port     = 8100
-      protocol    = "udp"
-      cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-      from_port   = 3000
-      to_port     = 3000
+      from_port   = 8443
+      to_port     = 8443
       protocol    = "tcp"
       cidr_blocks = ["0.0.0.0/0"]
   }
@@ -117,6 +114,13 @@ resource "aws_security_group" "toonin_rules" {
   ingress {
       from_port   = 80
       to_port     = 80
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+      from_port   = 443
+      to_port     = 443
       protocol    = "tcp"
       cidr_blocks = ["0.0.0.0/0"]
   }

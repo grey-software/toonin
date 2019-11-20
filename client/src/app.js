@@ -1,6 +1,6 @@
 import io from "socket.io-client";
 
-const ENDPOINT = "http://www.toonin.ml:8100/";
+const ENDPOINT = "https://www.toonin.ml:8443/";
 //const ENDPOINT = "http://138.51.171.230:8100/";
 
 const servers = {
@@ -20,7 +20,7 @@ const SUCCESSFUL = "connected";
 const DISCONNECTED = "disconnected";
 const FAILED = "failed";
 
-var socket = io(ENDPOINT);;
+var socket = io(ENDPOINT, { secure: true });
 
 var incomingStream = null;
 var audioElem;
