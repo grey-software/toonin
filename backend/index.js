@@ -3,12 +3,7 @@ var app = require("express")();
 var cors = require("cors");
 app.use(cors());
 var http = require("http").Server(app);
-const fs = require('fs');
-var https = require('https').createServer({
-  key: fs.readFileSync('server.key'),
-  cert: fs.readFileSync('server.cert')
-}, app);
-var io = require("socket.io")(https);
+var io = require("socket.io")(http);
 var vars = require("./vars");
 
 var rooms = {};
@@ -148,7 +143,3 @@ app.get("/", (req, res) => {
 http.listen(8100, () => {
   console.log("Signalling server started on port 8100");
 });
-
-https.listen(8443, () => {
-  console.log('https listening on 8443');
-})
