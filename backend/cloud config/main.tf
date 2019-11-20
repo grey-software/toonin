@@ -79,7 +79,7 @@ resource "aws_elb" "toonin-backend-elb" {
     lb_protocol = "ssl"
     instance_port = 8443
     instance_protocol = "tcp"
-    ssl_certificate_id = "arn:aws:acm:us-east-1:208677296787:certificate/8b528dba-a50d-439b-b948-3f17f02ec1de"
+    ssl_certificate_id = "${var.cert_arn}"
   }
 
   listener {
@@ -87,7 +87,7 @@ resource "aws_elb" "toonin-backend-elb" {
     lb_protocol = "ssl"
     instance_port = 443
     instance_protocol = "tcp"
-    ssl_certificate_id = "arn:aws:acm:us-east-1:208677296787:certificate/8b528dba-a50d-439b-b948-3f17f02ec1de"
+    ssl_certificate_id = "${var.cert_arn}"
   }
   
   health_check {
