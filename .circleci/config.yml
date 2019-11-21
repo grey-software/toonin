@@ -57,7 +57,7 @@ jobs:
       - run:
           name: Building App
           command: |
-            npm --prefix ./client run build
+            npm --prefix ./client run build-once
   publish-github-release:
     docker:
       - image: cibuilds/github:0.10
@@ -79,9 +79,9 @@ workflows:
       - publish-github-release:
           requires:
             - Build-Extension
-          filters:
-            branches:
-              only: master
+          # filters:
+          #   branches:
+          #     only: master
 notify:
   webhooks:
     - url: https://outlook.office.com/webhook/04e18692-6efb-49e9-9028-139bf917ab16@78aac226-2f03-4b4d-9037-b46d56c55210/CircleCI/30437ffdcb3e400baa80214e81552edc/5b046f8c-07ba-4e2f-a006-653143830ede
