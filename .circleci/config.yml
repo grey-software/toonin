@@ -24,7 +24,7 @@ jobs:
       - run:
           name: Building the extension
           command: |
-             npm --prefix ./extension run build
+             npm --prefix ./extension run build-once
       - run:
           name: Compress extension for storage
           command: zip -r /tmp/workspace/extension.zip ./extension/build
@@ -57,7 +57,7 @@ jobs:
       - run:
           name: Building App
           command: |
-            npm --prefix ./client run build-once
+            npm --prefix ./client run build
   publish-github-release:
     docker:
       - image: cibuilds/github:0.10
