@@ -8,8 +8,8 @@
           <a class="title-text" style="font-size: 130%; font-weight: 300;" ref="title"></a>
       </div>
 
-      <v-btn id="connect-btn" @click="checkstream" rounded>Toonin</v-btn><br><br>
-      <v-btn ref="playBtn" @click="manualPlay" style="margin-left: 2%;" hidden rounded>Play</v-btn>
+      <v-btn id="connect-btn" @click="checkstream" rounded>Toonin</v-btn>
+      <v-btn ref="playBtn" @click="manualPlay" style="margin-left: 2%;" rounded hidden>Play</v-btn>
 
       <div style="float: left; margin-top: 2%; margin-right: 0%;" id='timeline-container'>
         <a id="timelineHeader">Status</a>
