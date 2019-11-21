@@ -69,7 +69,7 @@ jobs:
           name: "Publish Release on GitHub"
           command: |
             VERSION=0.1.0
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -b "Toonin Chrome extension build. To use, unzip and enable developer tools in chrome -> load unpacked -> select unzipped build folder." -delete ${VERSION}  /tmp/workspace/extension.zip
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -b "Toonin Chrome extension build. To use, unzip and enable developer tools in chrome -> load unpacked -> select unzipped extension/build folder." -delete ${VERSION}  /tmp/workspace/extension.zip
 workflows:
   version: 2
   Validate_Build:
