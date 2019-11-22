@@ -41,6 +41,16 @@
           </v-timeline-item>
 
         </v-timeline>
+
+        <br><br><br><br><br>
+        <v-container fluid style="width: 80%; margin-left: -10%;">
+          <v-slider
+            v-model="volume"
+            prepend-icon="mdi-volume-high"
+            @change="updateVolume"
+          ></v-slider>
+        </v-container>
+
       </div>
       
       <div>
@@ -159,7 +169,7 @@
 
 <script>
 
-import {init, logMessage, checkstream, enablePlayback, manualPlay} from './app';
+import {init, logMessage, checkstream, enablePlayback, manualPlay, updateVolume} from './app';
 
 export default {
     name: "App",
@@ -171,13 +181,15 @@ export default {
       rtcConn: null,
       isPlaying: false,
       stream: null,
-      streamTitle: ""
+      streamTitle: "",
+      volume: 100
     }),
     methods: {
       logMessage,
       checkstream,
       enablePlayback,
-      manualPlay
+      manualPlay,
+      updateVolume
     },
     mounted: function() { init(this, this.$refs.audio, this.$refs.playBtn, this.$refs.title); }
 };

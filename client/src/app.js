@@ -23,9 +23,7 @@ const FAILED = "failed";
 var socket = io(ENDPOINT, { secure: true });
 
 var incomingStream = null;
-var audioElem;
-var playBtn;
-var titleTag;
+var audioElem, playBtn, titleTag;
 var state = null;
 
 /**
@@ -72,6 +70,8 @@ function updateState(newState) {
 }
 
 export function enablePlayback() { this.$refs.audio.muted = false; }
+
+export function updateVolume() { audioElem.volume = state.volume / 100; }
 
 /**
  * callback for <v-btn>.onclick for manual audio playback
@@ -216,6 +216,7 @@ function attachRTCliteners(rtcConn) {
 
         logMessage('track added');
         incomingStream = new MediaStream([event.track]);
+        
         var _iOSDevice = !!navigator.platform.match(/iPhone|iPod|iPad|Macintosh|MacIntel/);
         if(_iOSDevice) {
             playBtn.$refs.link.hidden = false;
