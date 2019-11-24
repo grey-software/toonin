@@ -4,11 +4,13 @@
       <v-text-field style="color: white;" v-model="room" :autofocus="true" placeholder="Room Key" 
       label="Connect" outlined rounded @keyup.enter="checkstream"/>
 
-      <img src='./icon.png' style="width: 8%; float: right; margin-right: 4%; margin-top: -7%;"/>
+      <img src='./icon.png' id="logo" style="width: 8%; float: right; margin-right: 4%; margin-top: -7%;"/>
 
       <v-btn id="connect-btn" @click="checkstream" rounded>Toonin</v-btn>
       <v-btn ref="playBtn" @click="manualPlay" style="margin-left: 2%;" rounded hidden>Play</v-btn>
-      <v-btn ref="disconnectBtn" @click="disconnectStream" style="margin-left: 2%;" rounded hidden>Disconnect</v-btn>
+      <v-btn id="disconnect-btn" ref="disconnectBtn" @click="disconnectStream" style="margin-left: 2%;" rounded hidden>
+        Disconnect
+      </v-btn>
 
       <div style="float: left; margin-top: 5%; margin-right: 0%;" id='timeline-container'>
 
@@ -48,10 +50,9 @@
         <audio ref="audio"/>
       </div>
 
-      <!-- <img src='./icon.png' id="logo"/> -->
       <v-bottom-navigation id="bottomBar">
         <v-icon style="margin-left: 2%; margin-right: 0%; color: white;">mdi-volume-high</v-icon>
-        <v-container fluid style="width: 20%; margin-left: -1%;">
+        <v-container fluid id="volumeContainer" style="width: 20%; margin-left: -1%;">
           <v-slider
             v-model="volume"
             color="#E3F2FD"
@@ -61,7 +62,8 @@
         </v-container>
 
         <div class="title-container">
-          <a class="title-text" style="font-size: 130%; font-weight: 300; color: white;" ref="title"></a>
+          <a class="title-text" style="font-size: 130%; font-weight: 300; color: white; cursor: default" ref="title">
+          </a>
         </div>
 
       </v-bottom-navigation>
@@ -76,12 +78,12 @@
 
     div.v-text-field {
       width: 45%;
+      margin-right: 0%;
     }
 
     img#logo {
-      height: 20%; 
-      margin-left: 20.5%; 
-      margin-top: 10%;
+      width: 30% !important;
+      margin-top: -20% !important;
     }
 
     div#timeline-container {
@@ -90,11 +92,10 @@
 
     div.title-container {
       padding: 5%; 
-      float: right; 
-      margin-top: -23%; 
-      margin-left: 5%;
+      margin-top: -2%; 
+      margin-left: 3%;
       width: 50%;
-      margin-right: 2%;
+      margin-right: 4%;
       overflow: hidden;
       white-space: nowrap;
     }
@@ -103,6 +104,20 @@
       display: inline-block;
       padding-left: 100%;
       animation: title-text 15s linear infinite;
+    }
+
+    #connect-btn {
+      margin-left: 2% !important;
+    }
+
+    #disconnect-btn {
+      visibility: hidden !important;
+    }
+
+    #volumeContainer {
+      width: 38% !important;
+      margin-left: -3% !important;
+      margin-right: 0%;
     }
   }
 
@@ -161,12 +176,6 @@
 
   #connect-btn {
     margin-left: -23%;
-  }
-
-  #logo {
-    height: 35%; 
-    margin-left: 15%; 
-    margin-top: 6%;
   }
 
   .statusCard {

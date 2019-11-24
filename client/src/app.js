@@ -1,7 +1,6 @@
 import io from "socket.io-client";
 
 const ENDPOINT = "https://www.toonin.ml:8443/";
-//const ENDPOINT = "http://138.51.171.230:8100/";
 
 const servers = {
     iceServers: [
@@ -74,6 +73,10 @@ export function enablePlayback() { this.$refs.audio.muted = false; }
 
 export function updateVolume() { audioElem.volume = state.volume / 100; }
 
+/**
+ * Callback for disconnect button to disconnect from the current stream.
+ * Resets the state of the app.
+ */
 export function disconnectStream() {
     socket.emit('logoff', { from: socket.id, to: state.room });
     state.rtcConn.close();
@@ -88,6 +91,8 @@ export function disconnectStream() {
         streamTitle: "",
         isPlaying: false
     });
+
+    titleTag.innerText = state.streamTitle;
 }
 
 /**
@@ -267,8 +272,7 @@ function attachRTCliteners(rtcConn) {
             audioElem.play().catch = (err) => { playBtn.$refs.link.hidden = false; }
         }
 
-        disconnectBtn.$refs.link.hidden = true;
-
+        disconnectBtn.$refs.link.hidden = false;
     }
 }
 
