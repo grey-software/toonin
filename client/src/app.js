@@ -23,7 +23,7 @@ const FAILED = "failed";
 var socket = io(ENDPOINT, { secure: true });
 
 var incomingStream = null;
-var audioElem, playBtn, titleTag;
+var audioElem, playBtn, titleTag, disconnectBtn;
 var state = null;
 
 /**
@@ -32,11 +32,12 @@ var state = null;
  * @param {HTMLAudioElement} audioElement reference to <audio> tag on page for playback
  * @param {any} playRef <v-btn> for manual audio playback by the user, revealed when auto playback is not possible
  */
-export function init(vueDataRef, audioElement, playRef, titleRef) {
+export function init(vueDataRef, audioElement, playRef, titleRef, disconnectRef) {
     playBtn = playRef;
     audioElem = audioElement;
     titleTag = titleRef;
     state = vueDataRef;
+    disconnectBtn = disconnectRef;
     // bind window close event to handler to notify backend of client
     // disconnection
     window.onbeforeunload = (event) => { onCloseHandler(); }
@@ -73,6 +74,22 @@ export function enablePlayback() { this.$refs.audio.muted = false; }
 
 export function updateVolume() { audioElem.volume = state.volume / 100; }
 
+export function disconnectStream() {
+    socket.emit('logoff', { from: socket.id, to: state.room });
+    state.rtcConn.close();
+    audioElem.srcObject = null;
+    incomingStream = null;
+    disconnectBtn.$refs.link.hidden = true;
+    updateState({
+        established: false,
+        room: "",
+        roomFound: false,
+        peerID: "",
+        streamTitle: "",
+        isPlaying: false
+    });
+}
+
 /**
  * callback for <v-btn>.onclick for manual audio playback
  */
@@ -81,6 +98,7 @@ export function manualPlay() {
     audioElem.srcObject = incomingStream;
     audioElem.play();
     updateState({isPlaying: audioElem.srcObject.active });
+    disconnectBtn.$refs.link.hidden = false;
 }
 
 /**
@@ -143,7 +161,7 @@ function onDataChannelMsg(messageEvent) {
         updateState({ streamTitle: mediaDescription.title });
 
         if(state.streamTitle.length > 0) {
-            titleTag.innerText = 'Playing: ' + state.streamTitle;
+            titleTag.innerText = state.streamTitle;
             if(state.streamTitle.length <= 41) {
                 titleTag.classList.remove('title-text');
                 titleTag.classList.add('title-text-no-animation');
@@ -182,8 +200,15 @@ function attachRTCliteners(rtcConn) {
         rtcConn.connectionState == FAILED) {
             updateState({ 
                 established: false,
-                isPlaying: false
+                isPlaying: false,
+                streamTitle: ""
             });
+
+            titleTag.classList.remove('title-text');
+            titleTag.classList.add('title-text-no-animation');
+            titleTag.innerText = "";
+
+            disconnectBtn.$refs.link.hidden = true;
         }
     }
 
@@ -197,6 +222,7 @@ function attachRTCliteners(rtcConn) {
     rtcConn.onaddstream = event => {
         logMessage("Stream added");
         incomingStream = event.stream;
+        disconnectBtn.$refs.link.hidden = false;
         audioElem.oncanplay = () => {
             audioElem.srcObject = incomingStream;
             audioElem.onplay = () => {
@@ -240,6 +266,8 @@ function attachRTCliteners(rtcConn) {
 
             audioElem.play().catch = (err) => { playBtn.$refs.link.hidden = false; }
         }
+
+        disconnectBtn.$refs.link.hidden = true;
 
     }
 }

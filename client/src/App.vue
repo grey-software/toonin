@@ -8,6 +8,7 @@
 
       <v-btn id="connect-btn" @click="checkstream" rounded>Toonin</v-btn>
       <v-btn ref="playBtn" @click="manualPlay" style="margin-left: 2%;" rounded hidden>Play</v-btn>
+      <v-btn ref="disconnectBtn" @click="disconnectStream" style="margin-left: 2%;" rounded hidden>Disconnect</v-btn>
 
       <div style="float: left; margin-top: 5%; margin-right: 0%;" id='timeline-container'>
 
@@ -41,14 +42,6 @@
 
         </v-timeline>
 
-        <!-- <v-container fluid style="width: 80%;">
-          <v-slider
-            v-model="volume"
-            prepend-icon="mdi-volume-high"
-            @change="updateVolume"
-          ></v-slider>
-        </v-container> -->
-
       </div>
       
       <div>
@@ -57,12 +50,13 @@
 
       <!-- <img src='./icon.png' id="logo"/> -->
       <v-bottom-navigation id="bottomBar">
-        <v-container fluid style="width: 20%; margin-left: 0%;">
+        <v-icon style="margin-left: 2%; margin-right: 0%; color: white;">mdi-volume-high</v-icon>
+        <v-container fluid style="width: 20%; margin-left: -1%;">
           <v-slider
             v-model="volume"
             color="#E3F2FD"
-            prepend-icon="mdi-volume-high"
             @change="updateVolume"
+            style="margin-left: 5%;"
           ></v-slider>
         </v-container>
 
@@ -143,6 +137,7 @@
     overflow: hidden;
     white-space: nowrap;
     margin-right: 30%;
+    text-align: center;
   }
 
   .title-text {
@@ -189,7 +184,7 @@
 
 <script>
 
-import {init, logMessage, checkstream, enablePlayback, manualPlay, updateVolume} from './app';
+import {init, logMessage, checkstream, enablePlayback, manualPlay, updateVolume, disconnectStream} from './app';
 
 export default {
     name: "App",
@@ -209,8 +204,9 @@ export default {
       checkstream,
       enablePlayback,
       manualPlay,
-      updateVolume
+      updateVolume,
+      disconnectStream
     },
-    mounted: function() { init(this, this.$refs.audio, this.$refs.playBtn, this.$refs.title); }
+    mounted: function() { init(this, this.$refs.audio, this.$refs.playBtn, this.$refs.title, this.$refs.disconnectBtn); }
 };
 </script>
