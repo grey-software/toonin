@@ -1,15 +1,15 @@
 import Vue from 'vue';
+import App from './App.vue';
+
+new Vue({
+  el: '#app',
+  render: h => h(App)
+});
 
 const port = chrome.runtime.connect({
     name: "toonin-extension"
 });
 
-var app = new Vue({
-  el: '#app',
-  data: {
-    message: 'Hello Vue!'
-  }
-})
 const shareButton = document.getElementById("btnShare");
 const stopSharingButton = document.getElementById("btnShareStop");
 const sessionIDText = document.getElementById("roomText");
