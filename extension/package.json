@@ -1,8 +1,7 @@
 {
   "scripts": {
-    "build": "bash build_script.sh",
-    "build-once": "bash build_once.sh",
-    "develop": "webpack --config webpack.config.js"
+    "develop": "webpack --config webpack.config.js ",
+    "develop:watch": "webpack --config webpack.config.js --watch"
   },
   "dependencies": {
     "css-loader": "^3.2.0",
