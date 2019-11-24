@@ -1,7 +1,8 @@
 {
   "scripts": {
     "build": "bash build_script.sh",
-    "build-once": "bash build_once.sh"
+    "build-once": "bash build_once.sh",
+    "develop": "webpack --config webpack.config.js"
   },
   "dependencies": {
     "media-recorder-stream": "^2.1.1",

@@ -1,3 +1,5 @@
+import Vue from 'vue';
+
 const port = chrome.runtime.connect({
     name: "toonin-extension"
 });
