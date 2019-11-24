@@ -23,10 +23,6 @@ module.exports = {
             }
         ]
     },
-    output: {
-        filename: "[name].js",
-        path: path.resolve(__dirname, 'dist')
-    },
     entry: {
         popup: './src/popup.js',
         background: './src/js/background/index.js',
@@ -36,5 +32,9 @@ module.exports = {
         new CopyWebpackPlugin([
             { from: 'src' }
         ])
-    ]
+    ],
+    output: {
+        filename: "[name].js",
+        path: path.resolve(__dirname, 'dist')
+    },
 }
