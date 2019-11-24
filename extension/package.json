@@ -1,17 +1,23 @@
 {
   "scripts": {
-    "build": "bash build_script.sh",
-    "build-once": "bash build_once.sh"
+    "develop": "webpack --config webpack.config.js ",
+    "develop:watch": "webpack --config webpack.config.js --watch"
   },
   "dependencies": {
+    "css-loader": "^3.2.0",
     "media-recorder-stream": "^2.1.1",
-    "socket.io-client": "^2.1.1"
+    "socket.io-client": "^2.1.1",
+    "style-loader": "^1.0.0",
+    "vue": "^2.6.10",
+    "vue-loader": "^15.7.2",
+    "vue-template-compiler": "^2.6.10"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.4",
     "babel-preset-env": "^1.7.0",
     "babel-preset-es2015": "^6.24.1",
+    "copy-webpack-plugin": "^5.0.5",
     "webpack": "^4.8.3",
     "webpack-cli": "^3.3.10"
   }

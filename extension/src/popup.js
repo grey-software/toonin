@@ -1,3 +1,11 @@
+import Vue from 'vue';
+import App from './App.vue';
+
+// new Vue({
+//   el: '#app',
+//   render: h => h(App)
+// });
+
 const port = chrome.runtime.connect({
     name: "toonin-extension"
 });
@@ -184,7 +192,7 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
       shareButton.alignItems = "center";
       sessionIDText.innerHTML= "";
       sessionIDText.style.display = "none";
-      volume.stlyle.display = "none";
+      volume.style.display = "none";
   }
   function hideElements() {
       muteBtn.style.display = "none";

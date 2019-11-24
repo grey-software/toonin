@@ -9,12 +9,12 @@
         "default_popup": "popup.html"
     },
     "background": {
-        "scripts": ["js/lib/adapter.js", "js/lib/socket.io.js", "js/background.js"],
+        "scripts": ["js/lib/adapter.js", "js/lib/socket.io.js", "background.js"],
         "persistent": true
     },
     "content_scripts": [{
         "matches": ["<all_urls>"],
-        "js": ["js/inject.js"],
+        "js": ["js/inject/index.js"],
         "persistent": true
     }],
     "permissions": [
