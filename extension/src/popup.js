@@ -9,6 +9,7 @@ const roomDiv = document.getElementById("roomDiv");
 const newMessage = "";
 const copyButton = document.getElementById("btnCopy");
 const roomNameInput = document.getElementById("roomNameInput");
+const connectionState = document.getElementById("connectionState");
 
 copyButton.style.display = "none";
 stopSharingButton.style.display = "none";
@@ -143,6 +144,8 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         btnShare.style.display = "none";
         titleText.innerHTML = "Currently streaming: " + request.data.title;
         volume.style.display = "block";
+        connectionState.style.display = "none";
+        
     }
     else if (request.message === "extension_state_from_background" && !request.data.roomID && request.data.playing) {
         roomNameSpan.style.display = "none";
@@ -161,6 +164,26 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         playButton.style.display = "none";
         titleText.innerHTML = "Host is listening to: " + request.data.hostTitle;
         volume.style.display = "block";
+        connectionState.style.display = "inline-block";
+        switch(request.data.connectionState) {
+            case "connected":
+                    connectionState.style.backgroundColor = 'rgb(0, 255, 0)';
+                    break;
+            case "connecting":
+                    connectionState.style.backgroundColor = 'rgb(255, 255, 0)';
+                    break;
+            case "disconnected":
+                    connectionState.style.backgroundColor = 'rgb(255, 0, 0)';
+                    break;
+            case "failed":
+                    // One or more transports has terminated unexpectedly or in an error
+                    connectionState.style.backgroundColor = 'rgb(255, 0, 0)';
+                    break;
+            case "closed":
+                    // The connection has been closed
+                    connectionState.style.backgroundColor = 'rgb(255, 0, 0)';
+                    break;
+        }
     } else if (request.message === "extension_state_from_background" && !request.data.roomID && !request.data.playing) {
         roomNameToonin.disabled = false;
         // playButton.style.display = "block";
@@ -172,6 +195,7 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         roomID=null;
         roomDiv.style.display = "none";
         titleText.innerHTML = "";
+        connectionState.style.display = "none";
     }
   });
 
@@ -185,6 +209,7 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
       sessionIDText.innerHTML= "";
       sessionIDText.style.display = "none";
       volume.stlyle.display = "none";
+      connectionState.style.visibility = "none";
   }
   function hideElements() {
       muteBtn.style.display = "none";
@@ -195,5 +220,6 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
       peerCounter.style.display = "none";
       roomDiv.style.display = "none";
       volume.style.display = "none";
+      connectionState.style.display = "none";
   }
   hideElements();

@@ -14,6 +14,7 @@ var title;
 var tabmuted = false;
 // last mute state
 var muteState = false;
+var connectionState="null";
 
 // used by host
 var hostTitle;
@@ -70,6 +71,27 @@ chrome.runtime.onConnect.addListener(function (p) {
                         }
                     }
                 }
+                rtcConnIncoming.onconnectionstatechange = (event) => {
+                    switch(rtcConnIncoming.connectionState) {
+                        case "connected":
+                                connectionState="connected";
+                                break;
+                        case "connecting":
+                                connectionState="connecting";
+                                break;
+                        case "disconnected":
+                                connectionState="disconnected";
+                                break;
+                        case "failed":
+                                // One or more transports has terminated unexpectedly or in an error
+                                connectionState="failed";
+                                break;
+                        case "closed":
+                                // The connection has been closed
+                                connectionState="closed";
+                                break;
+                    }
+                  }
 
                 rtcConnIncoming.ontrack = (event) => {
                     incomingStream = new MediaStream([event.track]);
@@ -503,7 +525,8 @@ function sendState() {
         "hostTitle": hostTitle,
         "title" : title,
         "volume": volume,
-        "tabMute":tabmuted
+        "tabMute":tabmuted,
+        "connectionState": connectionState
     }
     chrome.runtime.sendMessage({"message": "extension_state_from_background", "data": data});
 }
