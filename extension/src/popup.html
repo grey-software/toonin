@@ -7,7 +7,8 @@
             crossorigin="anonymous">
         <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     </head>
-    <body style="height: 0;">
+    <body style="height: 300px;">
+      <div id="app"></div>
         <!-- Square card -->
 <style>
         .demo-card-square.mdl-card {
@@ -111,6 +112,13 @@
         .slider.round:before {
             border-radius: 50%;
         }
+        .dot {
+            height: 15px;
+            width: 15px;
+            background-color: rgb(255, 0, 0);
+            border-radius: 50%;
+            display: none;
+        }
 
     </style>
         <div class="demo-card-square mdl-card mdl-shadow--2dp" style="height: 450px;">
@@ -151,6 +159,7 @@
                     </p>
             </span>
             <span class="flexItem" id="roomDiv">
+                    <span id="connectionState" class="dot"></span>
                 <p class="" style="" id="peerCounter">
                 </p>
             </span>
