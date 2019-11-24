@@ -258,7 +258,8 @@ function setSocketListeners(socket) {
         incomingStream = null;
         audioElement.srcObject = null;
         play = false;
-        room=null;
+        room = null;
+        rtcConnIncoming = null;
         sendState();
     });
 

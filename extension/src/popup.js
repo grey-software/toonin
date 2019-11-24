@@ -102,9 +102,7 @@ playButton.onclick = () => {
         type: "play",
         roomName: roomNameToonin.value
     });
-    connectSpan.style.display = "none";
-    playButton.style.display = "flex;"
-    stopToonin.style.display = "flex";
+    roomNameToonin.value="";
 }
 
 stopToonin.onclick = () => {
