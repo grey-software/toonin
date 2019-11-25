@@ -1,17 +1,111 @@
 import Vue from 'vue';
 import vuetify from './plugins/vuetify' // path to vuetify export
 import App from './App.vue';
+import Vuex from 'vuex'
 
-const port = chrome.runtime.connect({
-    name: "toonin-extension"
+Vue.use(Vuex)
+
+chrome.tabs.query({
+    active: true,
+    currentWindow: true
+}, function (tabs) {
+    var activeTab = tabs[0];
+    chrome.tabs.sendMessage(activeTab.id, {"message": "clicked_extension"});
 });
+
+function makeid(length) {
+    var result           = '';
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+       result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+ }
+ 
+const port = chrome.runtime.connect({name: "toonin-extension"});
+const VALID_ROOM_REGEX = /^[a-zA-Z0-9_-]{6,16}$/
+const ROOM_NAME_INVALID = "Your room name is invalid"
+
+export const States = {
+    INITIAL: "INITIAL",
+    SHARING: "SHARING"
+}
+
+const store = new Vuex.Store({
+    state: {
+        roomName: '',
+        roomNameValid: false,
+        roomNameInputErrorMessages: [],
+        state: States.INITIAL
+    },
+    mutations: {
+        setRoomName(state, roomName) {
+            console.log(roomName)
+            state.roomName = roomName
+            const roomNameValid = state.roomName.match(VALID_ROOM_REGEX)
+            if (roomNameValid) {
+                state.roomNameInputErrorMessages = []
+                state.roomNameValid = true
+            } else {
+                state.roomNameValid = false
+                state.roomNameInputErrorMessages.push(ROOM_NAME_INVALID)
+            }
+        },
+        setRoomNameInputErrorMessage(state, errorMessage) {
+            state.roomNameInputErrorMessages = []
+            state.roomNameInputErrorMessages.push(errorMessage)
+        },
+        setSharing(state, isSharing) {
+            if (isSharing) {
+                state.state = SHARING;
+            } else {
+                state.state = INITIAL;
+            }
+        }
+    },
+    actions: {
+        startShare(context) {
+            const roomName = context.state.roomName
+            console.log(`startShare(${roomName})`)
+            port.postMessage({type: "init", roomName: roomName});
+        },
+        roomCreated(context) {
+            context.commit("setSharing", true)
+        },
+        roomCreationFailed(context) {
+            context.commit("setRoomNameInputErrorMessage", "A room with that name already exists")
+        },
+        randomRoomName(context) {
+            const roomName = makeid(8)
+            console.log(roomName)
+            context.commit("setRoomName", roomName)
+        }
+    }
+})
+
+port.onMessage.addListener((msg) => {
+    if (msg.type === "room creation fail") {
+        store.dispatch("roomCreationFailed")
+    }
+});
+
 
 const app = new Vue({
-  el: '#app',
-  vuetify,
-  render: h => h(App)
+    el: '#app',
+    vuetify,
+    store,
+    render: h => h(App)
 });
 
+
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+    if (request.message === "extension_state_from_background" && request.data.roomID) {
+        store.dispatch("roomCreated")
+    } else if (request.message === "extension_state_from_background" && ! request.data.roomID) {
+        store.commit(setSharing, false)
+    }
+});
 
 
 // const shareButton = document.getElementById("btnShare");
@@ -71,22 +165,6 @@ const app = new Vue({
 
 // var roomID;
 
-// port.onMessage.addListener((msg) => {
-//     console.log(msg);
-//     if (msg.type == "audio") {
-//         if (msg.status == "ok") localAudio.src = msg.url;
-//     } else if (msg.type == "roomID") {
-//         roomID = msg.roomID;
-
-//         Text.innerHTML = "Your Toonin ID is: \n" + roomID;
-//         sessionIDText.style.display = "block";
-//     }
-//     else if(msg.type === "room creation fail") {
-//         sessionIDText.innerHTML = "Room Creation Failed: \n" + msg.reason;
-//         roomDiv.style.display ="block";
-//         console.log("failed");
-//     }
-// });
 
 // copyButton.onclick = () => {
 //     var str = roomID;
@@ -105,7 +183,6 @@ const app = new Vue({
 //     // Remove temporary element
 //     document.body.removeChild(el);
 // };
-
 
 
 // playButton.onclick = () => {
@@ -127,12 +204,8 @@ const app = new Vue({
 //     titleText.innerHTML = "";
 // }
 
-// chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-//     var activeTab = tabs[0];
-//     chrome.tabs.sendMessage(activeTab.id, {"message": "clicked_extension"});
-// });
 
-//   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+// chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 //     if (request.message === "extension_state_from_background" && request.data.roomID) {
 //         roomNameSpan.style.display = "none";
 //         shareButton.style.display = "none";
@@ -185,9 +258,9 @@ const app = new Vue({
 //         roomDiv.style.display = "none";
 //         titleText.innerHTML = "";
 //     }
-//   });
+// });
 
-//   function homePage() {
+// function homePage() {
 //       roomNameSpan.style.display = "flex";
 //       shareButton.style.display = "flex";
 //       roomDiv.style.display = "flex";
@@ -197,8 +270,8 @@ const app = new Vue({
 //       sessionIDText.innerHTML= "";
 //       sessionIDText.style.display = "none";
 //       volume.style.display = "none";
-//   }
-//   function hideElements() {
+// }
+// function hideElements() {
 //       muteBtn.style.display = "none";
 //       stopToonin.style.display = "none";
 //       muteSpan.style.display = "none";
@@ -207,5 +280,5 @@ const app = new Vue({
 //       peerCounter.style.display = "none";
 //       roomDiv.style.display = "none";
 //       volume.style.display = "none";
-//   }
-//   hideElements();
+// }
+// hideElements();

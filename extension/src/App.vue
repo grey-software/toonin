@@ -5,8 +5,27 @@
       <span class="title-text">Toonin</span>
     </div>
     <div class="body-container">
-      <v-text-field label="Name your room" color="primary" outlined rounded autofocus></v-text-field>
-      <v-btn class="btn-share" height="42" outlined color="primary" rounded>
+      <v-text-field
+        :value="roomName"
+        @change="setRoomName"
+        append-icon="mdi-cached"
+        @click:append="randomRoomName"
+        :error-messages="roomNameInputErrorMessages"
+        label="Name your room"
+        color="primary"
+        outlined
+        rounded
+        autofocus
+      ></v-text-field>
+      <v-btn
+        :disabled="!roomNameValid"
+        @click="startShare"
+        class="btn-share"
+        height="42"
+        outlined
+        color="primary"
+        rounded
+      >
         <v-icon left>$vuetify.icons.toonin</v-icon>Share
       </v-btn>
     </div>
@@ -14,11 +33,25 @@
 </template>
 
 <script>
+import { mapState, mapMutations, mapActions } from "vuex";
+
 export default {
   data() {
     return {
       message: "My new tab page"
     };
+  },
+  computed: {
+    ...mapState(["roomNameInputErrorMessages", "roomNameValid", "roomName"])
+  },
+  methods: {
+    ...mapActions([
+      "startShare",
+      "randomRoomName" //also supports payload `this.nameOfAction(amount)`
+    ]),
+    ...mapMutations([
+      "setRoomName" //also supports payload `this.nameOfMutation(amount)`
+    ])
   }
 };
 </script>
