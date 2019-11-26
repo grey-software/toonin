@@ -4,7 +4,7 @@
       <img class="title-icon" src="icon.png" />
       <span class="title-text">Toonin</span>
     </div>
-    <div class="body-container">
+    <div class="body-container" v-if="state === 'INITIAL'">
       <v-text-field
         :value="roomName"
         @change="setRoomName"
@@ -29,6 +29,30 @@
         <v-icon left>$vuetify.icons.toonin</v-icon>Share
       </v-btn>
     </div>
+
+    <div class="body-container" v-if="state === 'SHARING'">
+      <v-text-field
+        :value="roomName"
+        :readonly="true"
+        @click:append="copyIdToClipboard"
+        append-icon="mdi-content-copy"
+        color="primary"
+        label="Your Toonin ID"
+        id="id-display-area"
+        outlined
+        rounded
+      ></v-text-field>
+      <v-btn
+        @click="stopSharing"
+        class="btn-share"
+        height="42"
+        outlined
+        color="primary"
+        rounded
+      >
+        <v-icon left>$vuetify.icons.toonin</v-icon>Stop Sharing
+      </v-btn>
+    </div>
   </v-app>
 </template>
 
@@ -42,12 +66,14 @@ export default {
     };
   },
   computed: {
-    ...mapState(["roomNameInputErrorMessages", "roomNameValid", "roomName"])
+    ...mapState(["roomNameInputErrorMessages", "roomNameValid", "roomName", "state"])
   },
   methods: {
     ...mapActions([
       "startShare",
-      "randomRoomName" //also supports payload `this.nameOfAction(amount)`
+      "randomRoomName", //also supports payload `this.nameOfAction(amount)`
+      "copyIdToClipboard", 
+      "stopSharing",
     ]),
     ...mapMutations([
       "setRoomName" //also supports payload `this.nameOfMutation(amount)`

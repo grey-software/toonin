@@ -10,7 +10,7 @@ chrome.tabs.query({
     currentWindow: true
 }, function (tabs) {
     var activeTab = tabs[0];
-    chrome.tabs.sendMessage(activeTab.id, {"message": "clicked_extension"});
+    //chrome.tabs.sendMessage(activeTab.id, {"message": "clicked_extension"});
 });
 
 function makeid(length) {
@@ -41,52 +41,68 @@ const store = new Vuex.Store({
     },
     mutations: {
         setRoomName(state, roomName) {
-            console.log(roomName)
-            state.roomName = roomName
-            const roomNameValid = state.roomName.match(VALID_ROOM_REGEX)
+            state.roomName = roomName;
+            const roomNameValid = state.roomName.match(VALID_ROOM_REGEX);
             if (roomNameValid) {
-                state.roomNameInputErrorMessages = []
-                state.roomNameValid = true
+                state.roomNameInputErrorMessages = [];
+                state.roomNameValid = true;
             } else {
-                state.roomNameValid = false
-                state.roomNameInputErrorMessages.push(ROOM_NAME_INVALID)
+                state.roomNameValid = false;
+                state.roomNameInputErrorMessages.push(ROOM_NAME_INVALID);
             }
         },
         setRoomNameInputErrorMessage(state, errorMessage) {
-            state.roomNameInputErrorMessages = []
-            state.roomNameInputErrorMessages.push(errorMessage)
+            state.roomNameInputErrorMessages = [];
+            state.roomNameInputErrorMessages.push(errorMessage);
         },
         setSharing(state, isSharing) {
             if (isSharing) {
-                state.state = SHARING;
+                state.state = States.SHARING;
             } else {
-                state.state = INITIAL;
+                state.state = States.INITIAL;
             }
+        },
+        resetState(state) {
+            state.roomName = '';
+            state.roomNameValid = false;
+            state.roomNameInputErrorMessages = [];
         }
     },
     actions: {
         startShare(context) {
-            const roomName = context.state.roomName
-            console.log(`startShare(${roomName})`)
+            const roomName = context.state.roomName;
+            console.log(`startShare(${roomName})`);
             port.postMessage({type: "init", roomName: roomName});
         },
         roomCreated(context) {
-            context.commit("setSharing", true)
+            context.commit("setSharing", true);
         },
         roomCreationFailed(context) {
-            context.commit("setRoomNameInputErrorMessage", "A room with that name already exists")
+            context.commit("setRoomNameInputErrorMessage", "A room with that name already exists");
         },
         randomRoomName(context) {
-            const roomName = makeid(8)
-            console.log(roomName)
-            context.commit("setRoomName", roomName)
+            const roomName = makeid(8);
+            console.log(roomName);
+            context.commit("setRoomName", roomName);
+        },
+        copyIdToClipboard(context) {
+            console.log('copy called');
+            var textField = document.querySelector("#id-display-area");
+            textField.setAttribute("type", "text");
+            textField.select();
+            document.execCommand('copy');
+        },
+        stopSharing(context) {
+            port.postMessage({ type: "stopSharing" });
+            context.commit("setSharing", false);
+            context.commit("resetState");
         }
     }
 })
 
 port.onMessage.addListener((msg) => {
     if (msg.type === "room creation fail") {
-        store.dispatch("roomCreationFailed")
+        store.dispatch("roomCreationFailed");
     }
 });
 
@@ -101,9 +117,9 @@ const app = new Vue({
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (request.message === "extension_state_from_background" && request.data.roomID) {
-        store.dispatch("roomCreated")
+        store.dispatch("roomCreated");
     } else if (request.message === "extension_state_from_background" && ! request.data.roomID) {
-        store.commit(setSharing, false)
+        store.commit("setSharing", false);
     }
 });
 
