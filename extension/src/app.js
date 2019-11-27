@@ -3,15 +3,7 @@ import vuetify from './plugins/vuetify' // path to vuetify export
 import App from './App.vue';
 import Vuex from 'vuex'
 
-Vue.use(Vuex)
-
-chrome.tabs.query({
-    active: true,
-    currentWindow: true
-}, function (tabs) {
-    var activeTab = tabs[0];
-    //chrome.tabs.sendMessage(activeTab.id, {"message": "clicked_extension"});
-});
+Vue.use(Vuex);
 
 function makeid(length) {
     var result           = '';
@@ -24,11 +16,11 @@ function makeid(length) {
  }
  
 const port = chrome.runtime.connect({name: "toonin-extension"});
-const VALID_ROOM_REGEX = /^[a-zA-Z0-9_-]{6,16}$/
+const VALID_ROOM_REGEX = /^[a-zA-Z0-9_-]{4,16}$/
 const ROOM_NAME_INVALID = "Your room name is invalid"
 
 export const States = {
-    INITIAL: "INITIAL",
+    HOME: "HOME",
     SHARING: "SHARING"
 }
 
@@ -36,8 +28,12 @@ const store = new Vuex.Store({
     state: {
         roomName: '',
         roomNameValid: false,
-        roomNameInputErrorMessages: [],
-        state: States.INITIAL
+        roomNameInputErrorMessages:  [],
+        state: States.HOME,
+        peerCount: 0,
+        tabId: '',
+        muted: false,
+        volume: 1
     },
     mutations: {
         setRoomName(state, roomName) {
@@ -55,17 +51,23 @@ const store = new Vuex.Store({
             state.roomNameInputErrorMessages = [];
             state.roomNameInputErrorMessages.push(errorMessage);
         },
-        setSharing(state, isSharing) {
-            if (isSharing) {
-                state.state = States.SHARING;
-            } else {
-                state.state = States.INITIAL;
+        setState(state, appState) {
+
+            var stateKeys = Object.keys(appState);
+            for(var i = 0; i < stateKeys.length; i++) {
+                if(stateKeys[i] in state) {
+                    state[stateKeys[i]] = appState[stateKeys[i]];
+                }
             }
+
         },
         resetState(state) {
             state.roomName = '';
             state.roomNameValid = false;
             state.roomNameInputErrorMessages = [];
+        },
+        saveState(state) {
+            port.postMessage({ type: 'stateUpdate', state: state});
         }
     },
     actions: {
@@ -73,20 +75,22 @@ const store = new Vuex.Store({
             const roomName = context.state.roomName;
             console.log(`startShare(${roomName})`);
             port.postMessage({type: "init", roomName: roomName});
+            context.commit("saveState");
         },
         roomCreated(context) {
-            context.commit("setSharing", true);
+            context.commit("setState", {state : States.SHARING});
+            context.commit("saveState");
         },
         roomCreationFailed(context) {
             context.commit("setRoomNameInputErrorMessage", "A room with that name already exists");
+            context.commit("saveState");
         },
         randomRoomName(context) {
             const roomName = makeid(8);
-            console.log(roomName);
             context.commit("setRoomName", roomName);
+            context.commit("saveState");
         },
         copyIdToClipboard(context) {
-            console.log('copy called');
             var textField = document.querySelector("#id-display-area");
             textField.setAttribute("type", "text");
             textField.select();
@@ -94,8 +98,13 @@ const store = new Vuex.Store({
         },
         stopSharing(context) {
             port.postMessage({ type: "stopSharing" });
-            context.commit("setSharing", false);
+            context.commit("setState", {state : States.HOME});
             context.commit("resetState");
+            localStorage.removeItem('state');
+        },
+        requestState(context) {
+            console.log('state requested from background');
+            port.postMessage({ type: "requestState"});
         }
     }
 })
@@ -116,13 +125,21 @@ const app = new Vue({
 
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-    if (request.message === "extension_state_from_background" && request.data.roomID) {
+    if (request.message === "extension-state") {
         store.dispatch("roomCreated");
-    } else if (request.message === "extension_state_from_background" && ! request.data.roomID) {
-        store.commit("setSharing", false);
+        store.commit("setState", request.data);
     }
 });
 
+chrome.tabs.query({
+    active: true,
+    currentWindow: true
+}, function (tabs) {
+    // store.dispatch("requestState");
+});
+
+// window.onbeforeunload = function() { this.localStorage.removeItem('state'); }
+// window.onunload = function() { this.localStorage.removeItem('state'); }
 
 // const shareButton = document.getElementById("btnShare");
 // const stopSharingButton = document.getElementById("btnShareStop");

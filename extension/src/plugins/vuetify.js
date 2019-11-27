@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuetify from 'vuetify/lib'
-import TooninIconComponent from '../components/TooninIconComponent.vue'
+import TooninIcon from '../components/TooninIcon.vue'
 
 
 Vue.use(Vuetify)
@@ -13,7 +13,7 @@ const opts = {
     icons: {
         values: {
             toonin: {
-                component: TooninIconComponent, // you can use string here if component is registered globally
+                component: TooninIcon, // you can use string here if component is registered globally
               },
         },
       },

@@ -4,76 +4,45 @@
       <img class="title-icon" src="icon.png" />
       <span class="title-text">Toonin</span>
     </div>
-    <div class="body-container" v-if="state === 'INITIAL'">
-      <v-text-field
-        :value="roomName"
-        @change="setRoomName"
-        append-icon="mdi-cached"
-        @click:append="randomRoomName"
-        :error-messages="roomNameInputErrorMessages"
-        label="Name your room"
-        color="primary"
-        outlined
-        rounded
-        autofocus
-      ></v-text-field>
-      <v-btn
-        :disabled="!roomNameValid"
-        @click="startShare"
-        class="btn-share"
-        height="42"
-        outlined
-        color="primary"
-        rounded
-      >
-        <v-icon left>$vuetify.icons.toonin</v-icon>Share
-      </v-btn>
-    </div>
-
-    <div class="body-container" v-if="state === 'SHARING'">
-      <v-text-field
-        :value="roomName"
-        :readonly="true"
-        @click:append="copyIdToClipboard"
-        append-icon="mdi-content-copy"
-        color="primary"
-        label="Your Toonin ID"
-        id="id-display-area"
-        outlined
-        rounded
-      ></v-text-field>
-      <v-btn
-        @click="stopSharing"
-        class="btn-share"
-        height="42"
-        outlined
-        color="primary"
-        rounded
-      >
-        <v-icon left>$vuetify.icons.toonin</v-icon>Stop Sharing
-      </v-btn>
-    </div>
+    <home-view v-if="state === states.HOME" />
+    <sharing-view v-if="state === states.SHARING" />
   </v-app>
 </template>
 
 <script>
 import { mapState, mapMutations, mapActions } from "vuex";
+import { States } from "./app.js";
+import HomeView from "./HomeView.vue";
+import SharingView from "./SharingView.vue";
 
 export default {
+  components: {
+    HomeView,
+    SharingView
+  },
+  beforeCreate() {
+		this.$store.dispatch('requestState');
+	},
   data() {
     return {
-      message: "My new tab page"
+      message: "My new tab page",
+      states: States
     };
   },
   computed: {
-    ...mapState(["roomNameInputErrorMessages", "roomNameValid", "roomName", "state"])
+    ...mapState([
+      "roomNameInputErrorMessages",
+      "roomNameValid",
+      "roomName",
+      "state"
+    ])
   },
   methods: {
     ...mapActions([
       "startShare",
       "randomRoomName", //also supports payload `this.nameOfAction(amount)`
-      "copyIdToClipboard", 
-      "stopSharing",
+      "copyIdToClipboard",
+      "stopSharing"
     ]),
     ...mapMutations([
       "setRoomName" //also supports payload `this.nameOfMutation(amount)`
