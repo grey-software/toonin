@@ -21,8 +21,8 @@ export default {
     SharingView
   },
   beforeCreate() {
-		this.$store.dispatch('requestState');
-	},
+    this.$store.dispatch("requestState");
+  },
   data() {
     return {
       message: "My new tab page",

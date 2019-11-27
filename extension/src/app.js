@@ -37,6 +37,7 @@ const store = new Vuex.Store({
     },
     mutations: {
         setRoomName(state, roomName) {
+            console.log('setRoomName: ' + roomName)
             state.roomName = roomName;
             const roomNameValid = state.roomName.match(VALID_ROOM_REGEX);
             if (roomNameValid) {

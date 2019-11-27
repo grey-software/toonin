@@ -27,7 +27,7 @@
 </template>
 
 <script>
-import { mapState, mapActions } from "vuex";
+import { mapState, mapActions, mapMutations } from "vuex";
 
 export default {
   name: "home-view",
@@ -35,7 +35,8 @@ export default {
     ...mapState(["roomName", "roomNameValid", "roomNameInputErrorMessages"])
   },
   methods: {
-    ...mapActions(["setRoomName", "randomRoomName", "startShare"])
+    ...mapActions(["randomRoomName", "startShare"]),
+    ...mapMutations(["setRoomName"])
   }
 };
 </script>
