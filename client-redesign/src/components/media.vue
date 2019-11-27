@@ -1,71 +1,66 @@
 <template>
-    <v-card>
-    <v-bottom-nav fixed>
+    <v-card class="mx-auto" max-width="400px">
         <v-toolbar flat height=90>
-        <v-spacer></v-spacer>
-        <div style="padding-left: 50px; padding-top: 1%; width: 20%">
-        <v-slider
-          v-model="volume"
-          prepend-icon="volume_up"
-          label="Volume"
-          @change="updateVolume($event)"
-        ></v-slider>
-        </div>
-        <div style="overflow: hidden; white-space: nowrap;">
-            <v-card-title class="headline" style="animation: title-text 12s linear infinite; display:inline-block">{{streamTitle}}</v-card-title>
-        </div>
-        <div style="padding: 5px; padding-left: 20px;">
-            <v-btn outline fab small color="light-blue" @click="stopTrack">
-                <v-icon>stop</v-icon>
-            </v-btn>
+
+        <div style="width: 75%; padding-top: 2%">
+            <v-slider
+            v-model="volume"
+            prepend-icon="volume_up"
+            label="Volume"
+            @change="volChange"
+            ></v-slider>
         </div>
         <div style="padding: 5px">
-        <v-btn outline fab color="light-blue" @click="playTrack()">
+        <v-btn v-show="playing==false" :disabled="stream? false : true" outlined fab color="light-blue" @click="playTrack()">
             <v-icon large>play_arrow</v-icon>
         </v-btn>
-        </div>
-        <div style="padding: 5px">
-        <v-btn outline fab small color="light-blue" @click="pauseTrack">
-            <v-icon>pause</v-icon>
+         <v-btn v-show="connectedStatus=='connected' && playing==true" outlined fab color="light-blue" @click="pauseTrack()">
+            <v-icon large>pause</v-icon>
         </v-btn>
         </div>
-        <v-spacer></v-spacer>
         </v-toolbar>
-    </v-bottom-nav>
+        <div>
+            <audio :srcObject.prop="playing? stream : null" style="display: none;" preload="auto" autoplay ref="audio" />
+        </div>
     </v-card>
     
 </template>
 
 <script>
-// import { mapFields } from 'vuex-map-fields';
 import { mapState} from 'vuex'
 
 export default {
     name: "PlayerControls",
-    // data: () => ({
-    //     vol: 50
-    // }),
+    data() {
+        return { audio : undefined}
+    },
     methods: {
-        playTrack() {
-            this.$emit('playtrack')
-        },
         pauseTrack() {
-            this.$emit('pausetrack')
+            this.$store.dispatch("UPDATE_PLAYING", false);
+            this.audio.pause();
         },
-        stopTrack() {
-            this.$emit('stoptrack')
+        playTrack() {
+            this.$store.dispatch("UPDATE_PLAYING", true);
+            this.audio.play();
         },
-        updateVolume(value) {
-        //   this.$emit('volume-change', this.volume)
-          this.$store.dispatch("UPDATE_VOLUME", value);
+        volChange(value) {
+            this.audio.volume = value / 100;
         }
     },
     computed: {
-        ...mapState(['volume', 'streamTitle'])
-    }
+        ...mapState(['streamTitle', 'connectedStatus', 'stream', 'playing']),
+        volume: {
+            get: function(){return this.$store.getters.VOLUME},
+            set: function(value){this.$store.dispatch('UPDATE_VOLUME', value )}
+        }
+    },
+    mounted() {
+		this.audio = this.$refs.audio;
+	}
 }
 </script>
 
 <style>
+
 
 </style>

@@ -1,29 +1,32 @@
 <template>
 <v-app>
   <v-content >
-    <v-contianer>
-      <v-layout align-center justify-center>
-        <div style="padding: 50px">
+    <v-container>
+      <v-layout row wrap align-center justify-center>
+        <div style="padding: 5px">
           <card />
         </div>
-        <div style="padding: 50px">
+        <div style="padding: 5px">
           <connectionStatus />
         </div>
       </v-layout>
       
-    </v-contianer>
-    <PlayerControls @volume-change="volumeHandler" />
+    </v-container>
+    <v-container>
+      <PlayerControls @volume-change="volumeHandler" />
+      <Title />
+    </v-container>
+    
   </v-content>
 
   </v-app>
 </template>
 
 <script>
-// @ is an alias to /src
 import card from "@/components/roomName.vue"
 import connectionStatus from "@/components/connection.vue"
 import PlayerControls from "@/components/media.vue"
-// import {init, logMessage, checkstream, enablePlayback, manualPlay, updateVolume, disconnectStream} from '@/assets/app.js';
+import Title from "@/components/title.vue"
 export default {
   name: "user",
   data: () => ({
@@ -32,7 +35,8 @@ export default {
   components: {
     card,
     connectionStatus,
-    PlayerControls
+    PlayerControls,
+    Title
   },
   methods: {
         volumeHandler(volume) {

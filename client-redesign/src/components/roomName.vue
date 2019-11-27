@@ -3,16 +3,23 @@
     class="mx-auto"
     max-width="400"
     max-height="600px"
+    flat
   >
-    <v-card-title class="headline">Connect to Room</v-card-title>
+    <v-card-title v-show="connectedStatus=='disconnected' || connectedStatus=='failed'" class="headline" >Connect to Room</v-card-title>
+    <v-card-title v-show="connectedStatus=='connected'" class="headline">Connected to Room {{room}}</v-card-title>
     <v-img max-height="300px" contain src="../assets/icon.png" style="margin-top: 1%; padding-top: 20px" />
-    <v-card-text class="text--primary">
-      <v-text-field v-model="SET_ROOM" style="color: white;" :autofocus="true" placeholder="Room Key" outlined rounded/>
+    <v-card-text class="text--primary" >
+      <v-text-field v-show="connectedStatus=='disconnected' || connectedStatus=='failed'" v-model="SET_ROOM" style="color: white;" :autofocus="true" placeholder="Room Key" outlined rounded/>
     </v-card-text>
     <v-card-actions>
-      <Button @button-click="toonin" msg="Toonin"/>
-      <Button hidden msg="Play"/>
-      <Button hidden msg="Disconnect"/>
+      <v-spacer></v-spacer>
+      <div v-show="connectedStatus=='disconnected' || connectedStatus=='failed'">
+        <Button @button-click="toonin" msg="Toonin"/>
+      </div>
+      <div v-show="connectedStatus=='connected'">
+        <Button @button-click="disconnect" msg="Disconnect"/>
+      </div>
+      <v-spacer></v-spacer>
     </v-card-actions>
   </v-card>
 </template>
@@ -23,7 +30,6 @@ import { mapState} from 'vuex'
 const SUCCESSFUL = "connected";
 const DISCONNECTED = "disconnected";
 const FAILED = "failed";
-// const ENDPOINT = "https://www.toonin.ml:8443/";
 const servers = {
   iceServers: [
     {
@@ -51,22 +57,15 @@ export default {
     Button
   },
   methods: {
-    consoleClick() {
-      alert("Button clicked");
-    },
     toonin() {
-      // this.$store.dispatch("CONNECT_TO_ROOM", this.roomName);
-      // this.$socket.client.emit('new peer', this.roomName);
-      // this.$socket.$subscribe('src ice', payload => {
-      //   this.$store.dispatch("ROOM_SET", payload.room);
-      // });
       this.connectToRoom();
     },
     connectToRoom() {
       this.$store.dispatch("UPDATE_PEERID", this.$socket.client.id);
       this.$store.dispatch("UPDATE_ROOM", this.SET_ROOM);
-      this.$socket.client.emit('new peer', this.SET_ROOM);
       this.setSocketListeners();
+      this.$socket.client.emit('new peer', this.SET_ROOM);
+      
     },
     setSocketListeners() {
       this.$socket.$subscribe('room null', () => {
@@ -123,9 +122,7 @@ export default {
         });
       };
 
-      // eslint-disable-next-line no-unused-vars
-      this.rtcConn.onconnectionstatechange = _ev => {
-        // var data = {};
+      this.rtcConn.onconnectionstatechange = () => {
         if (this.rtcConn.connectionState === SUCCESSFUL) {
           this.$store.dispatch("UPDATE_CONNECTED_STATUS", SUCCESSFUL);
           this.SET_ROOM = "";
@@ -155,34 +152,10 @@ export default {
           /iPhone|iPod|iPad|Macintosh|MacIntel/
         );
         if (_iOSDevice) {
-          // need to fix
-
-          // playBtn.$refs.link.hidden = false;
-          // audioElem.srcObject = incomingStream;
-          // audioElem.onplay = () => {
-          //   updateState({
-          //     established: true,
-          //     isPlaying: audioElem.srcObject.active,
-          //     stream: incomingStream
-          //   });
-          // };
           this.$store.dispatch("UPDATE_CONNECTED_STATUS", SUCCESSFUL);
           this.$store.dispatch("UPDATE_PLAYING", false);
           this.$store.dispatch("UPDATE_STREAM", incomingStream);
         } else {
-          // NEED TO FIX
-          //
-          // audioElem.srcObject = incomingStream;
-          // audioElem.onplay = () => {
-          //   updateState({
-          //     established: true,
-          //     isPlaying: audioElem.srcObject.active,
-          //     stream: incomingStream
-          //   });
-          // };
-          // audioElem.play().catch = err => {
-          //   playBtn.$refs.link.hidden = false;
-          // };
           this.$store.dispatch("UPDATE_CONNECTED_STATUS", SUCCESSFUL);
           this.$store.dispatch("UPDATE_PLAYING", true);
           this.$store.dispatch("UPDATE_STREAM", incomingStream);
@@ -196,28 +169,36 @@ export default {
       try {
         var mediaDescription = JSON.parse(messageEvent.data);
         this.$store.dispatch("UPDATE_STREAM_TITLE", mediaDescription.title);
-
-        // if (state.streamTitle.length > 0) {
-        //   titleTag.innerText = state.streamTitle;
-        //   if (state.streamTitle.length <= 41) {
-        //     titleTag.classList.remove("title-text");
-        //     titleTag.classList.add("title-text-no-animation");
-        //   } else {
-        //     titleTag.classList.remove("title-text-no-animation");
-        //     titleTag.classList.add("title-text");
-        //   }
-        // }
       } catch (err) {
         this.logMessage();
       }
     },
     logMessage() {
       // continue regardless of error
+    },
+    logoff() {
+      this.$socket.client.emit('logoff', { from: this.peerID, to: this.room });
+    },
+    disconnect() {
+      this.logoff();
+      this.$store.dispatch("UPDATE_STREAM", null);
+      this.$store.dispatch("UPDATE_CONNECTED_STATUS", DISCONNECTED);
+      this.$store.dispatch("UPDATE_ROOM", "");
+      this.$store.dispatch("UPDATE_PEERID", null);
+      this.$store.dispatch("UPDATE_STREAM_TITLE", "");
+      this.$store.dispatch("UPDATE_PLAYING", false);
+      this.$store.dispatch("UPDATE_RTCCONN", null);
     }
 
   },
   computed: {
-    ...mapState(['room', 'rtcConn', 'streamTitle', 'playing', 'connectedStatus', 'peerID'])
+    ...mapState(['room', 'rtcConn', 'streamTitle', 'playing', 'connectedStatus', 'peerID', 'stream'])
+  },
+  mounted: function() {
+    if(this.$route.params.id){
+      this.SET_ROOM = this.$route.params.id;
+      setTimeout(() => this.toonin(), 500);
+    }
   }
 }
 </script>

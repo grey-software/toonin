@@ -3,7 +3,7 @@ import App from "./App.vue";
 import router from "./router";
 import store from "./store";
 import vuetify from "./plugins/vuetify";
-import VueSocketIOExt from 'vue-socket.io-extended';
+import VueSocketIOExt from "vue-socket.io-extended";
 import io from "socket.io-client";
 
 Vue.config.productionTip = false;

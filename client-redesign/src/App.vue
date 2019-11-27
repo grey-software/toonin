@@ -23,9 +23,9 @@
 <script>
 
 export default {
-  el: "App",
+  name: "App",
   data() {
-    //
+    return {}
   }
 };
 </script>

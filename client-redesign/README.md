@@ -20,10 +20,5 @@ npm run build
 npm run lint
 ```
 
-### Run node server
-```
-node server.js
-```
-
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
