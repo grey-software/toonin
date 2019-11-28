@@ -44,7 +44,7 @@ const servers = {
 };
 
 export default {
-  name: "card",
+  name: "ConnectTo",
   props: {
     
   },
@@ -195,8 +195,8 @@ export default {
     ...mapState(['room', 'rtcConn', 'streamTitle', 'playing', 'connectedStatus', 'peerID', 'stream'])
   },
   mounted: function() {
-    if(this.$route.params.id){
-      this.SET_ROOM = this.$route.params.id;
+    if(this.$route.params.room){
+      this.SET_ROOM = this.$route.params.room;
       setTimeout(() => this.toonin(), 500);
     }
   }

@@ -1,5 +1,5 @@
 <template>
-    <v-card class="mx-auto" max-width="850px">
+    <v-card v-show="streanTitle.length>0" class="mx-auto" max-width="850px">
         <v-toolbar flat height=90>
             <div style="overflow: hidden; white-space: nowrap;">
                 <v-card-title :class="streamTitle.length<40 ? 'v-toolbar-title title-text-no-animation' : 'v-toolbar-title title-text' " >{{streamTitle}}</v-card-title>
@@ -12,7 +12,7 @@
 import { mapState} from 'vuex'
 
 export default {
-    name: "title",
+    name: "Title",
     computed: {
         ...mapState(['streamTitle'])
     }

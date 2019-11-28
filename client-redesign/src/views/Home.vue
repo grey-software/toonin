@@ -4,37 +4,42 @@
     <v-container>
       <v-layout row wrap align-center justify-center>
         <div style="padding: 5px">
-          <card />
+          <connect-to />
         </div>
         <div style="padding: 5px">
-          <connectionStatus />
+          <connection-status />
         </div>
       </v-layout>
       
     </v-container>
     <v-container>
-      <PlayerControls @volume-change="volumeHandler" />
+      
+      <player-controls @volume-change="volumeHandler" />
       <Title />
     </v-container>
     
   </v-content>
+    <v-footer app>
+      <v-spacer></v-spacer>
+      <span>&copy; Toonin 2019</span>
+    </v-footer>
 
   </v-app>
 </template>
 
 <script>
-import card from "@/components/roomName.vue"
-import connectionStatus from "@/components/connection.vue"
+import ConnectTo from "@/components/roomName.vue"
+import ConnectionStatus from "@/components/connection.vue"
 import PlayerControls from "@/components/media.vue"
 import Title from "@/components/title.vue"
 export default {
-  name: "user",
+  name: "Home",
   data: () => ({
     volume: 50
   }),
   components: {
-    card,
-    connectionStatus,
+    ConnectTo,
+    ConnectionStatus,
     PlayerControls,
     Title
   },
