@@ -1,5 +1,5 @@
 <template>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve" width="512px" height="512px"><g><g>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve" width="36px" height="36px"><g><g>
 	<g>
 		<path d="M256,256.501c-70.442,0-127.75,57.308-127.75,127.75S185.558,512,256,512s127.75-57.308,127.75-127.75    S326.441,256.501,256,256.501z M256,496.971c-62.153,0-112.72-50.566-112.72-112.72S193.846,271.53,256,271.53    s112.72,50.566,112.72,112.72S318.153,496.971,256,496.971z" data-original="#000000" class="active-path" data-old_color="#000000" fill="#4296BD"/>
 	</g>
@@ -24,6 +24,6 @@
 
 <script>
 export default {
-  name: "toonin-icon-component"
+  name: "toonin-icon"
 };
 </script>

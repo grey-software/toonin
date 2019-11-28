@@ -2,21 +2,41 @@ import Vue from 'vue';
 import vuetify from './plugins/vuetify' // path to vuetify export
 import App from './App.vue';
 import Vuex from 'vuex'
+// import { sync } from 'vuex-router-sync'
+import VueRouter from "vue-router"
 
+Vue.use(VueRouter)
 Vue.use(Vuex);
 
 function makeid(length) {
-    var result           = '';
-    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var result = '';
+    var characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
     var charactersLength = characters.length;
-    for ( var i = 0; i < length; i++ ) {
-       result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    for (var i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     return result;
- }
- 
+}
+
+import HomeView from "./HomeView.vue";
+import SharingView from "./SharingView.vue";
+
+const routes = [
+    {
+        path: '/',
+        name: 'home',
+        component: HomeView
+    }, {
+        path: '/sharing',
+        name: 'sharing',
+        component: SharingView
+    }
+]
+
+const router = new VueRouter({routes})
+
 const port = chrome.runtime.connect({name: "toonin-extension"});
-const VALID_ROOM_REGEX = /^[a-zA-Z0-9_-]{4,16}$/
+const VALID_ROOM_REGEX = /^[a-z0-9_-]{4,16}$/
 const ROOM_NAME_INVALID = "Your room name is invalid"
 
 export const States = {
@@ -24,11 +44,23 @@ export const States = {
     SHARING: "SHARING"
 }
 
+const copyToClipboard = str => {
+    const el = document.createElement('textarea');
+    el.value = str;
+    el.setAttribute('readonly', '');
+    el.style.position = 'absolute';
+    el.style.left = '-9999px';
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+  };
+
 const store = new Vuex.Store({
     state: {
         roomName: '',
         roomNameValid: false,
-        roomNameInputErrorMessages:  [],
+        roomNameInputErrorMessages: [],
         state: States.HOME,
         peerCount: 0,
         tabId: '',
@@ -53,22 +85,29 @@ const store = new Vuex.Store({
             state.roomNameInputErrorMessages.push(errorMessage);
         },
         setState(state, appState) {
-
+            console.log(`setState: ${
+                {appState}
+            }`)
             var stateKeys = Object.keys(appState);
-            for(var i = 0; i < stateKeys.length; i++) {
-                if(stateKeys[i] in state) {
+            for (var i = 0; i < stateKeys.length; i++) {
+                if (stateKeys[i] in state) {
                     state[stateKeys[i]] = appState[stateKeys[i]];
                 }
             }
 
         },
         resetState(state) {
+            state.state = States.HOME
             state.roomName = '';
             state.roomNameValid = false;
             state.roomNameInputErrorMessages = [];
+            peerCount = 0,
+            state.tabId = '',
+            state.muted = false,
+            state.volume = 1
         },
         saveState(state) {
-            port.postMessage({ type: 'stateUpdate', state: state});
+            port.postMessage({type: 'stateUpdate', state: state});
         }
     },
     actions: {
@@ -76,11 +115,14 @@ const store = new Vuex.Store({
             const roomName = context.state.roomName;
             console.log(`startShare(${roomName})`);
             port.postMessage({type: "init", roomName: roomName});
-            context.commit("saveState");
         },
         roomCreated(context) {
-            context.commit("setState", {state : States.SHARING});
-            context.commit("saveState");
+            console.log("room created")
+            if (this.state.roomName != "") {
+                router.push({name: 'sharing'})
+                context.commit("setState", {state: States.SHARING});
+                context.commit("saveState");
+            }
         },
         roomCreationFailed(context) {
             context.commit("setRoomNameInputErrorMessage", "A room with that name already exists");
@@ -91,21 +133,21 @@ const store = new Vuex.Store({
             context.commit("setRoomName", roomName);
             context.commit("saveState");
         },
+        copyLinkToClipboard(context) {
+            copyToClipboard(`https://app.toonin.ml/${context.state.roomName}`)
+        },
         copyIdToClipboard(context) {
-            var textField = document.querySelector("#id-display-area");
-            textField.setAttribute("type", "text");
-            textField.select();
-            document.execCommand('copy');
+            copyToClipboard(context.state.roomName)
         },
         stopSharing(context) {
-            port.postMessage({ type: "stopSharing" });
-            context.commit("setState", {state : States.HOME});
+            port.postMessage({type: "stopSharing"});
+            router.push({name: 'home'})
             context.commit("resetState");
-            localStorage.removeItem('state');
+            context.commit("saveState")
         },
-        requestState(context) {
+        requestState() {
             console.log('state requested from background');
-            port.postMessage({ type: "requestState"});
+            port.postMessage({type: "requestState"});
         }
     }
 })
@@ -116,203 +158,21 @@ port.onMessage.addListener((msg) => {
     }
 });
 
+// const unsync = sync(store, router)
 
 const app = new Vue({
     el: '#app',
     vuetify,
     store,
+    router,
     render: h => h(App)
 });
+// unsync()
 
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (request.message === "extension-state") {
-        store.dispatch("roomCreated");
         store.commit("setState", request.data);
+        store.dispatch("roomCreated");
     }
 });
-
-chrome.tabs.query({
-    active: true,
-    currentWindow: true
-}, function (tabs) {
-    // store.dispatch("requestState");
-});
-
-// window.onbeforeunload = function() { this.localStorage.removeItem('state'); }
-// window.onunload = function() { this.localStorage.removeItem('state'); }
-
-// const shareButton = document.getElementById("btnShare");
-// const stopSharingButton = document.getElementById("btnShareStop");
-// const sessionIDText = document.getElementById("roomText");
-// const roomDiv = document.getElementById("roomDiv");
-// const newMessage = "";
-// const copyButton = document.getElementById("btnCopy");
-// const roomNameInput = document.getElementById("roomNameInput");
-
-// copyButton.style.display = "none";
-// stopSharingButton.style.display = "none";
-// const playButton = document.getElementById("playRoom");
-// const roomNameToonin = document.getElementById("tooninToRoom");
-// const stopToonin = document.getElementById("stopToonin");
-// // mute control elements
-// const muteBtn = document.getElementById("mute-btn");
-// const muteStatus = document.getElementById("muted-notif");
-// // listener count
-// const peerCounter = document.getElementById("peerCounter");
-// const roomNameSpan = document.getElementById("roomNameSpan");
-// const connectSpan = document.getElementById("connectSpan");
-// const muteSpan = document.getElementById("muteSpan");
-// const titleSpan = document.getElementById("titleOfPage");
-// const titleText = document.getElementById("titleText");
-// const volume = document.getElementById("volume");
-// muteBtn.onclick = function() {
-//     muteStatus.hidden = !this.checked;
-//     port.postMessage({
-//         type: "toggleMute",
-//         value: !this.checked
-//     });
-// }
-
-
-// volume.onchange = (event) => {
-//     port.postMessage({
-//         type: "volume",
-//         value: event.target.value
-//     });
-// }
-
-// shareButton.onclick = () => {
-//     var roomName = roomNameInput.value;
-//     port.postMessage({
-//         type: "init",
-//         roomName: roomName
-//     });
-// };
-
-// stopSharingButton.onclick = () => {
-//     port.postMessage({ type: 'stopSharing' });
-//     hideElements();
-//     homePage();
-//     titleText.innerHTML = "";
-// }
-
-// var roomID;
-
-
-// copyButton.onclick = () => {
-//     var str = roomID;
-//     // Create new element
-//     var el = document.createElement('textarea');
-//     // Set value (string to be copied)
-//     el.value = str;
-//     // Set non-editable to avoid focus and move outside of view
-//     el.setAttribute('readonly', '');
-//     el.style = {position: 'absolute', left: '-9999px'};
-//     document.body.appendChild(el);
-//     // Select text inside element
-//     el.select();
-//     // Copy text to clipboard
-//     document.execCommand('copy');
-//     // Remove temporary element
-//     document.body.removeChild(el);
-// };
-
-
-// playButton.onclick = () => {
-//     port.postMessage({
-//         type: "play",
-//         roomName: roomNameToonin.value
-//     });
-//     connectSpan.style.display = "none";
-//     playButton.style.display = "flex;"
-//     stopToonin.style.display = "flex";
-// }
-
-// stopToonin.onclick = () => {
-//     port.postMessage({
-//         type: "stopToonin"
-//     });
-//     hideElements();
-//     homePage();
-//     titleText.innerHTML = "";
-// }
-
-
-// chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-//     if (request.message === "extension_state_from_background" && request.data.roomID) {
-//         roomNameSpan.style.display = "none";
-//         shareButton.style.display = "none";
-//         stopSharingButton.style.display = "block";
-//         copyButton.style.display = "block";
-//         playButton.style.display = "none";
-//         stopToonin.style.display = "none";
-//         connectSpan.style.display = "none";
-//         roomID=request.data.roomID;
-//         muteSpan.style.display = "flex";
-//         muteBtn.checked = request.data.muted;
-//         muteStatus.hidden = !muteBtn.checked;
-//         sessionIDText.innerHTML = "Your Toonin ID is: \n" + roomID;
-//         roomDiv.style.display = "block";
-//         peerCounter.style.display = "block";
-//         peerCounter.innerHTML = "You have " + request.data.peerCounter + " listeners.";
-//         volume.value = request.data.volume * 100;
-//         volume.disabled=request.data.tabMute;
-//         roomNameSpan.style.display = "none";
-//         btnShare.style.display = "none";
-//         titleText.innerHTML = "Currently streaming: " + request.data.title;
-//         volume.style.display = "block";
-//     }
-//     else if (request.message === "extension_state_from_background" && !request.data.roomID && request.data.playing) {
-//         roomNameSpan.style.display = "none";
-//         shareButton.style.display = "none";
-//         stopSharingButton.style.display = "none";
-//         copyButton.style.display = "none";
-//         roomNameToonin.value = request.data.room;
-//         muteSpan.style.display = "none";
-//         muteBtn.checked = request.data.muted;
-//         muteStatus.hidden = !muteBtn.checked;
-//         roomID=null;
-//         roomDiv.style.display = "flex";
-//         peerCounter.style.display = "block";
-//         peerCounter.innerHTML = "Tooned into room "+request.data.room;
-//         stopToonin.style.display = "block";
-//         playButton.style.display = "none";
-//         titleText.innerHTML = "Host is listening to: " + request.data.hostTitle;
-//         volume.style.display = "block";
-//     } else if (request.message === "extension_state_from_background" && !request.data.roomID && !request.data.playing) {
-//         roomNameToonin.disabled = false;
-//         // playButton.style.display = "block";
-//         // stopToonin.style.display = "block";
-//         // connectSpan.style.display = "block";
-//         // muteSpan.style.display = "none";
-//         muteBtn.checked = request.data.muted;
-//         muteStatus.hidden = !muteBtn.checked;
-//         roomID=null;
-//         roomDiv.style.display = "none";
-//         titleText.innerHTML = "";
-//     }
-// });
-
-// function homePage() {
-//       roomNameSpan.style.display = "flex";
-//       shareButton.style.display = "flex";
-//       roomDiv.style.display = "flex";
-//       connectSpan.style.display = "flex";
-//       playButton.style.display = "flex";
-//       shareButton.alignItems = "center";
-//       sessionIDText.innerHTML= "";
-//       sessionIDText.style.display = "none";
-//       volume.style.display = "none";
-// }
-// function hideElements() {
-//       muteBtn.style.display = "none";
-//       stopToonin.style.display = "none";
-//       muteSpan.style.display = "none";
-//       stopSharingButton.style.display = "none";
-//       copyButton.style.display = "none";
-//       peerCounter.style.display = "none";
-//       roomDiv.style.display = "none";
-//       volume.style.display = "none";
-// }
-// hideElements();

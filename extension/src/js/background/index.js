@@ -96,10 +96,7 @@ function disconnect() {
     }
     peers = {};
     localAudioStream = null;
-    roomID = null;
-    tabID = null;
     peerCounter = Object.keys(peers).length;
-    sendState();
 }
 // sets the volume
 function changeVolume(value) {

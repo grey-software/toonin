@@ -4,13 +4,13 @@
       <img class="title-icon" src="icon.png" />
       <span class="title-text">Toonin</span>
     </div>
-    <home-view v-if="state === states.HOME" />
-    <sharing-view v-if="state === states.SHARING" />
+    <transition name="fade" mode="out-in">
+      <router-view></router-view>
+    </transition>
   </v-app>
 </template>
 
 <script>
-import { mapState, mapMutations, mapActions } from "vuex";
 import { States } from "./app.js";
 import HomeView from "./HomeView.vue";
 import SharingView from "./SharingView.vue";
@@ -29,25 +29,6 @@ export default {
       states: States
     };
   },
-  computed: {
-    ...mapState([
-      "roomNameInputErrorMessages",
-      "roomNameValid",
-      "roomName",
-      "state"
-    ])
-  },
-  methods: {
-    ...mapActions([
-      "startShare",
-      "randomRoomName", //also supports payload `this.nameOfAction(amount)`
-      "copyIdToClipboard",
-      "stopSharing"
-    ]),
-    ...mapMutations([
-      "setRoomName" //also supports payload `this.nameOfMutation(amount)`
-    ])
-  }
 };
 </script>
 
@@ -74,6 +55,7 @@ export default {
 }
 
 .body-container {
+  height: 124px;
   padding: 30px 32px 0px 32px;
   display: flex;
   background-color: white;
@@ -97,5 +79,12 @@ export default {
 
 .btn-share {
   margin-top: 6px;
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .5s;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
 }
 </style>
