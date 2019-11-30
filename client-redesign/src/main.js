@@ -10,7 +10,7 @@ Vue.config.productionTip = false;
 
 const ENDPOINT = "https://www.toonin.ml:8443/";
 
-const socket = io(ENDPOINT);
+const socket = io(ENDPOINT, { secure: true });
 
 Vue.use(VueSocketIOExt, socket, { store });
 

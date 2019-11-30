@@ -245,6 +245,7 @@ function sendMediaDescription() {
 socket.on("room created", (newRoomID) => {
     console.log("New room created with ID: " + newRoomID);
     roomID = newRoomID;
+    port.postMessage({ type: "room created" });
     getTabAudio();
 });
 // server unable to create a room
