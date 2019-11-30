@@ -1,7 +1,7 @@
-cd ./app
+cd client-redesign
 npm install
 wait
-echo "app npm installed"
+echo "npm on client has installed"
 cd ..
 cd ./backend
 npm install
@@ -12,5 +12,6 @@ cd ./extension
 npm install
 echo "extension npm installed"
 wait
+npm run develop
 cd ..
 echo "Done";
