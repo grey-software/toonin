@@ -85,9 +85,6 @@ const store = new Vuex.Store({
             state.roomNameInputErrorMessages.push(errorMessage);
         },
         setState(state, appState) {
-            console.log(`setState: ${
-                {appState}
-            }`)
             var stateKeys = Object.keys(appState);
             for (var i = 0; i < stateKeys.length; i++) {
                 if (stateKeys[i] in state) {
@@ -101,10 +98,11 @@ const store = new Vuex.Store({
             state.roomName = '';
             state.roomNameValid = false;
             state.roomNameInputErrorMessages = [];
-            peerCount = 0,
+            state.peerCount = 0,
             state.tabId = '',
             state.muted = false,
             state.volume = 1
+
         },
         saveState(state) {
             port.postMessage({type: 'stateUpdate', state: state});
@@ -141,7 +139,7 @@ const store = new Vuex.Store({
         },
         stopSharing(context) {
             port.postMessage({type: "stopSharing"});
-            router.push({name: 'home'})
+            router.push({name: 'home'});
             context.commit("resetState");
             context.commit("saveState")
         },
@@ -156,6 +154,8 @@ port.onMessage.addListener((msg) => {
     if (msg.type === "room creation fail") {
         store.dispatch("roomCreationFailed");
     }
+
+    if(msg.type === 'room created') { store.dispatch('roomCreated'); }
 });
 
 // const unsync = sync(store, router)
@@ -173,6 +173,11 @@ const app = new Vue({
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (request.message === "extension-state") {
         store.commit("setState", request.data);
-        store.dispatch("roomCreated");
+        if(store.state.state === States.HOME) { 
+            router.push({name: 'home'}).catch((err) => {});
+        }
+        else if(store.state.state === States.SHARING) { 
+            router.push({name: "sharing"}).catch((err) => {});
+        }
     }
 });
