@@ -8,7 +8,7 @@ import io from "socket.io-client";
 
 Vue.config.productionTip = false;
 
-const ENDPOINT = "https://www.toonin.ml:8443/";
+const ENDPOINT = "https://toonin.ali-raza.me/";
 
 const socket = io(ENDPOINT, { secure: true });
 

@@ -122,17 +122,6 @@ app.get("/clearRooms", (req, res) => {
   }
 });
 
-app.get("/:roomID", (req, res) => {
-  console.log(rooms);
-  const roomID = req.params.roomID;
-  if (roomID in rooms) {
-    console.log("Room with id: " + roomID + " found!");
-    return res.send(JSON.stringify("SUCCESS"));
-  }
-  console.log("ERROR: No room with id: " + roomID);
-  return res.send(JSON.stringify("FAIL"));
-});
-
 app.get("/status", (req, res) => {
   res.send("Server is alive");
   console.log(rooms);
