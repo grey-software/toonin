@@ -24,7 +24,7 @@ jobs:
       - run:
           name: Building the extension
           command: |
-             npm --prefix ./extension run build-once
+             npm --prefix ./extension run develop
       - run:
           name: Compress extension for storage
           command: zip -r /tmp/workspace/extension.zip ./extension/build
@@ -49,7 +49,7 @@ jobs:
       - run:
           name: Installing app dependencies
           command: |
-            npm --prefix ./client install
+            npm --prefix ./client-redesign install
       - save_cache:
           paths:
             - node_modules
@@ -57,7 +57,7 @@ jobs:
       - run:
           name: Building App
           command: |
-            npm --prefix ./client run build
+            npm --prefix ./client-redesign run build
   publish-github-release:
     docker:
       - image: cibuilds/github:0.10
@@ -68,7 +68,7 @@ jobs:
       - run:
           name: "Publish Release on GitHub"
           command: |
-            VERSION=0.1.0
+            VERSION=0.2.0
             ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -b "Toonin Chrome extension build. To use, unzip and enable developer tools in chrome -> load unpacked -> select unzipped extension/build folder." -delete ${VERSION}  /tmp/workspace/extension.zip
 workflows:
   version: 2
