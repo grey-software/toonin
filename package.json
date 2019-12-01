@@ -4,9 +4,6 @@
   "description": "Toonin is a Chrome Extension coupled with a web app that allows your friends to Tune In to what you're listening to !",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint",
     "start": "node server.js"
   },
   "dependencies": {
