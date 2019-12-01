@@ -1,3 +1,7 @@
+setup:
 build:
   docker:
-    web: Dockerfile
+       web: Dockerfile
+       target: builder
+run:
+  web
