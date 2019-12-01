@@ -5,7 +5,7 @@ var cors = require("cors");
 app.use(cors());
 var http = require("http").Server(app);
 var io = require("socket.io")(http);
-var vars = require("./vars");
+var vars = require("../vars");
 const serveStatic = require('serve-static')
 const path = require('path')
 const history = require('connect-history-api-fallback')
@@ -127,7 +127,7 @@ app.get("/status", (req, res) => {
   console.log(rooms);
 });
 
-const staticFileMiddleware = express.static(path.join(__dirname + '/client-redesign/dist'))
+const staticFileMiddleware = express.static('../client-redesign/dist')
 
 app.use(staticFileMiddleware)
 app.use(history({
@@ -137,7 +137,7 @@ app.use(history({
 app.use(staticFileMiddleware)
 
 app.get('/', function (req, res) {
-  res.render(path.join(__dirname + '/client-redesign/dist/index.html'))
+  res.render('../client-redesign/dist/index.html')
 })
 
 http.listen(port, () => {

@@ -1,7 +1,0 @@
-setup:
-build:
-  docker:
-       web: Dockerfile
-       target: builder
-run:
-  web
