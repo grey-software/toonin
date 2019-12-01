@@ -7,13 +7,14 @@
     "start": "node server.js"
   },
   "dependencies": {
+    "connect-history-api-fallback": "^1.6.0",
     "core-js": "^2.6.5",
-    "express": "^4.17.1",
-    "serve-static": "^1.14.1",
-    "socket.io-client": "^2.3.0",
     "cors": "^2.8.4",
+    "express": "^4.17.1",
     "node-static": "^0.7.10",
-    "socket.io": "^2.1.0"
+    "serve-static": "^1.14.1",
+    "socket.io": "^2.1.0",
+    "socket.io-client": "^2.3.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.11.0",
