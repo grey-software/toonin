@@ -133,8 +133,11 @@ export default {
           this.rtcConn.connectionState == FAILED
         ) {
           this.$store.dispatch("UPDATE_CONNECTED_STATUS", DISCONNECTED);
+          this.$store.dispatch("UPDATE_ROOM", "");
+          this.$store.dispatch("UPDATE_PEERID", null);
           this.$store.dispatch("UPDATE_STREAM_TITLE", "");
           this.$store.dispatch("UPDATE_PLAYING", false);
+          this.$store.dispatch("UPDATE_RTCCONN", null);
 
           // disconnectBtn.$refs.link.hidden = true;
         }
@@ -176,11 +179,8 @@ export default {
     logMessage() {
       // continue regardless of error
     },
-    logoff() {
-      this.$socket.client.emit('logoff', { from: this.peerID, to: this.room });
-    },
     disconnect() {
-      this.logoff();
+      this.rtcConn.close();
       this.$store.dispatch("UPDATE_STREAM", null);
       this.$store.dispatch("UPDATE_CONNECTED_STATUS", DISCONNECTED);
       this.$store.dispatch("UPDATE_ROOM", "");

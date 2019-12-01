@@ -199,7 +199,15 @@ function startShare(peerID) {
     rtcConn.addTrack(remoteDestination.stream.getAudioTracks()[0]);
     peers[peerID].rtcConn = rtcConn;
     peers[peerID].dataChannel = peers[peerID].rtcConn.createDataChannel('mediaDescription');
-    // console.log(peers);
+
+    peers[peerID].rtcConn.onconnectionstatechange = (event) => {
+        Object.keys(peers).forEach(key => {
+            if (peers[key].rtcConn.connectionState=="failed" || peers[key].rtcConn.connectionState=="disconnected") delete peers[key];
+          });
+        peerCounter = Object.keys(peers).length;
+        sendState();
+    }
+    
     peers[peerID].rtcConn.onicecandidate = function (event) {
         if (! event.candidate) {
             console.log("No candidate for RTC connection");
@@ -287,18 +295,7 @@ socket.on("peer desc", (descData) => {
         console.log("Error on setRemoteDescription: " + err);
     });
 });
-socket.on("peer disconnected", (peerData) => {
-    console.log("peer disconnected");
-    try {
-        peers[peerData.id].rtcConn.removeTrack(remoteDestination.stream.getAudioTracks()[0]);
-    } catch (err) {
-        console.log(err)
-    }
-    peers[peerData.id].rtcConn = undefined;
-    delete peers[peerData.id];
-    peerCounter = Object.keys(peers).length;
-    sendState();
-})
+
 socket.on("host disconnected", () => {
     console.log("host disconnected");
     incomingStream = null;
