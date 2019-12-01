@@ -1,5 +1,6 @@
 "use strict";
-var app = require("express")();
+var express= require("express");
+const app = express();
 var cors = require("cors");
 app.use(cors());
 var http = require("http").Server(app);
@@ -7,6 +8,7 @@ var io = require("socket.io")(http);
 var vars = require("./vars");
 const serveStatic = require('serve-static')
 const path = require('path')
+const history = require('connect-history-api-fallback')
 var rooms = {};
 const port = process.env.PORT || 8443;
 function sleep(ms) {
@@ -148,8 +150,18 @@ app.get("/status", (req, res) => {
   console.log(rooms);
 });
 
-app.use('/', serveStatic(path.join(__dirname, '/dist')));
+const staticFileMiddleware = express.static(path.join(__dirname + '/dist'))
 
+app.use(staticFileMiddleware)
+app.use(history({
+  disableDotRule: true,
+  verbose: true
+}))
+app.use(staticFileMiddleware)
+
+app.get('/', function (req, res) {
+  res.render(path.join(__dirname + '/dist/index.html'))
+})
 // http.listen(port, () => {
 //   console.log("Signalling server started on port 8100");
 // });
