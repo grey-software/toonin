@@ -70,6 +70,28 @@ jobs:
           command: |
             VERSION=0.2.0
             ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -b "Toonin Chrome extension build. To use, unzip and enable developer tools in chrome -> load unpacked -> select unzipped extension/build folder." -delete ${VERSION}  /tmp/workspace/extension.zip
+  Deploy-App:
+    docker:
+      - image: circleci/node:latest
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+         name: Build Docker image
+         command: docker build -t toonin/client:$CIRCLE_SHA1 .
+      - run:
+          name: Setup Heroku
+          command: |
+            chmod +x .circleci/setup-heroku.sh
+            .circleci/setup-heroku.sh
+      - run:
+          name: Deploy to Heroku
+          command: |
+             docker login --username=$HEROKU_LOGIN --password=$HEROKU_API_KEY registry.heroku.com
+             docker tag toonin/client:$CIRCLE_SHA1 registry.heroku.com/$HEROKU_APP_NAME/web
+             heroku container:login
+             heroku container:push web
+             heroku container:release web
 workflows:
   version: 2
   Validate_Build:
@@ -79,6 +101,12 @@ workflows:
       - publish-github-release:
           requires:
             - Build-Extension
+          filters:
+            branches:
+              only: master
+      - Deploy-App:
+          requires:
+            - Build-App
           filters:
             branches:
               only: master

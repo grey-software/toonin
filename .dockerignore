@@ -1,0 +1,4 @@
+backend/*
+.circleci/*
+extension/*
+npm-debug.log
