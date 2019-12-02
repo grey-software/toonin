@@ -1,23 +1,21 @@
 "use strict";
-var app = require("express")();
+var express= require("express");
+const app = express();
 var cors = require("cors");
 app.use(cors());
 var http = require("http").Server(app);
 var io = require("socket.io")(http);
-var vars = require("./vars");
-var networkTree = require("./networkTree").networkTree;
-
+var vars = require("../vars");
+const path = require('path')
+const history = require('connect-history-api-fallback')
 var rooms = {};
-const MAX_CLIENTS_PER_HOST = 8;
-
+const port = process.env.PORT || 8443;
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function generateSocketRoom(socketID, roomName) { return socketID + '-' + roomName; }
-
 // reduced the gen room id length to 6 characters (2, 15) -> (2, 5)
-const genRoomID = (socketID) => {
+const genRoomID = () => {
   while (true) {
     const id =
       Math.random()
@@ -27,30 +25,31 @@ const genRoomID = (socketID) => {
         .toString(36)
         .substring(2, 5);
     if (!(id in rooms)) {
-      rooms[id] = new networkTree(socketID, MAX_CLIENTS_PER_HOST);
+      rooms[id] = {};
       return id;
     }
   }
 };
 
-/**
- * 
- * @param {SocketIO.Socket} socket 
- * @param {string} roomName 
- */
+app.get('*',function(req,res,next){
+  if(req.headers['x-forwarded-proto']!='https')
+    res.redirect("https://" + req.headers.host + req.url)
+  else
+    next() /* Continue to other routes if we're not redirecting */
+});
+
 function createRoom(socket, roomName) {
     var newRoomID = "";
     console.log("Received request to create new room");
     const hasCustomRoomName = roomName.length > 0;
-
     if (hasCustomRoomName) {
 
       if (roomName in rooms) {
         socket.emit("room creation failed", "name already exists");
       } else {
         newRoomID = roomName;
-        rooms[newRoomID] = new networkTree(socket.id, MAX_CLIENTS_PER_HOST);
-        socket.join(socket.id, () => {
+        rooms[newRoomID] = {};
+        socket.join(newRoomID, () => {
           socket.emit("room created", newRoomID);
           console.log(rooms);
         });
@@ -58,13 +57,12 @@ function createRoom(socket, roomName) {
 
       // if no custom room name, generate a random id
     } else {
-      newRoomID = genRoomID(socket.id);
-      socket.join(socket.id, () => {
+      newRoomID = genRoomID();
+      socket.join(newRoomID, () => {
         socket.emit("room created", newRoomID);
         console.log(rooms);
       });
     }
-
 }
 
 //Socket create a new "room" and listens for other connections
@@ -72,38 +70,20 @@ io.on("connection", socket => {
 
   socket.on("create room", (roomName) => {
     createRoom(socket, roomName);
-    console.log(socket.rooms);
   });
 
   socket.on("new peer", room => {
     if(rooms[room]){
-
-      var potentialHosts = rooms[room].getConnectableNodes();
-      socket.emit("host pool", { potentialHosts: potentialHosts });
-      // socket.join(room, () => {
-      //   console.log("Peer connected successfully to room: " + room);
-      //   console.log(socket.id + " now in rooms ", socket.rooms);
-      //   socket.to(room).emit("peer joined", { room: room, id: socket.id });
-      // });
-    } else {
-        console.log("invalid room");
-        socket.emit("room null");
-    }
-    
-  });
-
-  socket.on("host eval res", (res) => {
-    if(res.evalResult.hostFound) {
-
-      var room = res.evalResult.selectedHost;
-
       socket.join(room, () => {
         console.log("Peer connected successfully to room: " + room);
-        // console.log(socket.id + " now in rooms ", socket.rooms);
-
+        console.log(socket.id + " now in rooms ", socket.rooms);
         socket.to(room).emit("peer joined", { room: room, id: socket.id });
       });
+    } else {
+      console.log("invalid room");
+      socket.emit("room null");
     }
+    
   });
 
   socket.on("src new ice", iceData => {
@@ -141,22 +121,24 @@ app.get("/clearRooms", (req, res) => {
   }
 });
 
-app.get("/:roomID", (req, res) => {
-  console.log(rooms);
-  const roomID = req.params.roomID;
-  if (roomID in rooms) {
-    console.log("Room with id: " + roomID + " found!");
-    return res.send(JSON.stringify("SUCCESS"));
-  }
-  console.log("ERROR: No room with id: " + roomID);
-  return res.send(JSON.stringify("FAIL"));
-});
-
-app.get("/", (req, res) => {
+app.get("/status", (req, res) => {
   res.send("Server is alive");
   console.log(rooms);
 });
 
-http.listen(8100, () => {
-  console.log("Signalling server started on port 8100");
-});
+const staticFileMiddleware = express.static('../client-redesign/dist')
+
+app.use(staticFileMiddleware)
+app.use(history({
+  disableDotRule: true,
+  verbose: true
+}))
+app.use(staticFileMiddleware)
+
+app.get('/', function (req, res) {
+  res.render('../client-redesign/dist/index.html')
+})
+
+http.listen(port, () => {
+  console.log('https listening on '+port);
+})
