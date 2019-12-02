@@ -8,6 +8,8 @@
         style="padding:15px; padding-top: 40px"
         :label="`Dark Mode`"
         v-model="$vuetify.theme.dark"
+        ref="darkSwitch"
+        @change="onDarkModeChange"
       ></v-switch>
     </v-app-bar>
     <v-content>
@@ -21,6 +23,12 @@ export default {
   name: "App",
   data() {
     return {};
+  },
+  methods: {
+    onDarkModeChange() { window.localStorage.setItem('isDark', this.$refs.darkSwitch.appIsDark ? 1 : 0); }
+  },
+  mounted: function() { 
+    this.$refs.darkSwitch.$vuetify.theme.dark = window.localStorage.getItem('isDark') == 1 ? true : false;
   }
 };
 </script>
