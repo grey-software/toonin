@@ -67,11 +67,24 @@ export default {
       this.$socket.client.emit('new peer', this.SET_ROOM);
       
     },
+    evaluateHosts(hostPool) { return { hostFound: true, selectedHost: hostPool[0].socketID }; },
     setSocketListeners() {
+      /*eslint no-console: ["error", { allow: ["log"] }] */
       this.$socket.$subscribe('room null', () => {
         this.SET_ROOM = "";
         this.$store.dispatch("UPDATE_ROOM", "");
       });
+
+      this.$socket.$subscribe("host pool", (hostPool) => {
+        console.log("recieved host pool to evaluate");
+        var evalResult = this.evaluateHosts(hostPool.potentialHosts);
+        evalResult.room = hostPool.room;
+        if(evalResult.hostFound) {
+            console.log("sending eval result");
+            this.$socket.client.emit("host eval res", { evalResult: evalResult });
+        }
+      });
+
       this.$socket.$subscribe("src ice", iceData => {
         if (iceData.room !== this.room || iceData.id !== this.peerID) {
           return;

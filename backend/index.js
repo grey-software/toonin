@@ -14,8 +14,6 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function generateSocketRoom(socketID, roomName) { return socketID + '-' + roomName; }
-
 // reduced the gen room id length to 6 characters (2, 15) -> (2, 5)
 const genRoomID = (socketID) => {
   while (true) {
@@ -50,7 +48,7 @@ function createRoom(socket, roomName) {
       } else {
         newRoomID = roomName;
         rooms[newRoomID] = new networkTree(socket.id, MAX_CLIENTS_PER_HOST);
-        socket.join(socket.id, () => {
+        socket.join(newRoomID, () => {
           socket.emit("room created", newRoomID);
           console.log(rooms);
         });
@@ -59,7 +57,7 @@ function createRoom(socket, roomName) {
       // if no custom room name, generate a random id
     } else {
       newRoomID = genRoomID(socket.id);
-      socket.join(socket.id, () => {
+      socket.join(newRoomID, () => {
         socket.emit("room created", newRoomID);
         console.log(rooms);
       });
@@ -79,7 +77,7 @@ io.on("connection", socket => {
     if(rooms[room]){
 
       var potentialHosts = rooms[room].getConnectableNodes();
-      socket.emit("host pool", { potentialHosts: potentialHosts });
+      socket.emit("host pool", { potentialHosts: potentialHosts, room: room });
       // socket.join(room, () => {
       //   console.log("Peer connected successfully to room: " + room);
       //   console.log(socket.id + " now in rooms ", socket.rooms);
@@ -95,11 +93,11 @@ io.on("connection", socket => {
   socket.on("host eval res", (res) => {
     if(res.evalResult.hostFound) {
 
-      var room = res.evalResult.selectedHost;
+      var room = res.evalResult.room;
+      console.log('res room: ' + room)
 
       socket.join(room, () => {
         console.log("Peer connected successfully to room: " + room);
-        // console.log(socket.id + " now in rooms ", socket.rooms);
 
         socket.to(room).emit("peer joined", { room: room, id: socket.id });
       });
