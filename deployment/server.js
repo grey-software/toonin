@@ -5,7 +5,7 @@ var cors = require("cors");
 app.use(cors());
 var http = require("http").Server(app);
 var io = require("socket.io")(http);
-var vars = require("../vars");
+var vars = require("./vars");
 const path = require('path')
 const history = require('connect-history-api-fallback')
 var rooms = {};
