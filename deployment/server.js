@@ -31,12 +31,12 @@ const genRoomID = () => {
   }
 };
 
-app.get('*',function(req,res,next){
-  if(req.headers['x-forwarded-proto']!='https')
-    res.redirect("https://" + req.headers.host + req.url)
-  else
-    next() /* Continue to other routes if we're not redirecting */
-});
+// app.get('*',function(req,res,next){
+//   if(req.headers['x-forwarded-proto']!='https')
+//     res.redirect("https://" + req.headers.host + req.url)
+//   else
+//     next() /* Continue to other routes if we're not redirecting */
+// });
 
 function createRoom(socket, roomName) {
     var newRoomID = "";
@@ -104,6 +104,11 @@ io.on("connection", socket => {
   socket.on("peer new desc", descData => {
     console.log(`Received answer description from peer: ${descData.id} in room: ${descData.room}`);
     socket.to(descData.room).emit("peer desc", descData);
+  });
+
+  socket.on("title", title => {
+    console.log(title)
+    io.to(title.id).emit("title", title.title);
   });
 });
 
