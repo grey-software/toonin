@@ -198,7 +198,7 @@ function startShare(peerID) {
     });
     rtcConn.addTrack(remoteDestination.stream.getAudioTracks()[0]);
     peers[peerID].rtcConn = rtcConn;
-    peers[peerID].dataChannel = peers[peerID].rtcConn.createDataChannel('mediaDescription', {id: 786});
+    peers[peerID].dataChannel = peers[peerID].rtcConn.createDataChannel('mediaDescription');
 
     peers[peerID].rtcConn.onconnectionstatechange = (event) => {
         Object.keys(peers).forEach(key => {

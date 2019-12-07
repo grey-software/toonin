@@ -129,7 +129,7 @@ export default {
         if (this.rtcConn.connectionState === SUCCESSFUL) {
           this.$store.dispatch("UPDATE_CONNECTED_STATUS", SUCCESSFUL);
           this.SET_ROOM = "";
-          this.rtcConn.createDataChannel('mediaDescription',{id: 786});
+          this.rtcConn.createDataChannel('mediaDescription');
         }
 
         if (
