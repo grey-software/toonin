@@ -20,17 +20,25 @@ function makeid(length) {
 
 import HomeView from "./HomeView.vue";
 import SharingView from "./SharingView.vue";
+import TooninView from "./TooninView.vue";
 
 const routes = [
     {
         path: '/',
         name: 'home',
         component: HomeView
-    }, {
+    }, 
+    {
         path: '/sharing',
         name: 'sharing',
         component: SharingView
+    },
+    {
+        path: '/tooning',
+        name: 'tooning',
+        component: TooninView
     }
+
 ]
 
 const router = new VueRouter({routes})
@@ -41,7 +49,8 @@ const ROOM_NAME_INVALID = "Your room name is invalid"
 
 export const States = {
     HOME: "HOME",
-    SHARING: "SHARING"
+    SHARING: "SHARING",
+    TOONING: "TOONING"
 }
 
 const copyToClipboard = str => {
@@ -65,7 +74,8 @@ const store = new Vuex.Store({
         peerCount: 0,
         tabId: '',
         muted: false,
-        volume: 1
+        volume: 1,
+        tooninName: ''
     },
     mutations: {
         setRoomName(state, roomName) {
@@ -83,6 +93,10 @@ const store = new Vuex.Store({
         setRoomNameInputErrorMessage(state, errorMessage) {
             state.roomNameInputErrorMessages = [];
             state.roomNameInputErrorMessages.push(errorMessage);
+        },
+        tooninNameChange(state, tooninName) {
+            console.log('setRoomName: ' + tooninName);
+            state.tooninName = tooninName;
         },
         setState(state, appState) {
             var stateKeys = Object.keys(appState);
@@ -146,11 +160,20 @@ const store = new Vuex.Store({
         requestState() {
             console.log('state requested from background');
             port.postMessage({type: "requestState"});
+        },
+        startTooning(context) {
+            const roomName = context.state.tooninName;
+            console.log(`startTooning(${roomName})`);
+            port.postMessage({
+                type: "play",
+                roomName: roomName
+            });
         }
     }
 })
 
 port.onMessage.addListener((msg) => {
+    console.log("type" + msg.type);
     if (msg.type === "room creation fail") {
         store.dispatch("roomCreationFailed");
     }

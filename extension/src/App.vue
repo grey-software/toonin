@@ -14,11 +14,13 @@
 import { States } from "./app.js";
 import HomeView from "./HomeView.vue";
 import SharingView from "./SharingView.vue";
+import TooninView from "./TooninView.vue";
 
 export default {
   components: {
     HomeView,
-    SharingView
+    SharingView,
+    TooninView
   },
   beforeCreate() {
     this.$store.dispatch("requestState");
@@ -38,6 +40,14 @@ export default {
 :root {
   --color-blue: #4296bd;
   --color-title-text: #f6d45a;
+}
+
+.flex {
+  display:flex;
+}
+
+.column {
+  flex-direction:column;
 }
 
 .toonin-container {
@@ -71,6 +81,10 @@ export default {
 .title-icon {
   width: 102px;
   height: 102px;
+}
+
+.vue-create-input {
+  display:flex;
 }
 
 .v-input__slot {
