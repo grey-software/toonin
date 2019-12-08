@@ -1,16 +1,16 @@
 cd client-redesign
 npm install
 wait
-echo "npm on client has installed"
+echo "Client dependencies installed!"
 cd ..
 cd ./backend
 npm install
 wait
-echo "backend npm installed"
+echo "Backend dependencies installed!"
 cd ..
 cd ./extension
 npm install
-echo "extension npm installed"
+echo "Extension dependencies installed!"
 wait
 cd ..
-echo "Done";
+echo "Toonin dev setup complete!";
