@@ -1,7 +1,5 @@
 import io from "socket.io-client";
 
-const ENDPOINT = "https://www.toonin.ml:8443/";
-
 const servers = {
     iceServers: [
       {
@@ -18,8 +16,12 @@ const servers = {
 const SUCCESSFUL = "connected";
 const DISCONNECTED = "disconnected";
 const FAILED = "failed";
+const ENDPOINT = "https://www.toonin.ml:8443/";
 
+
+// ATTN: Uncomment accordingly for local/remote dev
 var socket = io(ENDPOINT, { secure: true });
+// var socket = io("http://127.0.0.1:8100");
 
 var incomingStream = null;
 var audioElem, playBtn, titleTag, disconnectBtn;
