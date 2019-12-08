@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "build": "webpack --config webpack.config.js ",
-    "dev": "webpack --config webpack.config.js --watch"
+    "build": "webpack",
+    "dev": "webpack --watch"
   },
   "dependencies": {
     "media-recorder-stream": "^2.2.0",
