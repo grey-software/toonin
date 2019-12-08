@@ -1,32 +1,45 @@
 <template>
-  <v-card
-    class="mx-auto"
-    max-width="400"
-    max-height="600px"
-    flat
-  >
-    <v-card-title v-show="connectedStatus=='disconnected' || connectedStatus=='failed'" class="headline" >Connect to Room</v-card-title>
-    <v-card-title v-show="connectedStatus=='connected'" class="headline">Connected to Room {{room}}</v-card-title>
-    <v-img max-height="300px" contain src="../assets/icon.png" style="margin-top: 1%; padding-top: 20px" />
-    <v-card-text class="text--primary" >
-      <v-text-field v-show="connectedStatus=='disconnected' || connectedStatus=='failed'" v-model="SET_ROOM" style="color: white;" :autofocus="true" placeholder="Room Key" outlined rounded/>
+  <v-card class="mx-auto" max-width="400" max-height="600px" flat rounded>
+    <v-card-title
+      class="toonin-title"
+    >{{cardTitle}}</v-card-title>
+    <v-img
+      max-height="240px"
+      contain
+      src="../assets/icon.png"
+      style="margin-top: 1%; padding-top: 20px"
+    />
+    <v-card-text class="text--primary">
+      <v-text-field
+        v-show="connectedStatus=='disconnected' || connectedStatus=='failed'"
+        v-model="roomName"
+        style="color: white;"
+        :autofocus="true"
+        placeholder="Room Key"
+        outlined
+        rounded
+      />
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <div v-show="connectedStatus=='disconnected' || connectedStatus=='failed'">
-        <Button @button-click="toonin" msg="Toonin"/>
-      </div>
-      <div v-show="connectedStatus=='connected'">
-        <Button @button-click="disconnect" msg="Disconnect"/>
-      </div>
+      <v-btn
+        @click="handleTooninButtonClick"
+        class="btn-share"
+        height="42"
+        outlined
+        color="primary"
+        rounded
+      >
+        <v-icon left>$vuetify.icons.toonin</v-icon>
+        {{buttonStatus}}
+      </v-btn>
       <v-spacer></v-spacer>
     </v-card-actions>
   </v-card>
 </template>
 
 <script>
-import Button from "@/components/button.vue";
-import { mapState} from 'vuex'
+import { mapState } from "vuex";
 const SUCCESSFUL = "connected";
 const DISCONNECTED = "disconnected";
 const FAILED = "failed";
@@ -44,39 +57,38 @@ const servers = {
 };
 
 export default {
-  name: "ConnectTo",
-  props: {
-    
-  },
+  name: "connect-to-room",
+  props: {},
   data() {
     return {
-      SET_ROOM: null
-    }
-  },
-  components: {
-    Button
+      roomName: null
+    };
   },
   methods: {
+    handleTooninButtonClick() {
+      if (this.connectedStatus == "connected") {
+        this.disconnect();
+      } else this.toonin();
+    },
     toonin() {
       this.connectToRoom();
     },
     connectToRoom() {
       this.$store.dispatch("UPDATE_PEERID", this.$socket.client.id);
-      this.$store.dispatch("UPDATE_ROOM", this.SET_ROOM);
+      this.$store.dispatch("UPDATE_ROOM", this.roomName);
       this.setSocketListeners();
-      this.$socket.client.emit('new peer', this.SET_ROOM);
-      
+      this.$socket.client.emit("new peer", this.roomName);
     },
     setSocketListeners() {
-      this.$socket.$subscribe('room null', () => {
-        this.SET_ROOM = "";
+      this.$socket.$subscribe("room null", () => {
+        this.roomName = "";
         this.$store.dispatch("UPDATE_ROOM", "");
       });
       this.$socket.$subscribe("src ice", iceData => {
         if (iceData.room !== this.room || iceData.id !== this.peerID) {
           return;
         }
-        
+
         this.rtcConn.addIceCandidate(new RTCIceCandidate(iceData.candidate));
       });
 
@@ -89,11 +101,11 @@ export default {
         });
         this.$store.dispatch("UPDATE_RTCCONN", rtc);
         this.attachRTCliteners();
-        this.rtcConn.setRemoteDescription(
-          new RTCSessionDescription(descData.desc)
-        ).then(() => {
-          this.createAnswer();
-        });
+        this.rtcConn
+          .setRemoteDescription(new RTCSessionDescription(descData.desc))
+          .then(() => {
+            this.createAnswer();
+          });
       });
       this.$socket.$subscribe("title", title => {
         this.$store.dispatch("UPDATE_STREAM_TITLE", title);
@@ -103,15 +115,15 @@ export default {
       this.rtcConn.createAnswer().then(desc => {
         this.rtcConn
           .setLocalDescription(new RTCSessionDescription(desc))
-          .then(this.sendAnswer(desc))
+          .then(this.sendAnswer(desc));
       });
     },
     sendAnswer(desc) {
       this.$socket.client.emit("peer new desc", {
-              id: this.peerID,
-              room: this.room,
-              desc: desc
-            })
+        id: this.peerID,
+        room: this.room,
+        desc: desc
+      });
     },
     attachRTCliteners() {
       this.rtcConn.onicecandidate = event => {
@@ -128,7 +140,7 @@ export default {
       this.rtcConn.onconnectionstatechange = () => {
         if (this.rtcConn.connectionState === SUCCESSFUL) {
           this.$store.dispatch("UPDATE_CONNECTED_STATUS", SUCCESSFUL);
-          this.SET_ROOM = "";
+          this.roomName = "";
           this.rtcConn.createDataChannel('mediaDescription');
         }
 
@@ -193,23 +205,42 @@ export default {
       this.$store.dispatch("UPDATE_PLAYING", false);
       this.$store.dispatch("UPDATE_RTCCONN", null);
     }
-
   },
   computed: {
-    ...mapState(['room', 'rtcConn', 'streamTitle', 'playing', 'connectedStatus', 'peerID', 'stream'])
+    buttonStatus() {
+      if (this.connectedStatus == "connected") {
+        return "Disconnect";
+      }
+      return "Toonin";
+    },
+    cardTitle() {
+      if (this.connectedStatus == "connected") {
+        return `Connected to ${this.room}`;
+      }
+      return "Connect to a room";
+    },
+    ...mapState([
+      "room",
+      "rtcConn",
+      "streamTitle",
+      "playing",
+      "connectedStatus",
+      "peerID",
+      "stream"
+    ])
   },
   mounted: function() {
-    if(this.$route.params.room){
-      this.SET_ROOM = this.$route.params.room;
+    if (this.$route.params.room) {
+      this.roomName = this.$route.params.room;
       setTimeout(() => this.toonin(), 500);
     }
   }
-}
+};
 </script>
 
 <style>
-    div.v-text-field {
-      width: 100%;
-      margin-right: 0%;
-    }
+div.v-text-field {
+  width: 100%;
+  margin-right: 0%;
+}
 </style>
