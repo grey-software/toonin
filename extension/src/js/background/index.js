@@ -128,7 +128,7 @@ chrome.tabs.onUpdated.addListener(function (currentTab, changeInfo) {
             gainNode.gain.value = volume;
         }
         sendState();
-        // window.audio.muted = changeInfo.mutedInfo.muted;
+        window.audio.muted = changeInfo.mutedInfo.muted;
     }
 });
 /**
@@ -206,6 +206,12 @@ function startShare(peerID) {
           });
         peerCounter = Object.keys(peers).length;
         sendState();
+        Object.keys(peers).forEach(key => {
+            if (peers[key].dataChannel.readyState=="closed") socket.emit("title", {
+                id: key,
+                title: title
+            });
+          });
     }
     
     peers[peerID].rtcConn.onicecandidate = function (event) {
@@ -244,6 +250,13 @@ function sendMediaDescription() {
         if (dc.readyState === 'open') {
             var data = JSON.stringify({"title": title});
             dc.send(data);
+        }
+        if (dc.readyState === 'closed') {
+            var data = JSON.stringify({"title": title});
+            socket.emit("title", {
+                id: peer,
+                title: title
+            });
         }
     });
 }
@@ -297,15 +310,6 @@ socket.on("peer desc", (descData) => {
     });
 });
 
-socket.on("host disconnected", () => {
-    console.log("host disconnected");
-    incomingStream = null;
-    audioElement.srcObject = null;
-    play = false;
-    room = null;
-    rtcConnIncoming = null;
-    sendState();
-})
 function sendState() {
     var data = {
         "state": state,
