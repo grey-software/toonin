@@ -1,25 +1,29 @@
 import io from "socket.io-client";
 
-const ENDPOINT = "https://www.toonin.ml:8443/";
+
 
 const servers = {
     iceServers: [
-      {
-        urls: [
-          "stun:stun.l.google.com:19302",
-          "stun:stun2.l.google.com:19302",
-          "stun:stun3.l.google.com:19302",
-          "stun:stun4.l.google.com:19302"
-        ]
-      }
+        {
+            urls: [
+                "stun:stun.l.google.com:19302",
+                "stun:stun2.l.google.com:19302",
+                "stun:stun3.l.google.com:19302",
+                "stun:stun4.l.google.com:19302"
+            ]
+        }
     ]
 };
 
 const SUCCESSFUL = "connected";
 const DISCONNECTED = "disconnected";
 const FAILED = "failed";
+const ENDPOINT = "https://www.toonin.ml:8443/";
 
+// ATTN: Uncomment accordingly for local/remote dev
 var socket = io(ENDPOINT, { secure: true });
+// var socket = io("http://127.0.0.1:8100");
+
 
 var incomingStream = null;
 var audioElem, playBtn, titleTag, disconnectBtn;
@@ -41,7 +45,7 @@ export function init(vueDataRef, audioElement, playRef, titleRef, disconnectRef)
     // disconnection
     window.onbeforeunload = (event) => { onCloseHandler(); }
     var key = window.location.pathname;
-    if(key !== '/') {
+    if (key !== '/') {
         checkstream(null, key.substr(1, key.length));
     }
 
@@ -61,12 +65,12 @@ function onCloseHandler() { socket.emit('logoff', { from: socket.id, to: state.r
  */
 function updateState(newState) {
     var alteredVars = Object.keys(newState);
-    for(var i = 0; i < alteredVars.length; i++) {
-        if(alteredVars[i] in state) {
+    for (var i = 0; i < alteredVars.length; i++) {
+        if (alteredVars[i] in state) {
             state[alteredVars[i]] = newState[alteredVars[i]];
         }
     }
-    
+
 }
 
 export function enablePlayback() { this.$refs.audio.muted = false; }
@@ -102,7 +106,7 @@ export function manualPlay() {
     logMessage('user played manually');
     audioElem.srcObject = incomingStream;
     audioElem.play();
-    updateState({isPlaying: audioElem.srcObject.active });
+    updateState({ isPlaying: audioElem.srcObject.active });
     disconnectBtn.$refs.link.hidden = false;
 }
 
@@ -132,21 +136,21 @@ export function checkstream() {
  * @param {String} result server response for the roomID provided by the user
  */
 export function checkStreamResult(result) {
-    
+
     if (result === "SUCCESS") {
         updateState({ roomFound: true });
         logMessage("Active session with ID: " + state.room + " found!");
         socket.emit("new peer", state.room);
         setSocketListeners(socket);
 
-        const rtcConn = new RTCPeerConnection(servers, { optional: [ { RtpDataChannels: true } ]});
+        const rtcConn = new RTCPeerConnection(servers, { optional: [{ RtpDataChannels: true }] });
         attachRTCliteners(rtcConn);
-        
+
         updateState({
             rtcConn: rtcConn,
             peerID: socket.id
         });
-        
+
     } else {
         updateState({
             room: "",
@@ -165,9 +169,9 @@ function onDataChannelMsg(messageEvent) {
         var mediaDescription = JSON.parse(messageEvent.data);
         updateState({ streamTitle: mediaDescription.title });
 
-        if(state.streamTitle.length > 0) {
+        if (state.streamTitle.length > 0) {
             titleTag.innerText = state.streamTitle;
-            if(state.streamTitle.length <= 41) {
+            if (state.streamTitle.length <= 41) {
                 titleTag.classList.remove('title-text');
                 titleTag.classList.add('title-text-no-animation');
             }
@@ -197,13 +201,13 @@ function attachRTCliteners(rtcConn) {
     }
 
     rtcConn.onconnectionstatechange = (ev) => {
-        if(rtcConn.connectionState === SUCCESSFUL) { 
-            updateState({ established: true }); 
+        if (rtcConn.connectionState === SUCCESSFUL) {
+            updateState({ established: true });
         }
-    
-        if(rtcConn.connectionState == DISCONNECTED || 
-        rtcConn.connectionState == FAILED) {
-            updateState({ 
+
+        if (rtcConn.connectionState == DISCONNECTED ||
+            rtcConn.connectionState == FAILED) {
+            updateState({
                 established: false,
                 isPlaying: false,
                 streamTitle: ""
@@ -237,9 +241,9 @@ function attachRTCliteners(rtcConn) {
                     stream: incomingStream
                 });
             }
-            
+
             audioElem.play().catch = (err) => { playBtn.$refs.link.hidden = false; }
-            
+
         }
     }
 
@@ -247,9 +251,9 @@ function attachRTCliteners(rtcConn) {
 
         logMessage('track added');
         incomingStream = new MediaStream([event.track]);
-        
+
         var _iOSDevice = !!navigator.platform.match(/iPhone|iPod|iPad|Macintosh|MacIntel/);
-        if(_iOSDevice) {
+        if (_iOSDevice) {
             playBtn.$refs.link.hidden = false;
             audioElem.srcObject = incomingStream;
             audioElem.onplay = () => {

@@ -168,7 +168,10 @@ function getTabAudio() {
 }
 
 console.log("application script running");
+// ATTN: Uncomment accordingly for local/remote dev
 var socket = io("https://www.toonin.ml:8443", {secure: true});
+// var socket = io("http://127.0.0.1:8100");
+
 var peers = {};
 var localAudioStream;
 var roomID;
