@@ -6,8 +6,8 @@
             <v-slider
             v-model="volume"
             prepend-icon="volume_up"
-            label="Volume"
             @change="volChange"
+            @click:prepend="mute"
             ></v-slider>
         </div>
         <div style="padding: 5px">
@@ -45,6 +45,10 @@ export default {
         },
         volChange(value) {
             this.audio.volume = value / 100;
+        },
+        mute() {
+            this.audio.volume = 0;
+            this.$store.dispatch("UPDATE_VOLUME", 0);
         }
     },
     computed: {
