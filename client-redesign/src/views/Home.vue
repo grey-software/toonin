@@ -25,9 +25,9 @@
 
 <script>
 import ConnectToRoom from "@/components/ConnectToRoom.vue";
-import ConnectionStatus from "@/components/connection.vue";
-import PlayerControls from "@/components/media.vue";
-import Title from "@/components/title.vue";
+import ConnectionStatus from "@/components/Connection.vue";
+import PlayerControls from "@/components/PlayerControls.vue";
+import Title from "@/components/Title.vue";
 export default {
   name: "Home",
   data: () => ({
