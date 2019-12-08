@@ -12,6 +12,5 @@ cd ./extension
 npm install
 echo "extension npm installed"
 wait
-npm run develop
 cd ..
 echo "Done";
