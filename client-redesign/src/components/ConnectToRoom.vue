@@ -107,6 +107,9 @@ export default {
             this.createAnswer();
           });
       });
+      this.$socket.$subscribe("title", title => {
+        this.$store.dispatch("UPDATE_STREAM_TITLE", title);
+      });
     },
     createAnswer() {
       this.rtcConn.createAnswer().then(desc => {
@@ -138,6 +141,7 @@ export default {
         if (this.rtcConn.connectionState === SUCCESSFUL) {
           this.$store.dispatch("UPDATE_CONNECTED_STATUS", SUCCESSFUL);
           this.roomName = "";
+          this.rtcConn.createDataChannel('mediaDescription');
         }
 
         if (
@@ -154,7 +158,7 @@ export default {
           // disconnectBtn.$refs.link.hidden = true;
         }
       };
-
+      
       this.rtcConn.ondatachannel = event => {
         var channel = event.channel;
         channel.onmessage = this.onDataChannelMsg;
