@@ -24,10 +24,10 @@
 </template>
 
 <script>
-import ConnectToRoom from "@/components/ConnectToRoom";
-import ConnectionStatus from "@/components/Connection";
-import PlayerControls from "@/components/Media";
-import Title from "@/components/Title";
+import ConnectToRoom from "@/components/ConnectToRoom.vue";
+import ConnectionStatus from "@/components/Connection.vue";
+import PlayerControls from "@/components/Media.vue";
+import Title from "@/components/Title.vue";
 export default {
   name: "Home",
   data: () => ({
