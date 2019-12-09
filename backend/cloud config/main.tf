@@ -95,7 +95,7 @@ resource "aws_elb" "toonin-backend-elb" {
     unhealthy_threshold = 2
     timeout = 3
     interval = 10
-    target = "HTTP:443/"
+    target = "HTTP:443/elb-health-check"
   }
 }
 
