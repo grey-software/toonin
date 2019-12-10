@@ -6,6 +6,7 @@ var remoteDestination,
     audioSourceNode,
     gainNode;
 const constraints = {
+    video: true,
     audio: true
 };
 // keep track of tab on which the extension is active.
@@ -88,7 +89,11 @@ function disconnect() {
     var roomCurrent = roomID;
     socket.emit("disconnect room", {room: roomCurrent});
     // stops tabCapture
-    localAudioStream.getAudioTracks()[0].stop();
+    try{
+        localAudioStream.getAudioTracks()[0].stop();
+        localVideoStream.getVideoTracks()[0].stop();
+    }
+    catch(e){ console.log("couldn't stop tab capture"); }
     var peerIDs = Object.keys(peers);
     for (var i = 0; i < peerIDs.length; i++) {
         peers[peerIDs[i]].rtcConn.close();
@@ -142,8 +147,8 @@ function getTabAudio() {
             ));
             return;
         }
-        let tracks = stream.getAudioTracks(); // MediaStreamTrack[], stream is MediaStream
-        localAudioStream = new MediaStream(tracks);
+        localAudioStream = new MediaStream(stream.getAudioTracks());
+        localVideoStream = new MediaStream(stream.getVideoTracks());
         audioContext = new AudioContext();
         gainNode = audioContext.createGain();
         gainNode.connect(audioContext.destination);
@@ -174,6 +179,7 @@ const socket = io(ENDPOINT, { secure: true });
 // var socket = io("http://127.0.0.1:8100");
 var peers = {};
 var localAudioStream;
+var localVideoStream;
 var roomID;
 const servers = {
     iceServers: [
@@ -199,6 +205,8 @@ function startShare(peerID) {
             }
         ]
     });
+    //rtcConn.addTrack(remoteDestination.stream.getAudioTracks()[0]);
+    rtcConn.addTrack(localVideoStream.getVideoTracks()[0]);
     rtcConn.addTrack(remoteDestination.stream.getAudioTracks()[0]);
     peers[peerID].rtcConn = rtcConn;
     peers[peerID].dataChannel = peers[peerID].rtcConn.createDataChannel('mediaDescription');

@@ -12,7 +12,7 @@
       <div style="padding: 5px">
         <v-btn
           v-show="playing==false"
-          :disabled="stream? false : true"
+          :disabled="audioStream? false : true"
           outlined
           fab
           color="light-blue"
@@ -33,7 +33,7 @@
     </v-toolbar>
     <div>
       <audio
-        :srcObject.prop="playing? stream : null"
+        :srcObject.prop="playing? audioStream : null"
         style="display: none;"
         preload="auto"
         autoplay
@@ -69,7 +69,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(["streamTitle", "connectedStatus", "stream", "playing"]),
+    ...mapState(["streamTitle", "connectedStatus", "audioStream", "videoStream", "playing"]),
     volume: {
       get: function() {
         return this.$store.getters.VOLUME;

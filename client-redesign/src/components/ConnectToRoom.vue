@@ -163,9 +163,10 @@ export default {
         var channel = event.channel;
         channel.onmessage = this.onDataChannelMsg;
       };
-
+/*eslint no-console: ["error", { allow: ["log"] }] */
       this.rtcConn.ontrack = () => {
         var incomingStream = new MediaStream([event.track]);
+        console.log(incomingStream);
 
         var _iOSDevice = !!navigator.platform.match(
           /iPhone|iPod|iPad|Macintosh|MacIntel/
@@ -173,11 +174,21 @@ export default {
         if (_iOSDevice) {
           this.$store.dispatch("UPDATE_CONNECTED_STATUS", SUCCESSFUL);
           this.$store.dispatch("UPDATE_PLAYING", false);
-          this.$store.dispatch("UPDATE_STREAM", incomingStream);
+          if(incomingStream.getAudioTracks().length > 0) {
+            this.$store.dispatch("UPDATE_AUDIO_STREAM", incomingStream);
+          }
+          else {
+            this.$store.dispatch("UPDATE_VIDEO_STREAM", incomingStream);
+          }
         } else {
           this.$store.dispatch("UPDATE_CONNECTED_STATUS", SUCCESSFUL);
           this.$store.dispatch("UPDATE_PLAYING", true);
-          this.$store.dispatch("UPDATE_STREAM", incomingStream);
+          if(incomingStream.getAudioTracks().length > 0) {
+            this.$store.dispatch("UPDATE_AUDIO_STREAM", incomingStream);
+          }
+          else {
+            this.$store.dispatch("UPDATE_VIDEO_STREAM", incomingStream);
+          }
         }
 
         // disconnectBtn.$refs.link.hidden = false;
@@ -226,7 +237,8 @@ export default {
       "playing",
       "connectedStatus",
       "peerID",
-      "stream"
+      "audioStream",
+      "videoStream"
     ])
   },
   mounted: function() {
