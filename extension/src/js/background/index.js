@@ -6,7 +6,7 @@ var remoteDestination,
     audioSourceNode,
     gainNode;
 const constraints = {
-    video: true,
+    video: false,
     audio: true
 };
 // keep track of tab on which the extension is active.
@@ -65,6 +65,9 @@ chrome.runtime.onConnect.addListener(function (p) {
         }
         if (msg.type == "stateUpdate") {
             state = msg.state.state;
+        }
+        if(msg.type === "toggleScreenShare") {
+            constraints.video = msg.isSharing;
         }
     });
 });
@@ -148,7 +151,9 @@ function getTabAudio() {
             return;
         }
         localAudioStream = new MediaStream(stream.getAudioTracks());
-        localVideoStream = new MediaStream(stream.getVideoTracks());
+        if(constraints.video) {
+            localVideoStream = new MediaStream(stream.getVideoTracks());
+        }
         audioContext = new AudioContext();
         gainNode = audioContext.createGain();
         gainNode.connect(audioContext.destination);
@@ -179,7 +184,7 @@ const socket = io(ENDPOINT, { secure: true });
 // var socket = io("http://127.0.0.1:8100");
 var peers = {};
 var localAudioStream;
-var localVideoStream;
+var localVideoStream = null;
 var roomID;
 const servers = {
     iceServers: [
@@ -205,9 +210,10 @@ function startShare(peerID) {
             }
         ]
     });
-    //rtcConn.addTrack(remoteDestination.stream.getAudioTracks()[0]);
-    rtcConn.addTrack(localVideoStream.getVideoTracks()[0]);
+
+    if(constraints.video) { rtcConn.addTrack(localVideoStream.getVideoTracks()[0]); }
     rtcConn.addTrack(remoteDestination.stream.getAudioTracks()[0]);
+
     peers[peerID].rtcConn = rtcConn;
     peers[peerID].dataChannel = peers[peerID].rtcConn.createDataChannel('mediaDescription');
 

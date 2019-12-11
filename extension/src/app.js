@@ -146,6 +146,9 @@ const store = new Vuex.Store({
         requestState() {
             console.log('state requested from background');
             port.postMessage({type: "requestState"});
+        },
+        toggleScreenShare(state, checked=false) {
+            port.postMessage({ type: 'toggleScreenShare', isSharing: checked });
         }
     }
 })

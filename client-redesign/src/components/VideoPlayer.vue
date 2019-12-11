@@ -3,10 +3,12 @@
   style="height: 50%; width: 50%; margin-left: 25%; padding: 0%;" 
   :hidden="playing ? false : true"
   :elevation="20"
+  v-show="videoStream !== null"
   >
 
     <video 
     ref="videoPlayer"
+    v-show="videoStream !== null"
     style="margin: 0%; width: 100%; height: 100%;"
     :srcObject.prop="playing? videoStream : null"
     @click="requestFullScreen"
