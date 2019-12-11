@@ -9,25 +9,25 @@
         <v-timeline>
 
           <v-timeline-item :color="room != '' ? '#4CAF50' : '#F44336'" fill-dot>
-            <v-card style="width: 250px;" class="statusCard">
+            <v-card style="width: 250px;" class="statusCard" :elevation="4">
               <a class="statusCardRightText">Waiting</a>
             </v-card>
           </v-timeline-item>
 
           <v-timeline-item :color="room!='' ? '#4CAF50' : '#F44336'" fill-dot>
-            <v-card class="statusCard">
+            <v-card class="statusCard" :elevation="4">
               <a class="statusCardLeftText">Room found</a>
             </v-card> 
           </v-timeline-item>
 
           <v-timeline-item :color="connectedStatus=='connected' ? '#4CAF50' : '#F44336'" fill-dot >
-            <v-card class="statusCard">
+            <v-card class="statusCard" :elevation="4">
               <a class="statusCardRightText">Connected</a>
             </v-card>  
           </v-timeline-item>
 
           <v-timeline-item :color="playing ? '#4CAF50' : '#F44336'" fill-dot >
-            <v-card class="statusCard">
+            <v-card class="statusCard" :elevation="4">
               <a class="statusCardLeftText">Playing</a>
             </v-card>
           </v-timeline-item>

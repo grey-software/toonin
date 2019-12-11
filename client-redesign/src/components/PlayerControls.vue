@@ -1,7 +1,7 @@
 <template>
   <v-card class="mx-auto" max-width="400px">
-    <v-toolbar flat height="90">
-      <div style="width: 75%; padding-top: 2%">
+    <v-toolbar flat height="80" :elevation="20">
+      <div style="width: 75%; padding-top: 6%">
         <v-slider
           v-model="volume"
           prepend-icon="volume_up"
@@ -9,7 +9,7 @@
           @click:prepend="mute"
         ></v-slider>
       </div>
-      <div style="padding: 5px">
+      <div style="padding: 5px; margin-left: 5%;">
         <v-btn
           v-show="playing==false"
           :disabled="audioStream? false : true"

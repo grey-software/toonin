@@ -12,13 +12,11 @@
         </v-layout>
       </v-container>
       <v-container>
+        <video-player></video-player><br>
         <player-controls @volume-change="volumeHandler" />
         <Title />
       </v-container>
 
-      <br><br>
-
-      <video-player></video-player>
     </v-content>
     <v-footer app>
       <v-spacer></v-spacer>

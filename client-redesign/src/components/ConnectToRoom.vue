@@ -1,5 +1,5 @@
 <template>
-  <v-card class="mx-auto" max-width="400" max-height="600px" flat rounded>
+  <v-card class="mx-auto" max-width="400" max-height="600px" flat rounded :elevation="8">
     <v-card-title
       class="toonin-title"
     >{{cardTitle}}</v-card-title>
@@ -208,7 +208,8 @@ export default {
     },
     disconnect() {
       this.rtcConn.close();
-      this.$store.dispatch("UPDATE_STREAM", null);
+      this.$store.dispatch("UPDATE_AUDIO_STREAM", null);
+      this.$store.dispatch("UPDATE_VIDEO_STREAM", null);
       this.$store.dispatch("UPDATE_CONNECTED_STATUS", DISCONNECTED);
       this.$store.dispatch("UPDATE_ROOM", "");
       this.$store.dispatch("UPDATE_PEERID", null);
