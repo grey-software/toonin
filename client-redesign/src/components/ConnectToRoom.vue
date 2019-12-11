@@ -154,6 +154,8 @@ export default {
           this.$store.dispatch("UPDATE_STREAM_TITLE", "");
           this.$store.dispatch("UPDATE_PLAYING", false);
           this.$store.dispatch("UPDATE_RTCCONN", null);
+          this.$store.dispatch("UPDATE_AUDIO_STREAM", null);
+          this.$store.dispatch("UPDATE_VIDEO_STREAM", null);
 
           // disconnectBtn.$refs.link.hidden = true;
         }
@@ -163,10 +165,9 @@ export default {
         var channel = event.channel;
         channel.onmessage = this.onDataChannelMsg;
       };
-/*eslint no-console: ["error", { allow: ["log"] }] */
+
       this.rtcConn.ontrack = () => {
         var incomingStream = new MediaStream([event.track]);
-        console.log(incomingStream);
 
         var _iOSDevice = !!navigator.platform.match(
           /iPhone|iPod|iPad|Macintosh|MacIntel/
