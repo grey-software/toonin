@@ -142,13 +142,16 @@ const store = new Vuex.Store({
             router.push({name: 'home'});
             context.commit("resetState");
             context.commit("saveState")
+            context.dispatch("toggleScreenShare", false);
         },
         requestState() {
             console.log('state requested from background');
             port.postMessage({type: "requestState"});
         },
         toggleScreenShare(state, checked=false) {
-            port.postMessage({ type: 'toggleScreenShare', isSharing: checked });
+            if(this.state.state === States.HOME) {
+                port.postMessage({ type: 'toggleScreenShare', isSharing: checked });
+            }
         }
     }
 })
@@ -178,6 +181,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         store.commit("setState", request.data);
         if(store.state.state === States.HOME) { 
             router.push({name: 'home'}).catch((err) => {});
+            store.dispatch("toggleScreenShare", false);
         }
         else if(store.state.state === States.SHARING) { 
             router.push({name: "sharing"}).catch((err) => {});

@@ -21,7 +21,6 @@ export default {
     SharingView
   },
   beforeCreate() {
-    this.$store.dispatch("toggleScreenShare");
     this.$store.dispatch("requestState");
   },
   data() {
