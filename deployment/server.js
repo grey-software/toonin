@@ -131,7 +131,7 @@ app.get("/status", (req, res) => {
   console.log(rooms);
 });
 
-const staticFileMiddleware = express.static('../app/dist')
+const staticFileMiddleware = express.static('../client/dist')
 
 app.use(staticFileMiddleware)
 app.use(history({
@@ -141,7 +141,7 @@ app.use(history({
 app.use(staticFileMiddleware)
 
 app.get('/', function (req, res) {
-  res.render('../app/dist/index.html')
+  res.render('../client/dist/index.html')
 })
 
 http.listen(port, () => {
