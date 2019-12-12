@@ -101,6 +101,15 @@ io.on("connection", socket => {
     console.log(title)
     io.to(title.id).emit("title", title.title);
   });
+
+  // socket.emit("disconnect room", {room: roomCurrent});
+  socket.on('disconnect room', (req) => {
+    console.log('closing room ' + req.room);
+    delete rooms[req.room];
+    delete socket.rooms[req.room];
+
+    console.log(rooms);
+  })
 });
 
 // clear rooms list through an http request with key as query

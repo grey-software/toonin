@@ -92,11 +92,12 @@ function disconnect() {
     var roomCurrent = roomID;
     socket.emit("disconnect room", {room: roomCurrent});
     // stops tabCapture
-    try{
-        localAudioStream.getAudioTracks()[0].stop();
-        localVideoStream.getVideoTracks()[0].stop();
-    }
-    catch(e){ console.log("couldn't stop tab capture"); }
+    try{ localAudioStream.getAudioTracks()[0].stop(); }
+    catch(e){ console.log("couldn't stop audio capture"); }
+
+    try{ localVideoStream.getVideoTracks()[0].stop(); }
+    catch(e){ console.log("couldn't stop video capture"); }
+
     var peerIDs = Object.keys(peers);
     for (var i = 0; i < peerIDs.length; i++) {
         peers[peerIDs[i]].rtcConn.close();
@@ -180,8 +181,8 @@ function getTabAudio() {
 console.log("application script running");
 // ATTN: Uncomment accordingly for local/remote dev
 const ENDPOINT = "https://www.toonin.ml:8443/";
-const socket = io(ENDPOINT, { secure: true });
-// var socket = io("http://127.0.0.1:8100");
+//const socket = io(ENDPOINT, { secure: true });
+var socket = io("http://127.0.0.1:8100");
 var peers = {};
 var localAudioStream;
 var localVideoStream = null;
