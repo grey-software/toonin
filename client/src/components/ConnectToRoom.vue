@@ -14,7 +14,8 @@
         v-show="connectedStatus=='disconnected' || connectedStatus=='failed'"
         v-model="roomName"
         style="color: white;"
-        :autofocus="true"
+        autofocus
+        @keydown.enter="toonin"
         placeholder="Room Key"
         outlined
         rounded
@@ -24,13 +25,14 @@
       <v-spacer></v-spacer>
       <v-btn
         @click="handleTooninButtonClick"
-        class="btn-share"
+        class="btn-share pr-4"
         height="42"
         outlined
         color="primary"
         rounded
       >
-        <v-icon left>$vuetify.icons.toonin</v-icon>
+        <v-icon v-if="connectedStatus === 'connected'" left>mdi-stop</v-icon>
+        <v-icon v-else left>$vuetify.icons.toonin</v-icon>
         {{buttonStatus}}
       </v-btn>
       <v-spacer></v-spacer>
@@ -166,7 +168,7 @@ export default {
         channel.onmessage = this.onDataChannelMsg;
       };
 
-      this.rtcConn.ontrack = (event) => {
+      this.rtcConn.ontrack = event => {
         var incomingStream = new MediaStream([event.track]);
 
         var _iOSDevice = !!navigator.platform.match(
