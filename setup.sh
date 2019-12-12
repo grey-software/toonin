@@ -1,4 +1,4 @@
-cd client-redesign
+cd client
 npm install
 wait
 echo "Client dependencies installed!"
