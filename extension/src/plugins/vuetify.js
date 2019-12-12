@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuetify from 'vuetify/lib'
-import TooninIcon from '../TooninIcon.vue'
+import TooninIcon from '../Vue/TooninIcon.vue'
 
 
 Vue.use(Vuetify)

@@ -1,10 +1,11 @@
 import Vue from 'vue';
 import vuetify from './plugins/vuetify' // path to vuetify export
-import App from './App.vue';
 import Vuex from 'vuex'
-// import { sync } from 'vuex-router-sync'
 import VueRouter from "vue-router"
 
+import App from './Vue/App.vue';
+import HomeView from "./Vue/HomeView.vue";
+import SharingView from "./Vue/SharingView.vue";
 Vue.use(VueRouter)
 Vue.use(Vuex);
 
@@ -18,8 +19,6 @@ function makeid(length) {
     return result;
 }
 
-import HomeView from "./HomeView.vue";
-import SharingView from "./SharingView.vue";
 
 const routes = [
     {
@@ -179,11 +178,11 @@ const app = new Vue({
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (request.message === "extension-state") {
         store.commit("setState", request.data);
-        if(store.state.state === States.HOME) { 
+        if(store.state.state === States.HOME) {
             router.push({name: 'home'}).catch((err) => {});
             store.dispatch("toggleScreenShare", false);
         }
-        else if(store.state.state === States.SHARING) { 
+        else if(store.state.state === States.SHARING) {
             router.push({name: "sharing"}).catch((err) => {});
         }
     }

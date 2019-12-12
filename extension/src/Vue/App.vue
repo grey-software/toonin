@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import { States } from "./app.js";
+import { States } from "../app.js";
 import HomeView from "./HomeView.vue";
 import SharingView from "./SharingView.vue";
 
@@ -48,7 +48,7 @@ export default {
 .title-container {
   width: 477px;
   height: 158px;
-  background: url("title-background.png");
+  background: url("../title-background.png");
   background-size: 532px 158px;
   padding: 24px 32px;
   display: flex;
