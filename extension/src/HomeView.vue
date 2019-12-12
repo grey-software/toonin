@@ -12,6 +12,7 @@
       outlined
       rounded
       autofocus
+      @keydown.enter="startShare"
     ></v-text-field>
 
     <v-checkbox 
