@@ -18,15 +18,30 @@ bash setup.sh
 
 ## Running Toonin
 
-### client
-Use [Vue UI](https://cli.vuejs.org/guide/) to import and run the web app. 
+### Running the web app
+Enter the web app directory and serve the app on your machine
+```sh
+cd client
+npm run serve
+```
 
-### extension
-Run ``npm run build`` to run the webpack build script for the extension. Once the extension is packed under the build directory, load it into chrome as per [this guide](https://developer.chrome.com/extensions/getstarted)
+### Running the extension
+Enter the extension directory and run the development script for the extension. 
+```sh
+cd extension
+npm run dev
+```
 
-### backend
-``node index.js`` will run the signaling server on your local machine at port 8100 
+This packs the extension under the build directory and watches your extension files for local changes. 
 
-![Grey Software](https://github.com/grey-software/Grey-Software/blob/master/grey-software.png?raw=true)
+Use [this guide](https://developer.chrome.com/extensions/getstarted) to load the extension into chrome. 
+
+### Running the signalling server
+Enter the backend directory and run the signalling server. 
+```sh
+cd backend
+node index.js
+```
 
 
+[![Grey Software](https://github.com/grey-software/Grey-Software/blob/master/grey-software.png?raw=true)](https://greysoftware.webflow.io)
