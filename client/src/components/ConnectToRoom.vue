@@ -166,7 +166,7 @@ export default {
         channel.onmessage = this.onDataChannelMsg;
       };
 
-      this.rtcConn.ontrack = () => {
+      this.rtcConn.ontrack = (event) => {
         var incomingStream = new MediaStream([event.track]);
 
         var _iOSDevice = !!navigator.platform.match(
