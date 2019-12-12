@@ -1,5 +1,6 @@
 <template>
   <div class="body-container">
+    <div style="margin-bottom: 0%;">
     <v-text-field
       :value="roomName"
       @change="setRoomName"
@@ -12,16 +13,27 @@
       rounded
       autofocus
     ></v-text-field>
-    <v-btn
-      :disabled="!roomNameValid"
-      @click="startShare"
-      class="btn-share"
-      height="42"
-      outlined
+
+    <v-checkbox 
+      style="margin-bottom: 0%; margin-top: -5%; margin-left: 5%;"
+      label="Share Screen"
       color="primary"
-      rounded
+      @change="toggleScreenShare"
+      >
+      </v-checkbox>
+    </div>
+      
+    <v-btn
+    :disabled="!roomNameValid"
+    @click="startShare"
+    class="btn-share"
+    height="42"
+    outlined
+    color="primary"
+    rounded
+    style="margin-left: 10%;"
     >
-      <v-icon left>$vuetify.icons.toonin</v-icon>Share
+    <v-icon left>$vuetify.icons.toonin</v-icon>Share
     </v-btn>
   </div>
 </template>
@@ -35,7 +47,7 @@ export default {
     ...mapState(["roomName", "roomNameValid", "roomNameInputErrorMessages"])
   },
   methods: {
-    ...mapActions(["randomRoomName", "startShare"]),
+    ...mapActions(["randomRoomName", "startShare", "toggleScreenShare"]),
     ...mapMutations(["setRoomName"])
   }
 };

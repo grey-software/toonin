@@ -12,9 +12,11 @@
         </v-layout>
       </v-container>
       <v-container>
+        <video-player></video-player><br>
         <player-controls @volume-change="volumeHandler" />
         <Title />
       </v-container>
+
     </v-content>
     <v-footer app>
       <v-spacer></v-spacer>
@@ -28,6 +30,7 @@ import ConnectToRoom from "@/components/ConnectToRoom.vue";
 import ConnectionStatus from "@/components/Connection.vue";
 import PlayerControls from "@/components/PlayerControls.vue";
 import Title from "@/components/Title.vue";
+import VideoPlayer from "@/components/VideoPlayer.vue";
 export default {
   name: "Home",
   data: () => ({
@@ -37,7 +40,8 @@ export default {
     ConnectToRoom,
     ConnectionStatus,
     PlayerControls,
-    Title
+    Title,
+    VideoPlayer
   },
   methods: {
     volumeHandler(volume) {

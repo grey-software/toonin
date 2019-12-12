@@ -1,5 +1,5 @@
 <template>
-  <v-card class="mx-auto" max-width="400" max-height="600px" flat rounded>
+  <v-card class="mx-auto" max-width="400" max-height="600px" flat rounded :elevation="8">
     <v-card-title
       class="toonin-title"
     >{{cardTitle}}</v-card-title>
@@ -154,6 +154,8 @@ export default {
           this.$store.dispatch("UPDATE_STREAM_TITLE", "");
           this.$store.dispatch("UPDATE_PLAYING", false);
           this.$store.dispatch("UPDATE_RTCCONN", null);
+          this.$store.dispatch("UPDATE_AUDIO_STREAM", null);
+          this.$store.dispatch("UPDATE_VIDEO_STREAM", null);
 
           // disconnectBtn.$refs.link.hidden = true;
         }
@@ -173,11 +175,21 @@ export default {
         if (_iOSDevice) {
           this.$store.dispatch("UPDATE_CONNECTED_STATUS", SUCCESSFUL);
           this.$store.dispatch("UPDATE_PLAYING", false);
-          this.$store.dispatch("UPDATE_STREAM", incomingStream);
+          if(incomingStream.getAudioTracks().length > 0) {
+            this.$store.dispatch("UPDATE_AUDIO_STREAM", incomingStream);
+          }
+          else {
+            this.$store.dispatch("UPDATE_VIDEO_STREAM", incomingStream);
+          }
         } else {
           this.$store.dispatch("UPDATE_CONNECTED_STATUS", SUCCESSFUL);
           this.$store.dispatch("UPDATE_PLAYING", true);
-          this.$store.dispatch("UPDATE_STREAM", incomingStream);
+          if(incomingStream.getAudioTracks().length > 0) {
+            this.$store.dispatch("UPDATE_AUDIO_STREAM", incomingStream);
+          }
+          else {
+            this.$store.dispatch("UPDATE_VIDEO_STREAM", incomingStream);
+          }
         }
 
         // disconnectBtn.$refs.link.hidden = false;
@@ -197,7 +209,8 @@ export default {
     },
     disconnect() {
       this.rtcConn.close();
-      this.$store.dispatch("UPDATE_STREAM", null);
+      this.$store.dispatch("UPDATE_AUDIO_STREAM", null);
+      this.$store.dispatch("UPDATE_VIDEO_STREAM", null);
       this.$store.dispatch("UPDATE_CONNECTED_STATUS", DISCONNECTED);
       this.$store.dispatch("UPDATE_ROOM", "");
       this.$store.dispatch("UPDATE_PEERID", null);
@@ -226,7 +239,8 @@ export default {
       "playing",
       "connectedStatus",
       "peerID",
-      "stream"
+      "audioStream",
+      "videoStream"
     ])
   },
   mounted: function() {
