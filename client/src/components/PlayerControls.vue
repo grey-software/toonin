@@ -1,15 +1,15 @@
 <template>
-  <v-card class="mx-auto" max-width="400px">
-    <v-toolbar flat height="80" :elevation="20">
-      <div style="width: 75%; padding-top: 6%">
+  <v-card class="controls-container mx-auto">
+    <v-row class="controls-row px-4">
+      <v-col class="mt-5">
         <v-slider
           v-model="volume"
           prepend-icon="volume_up"
           @change="volChange"
           @click:prepend="mute"
         ></v-slider>
-      </div>
-      <div style="padding: 5px; margin-left: 5%;">
+      </v-col>
+      <v-col cols="3">
         <v-btn
           v-show="playing==false"
           :disabled="audioStream? false : true"
@@ -29,9 +29,7 @@
         >
           <v-icon large>pause</v-icon>
         </v-btn>
-      </div>
-    </v-toolbar>
-    <div>
+      </v-col>
       <audio
         :srcObject.prop="playing? audioStream : null"
         style="display: none;"
@@ -39,7 +37,7 @@
         autoplay
         ref="audio"
       />
-    </div>
+    </v-row>
   </v-card>
 </template>
 
@@ -69,7 +67,13 @@ export default {
     }
   },
   computed: {
-    ...mapState(["streamTitle", "connectedStatus", "audioStream", "videoStream", "playing"]),
+    ...mapState([
+      "streamTitle",
+      "connectedStatus",
+      "audioStream",
+      "videoStream",
+      "playing"
+    ]),
     volume: {
       get: function() {
         return this.$store.getters.VOLUME;
@@ -85,5 +89,19 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
+
+.controls-container {
+  max-width: 400px;
+  border-radius: 16px !important;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+}
+
+.controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 </style>
