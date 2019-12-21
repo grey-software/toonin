@@ -6,6 +6,11 @@ const history = require('connect-history-api-fallback')
 
 const app = express()
 
+app.get('/elb-health-check', (req, res) => {
+	res.status(200);
+	res.send('client is alive');
+});
+
 const staticFileMiddleware = express.static(path.join(__dirname + '/dist'))
 
 app.use(staticFileMiddleware)

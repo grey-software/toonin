@@ -6,6 +6,7 @@ var remoteDestination,
     audioSourceNode,
     gainNode;
 const constraints = {
+    video: false,
     audio: true
 };
 // keep track of tab on which the extension is active.
@@ -65,6 +66,9 @@ chrome.runtime.onConnect.addListener(function (p) {
         if (msg.type == "stateUpdate") {
             state = msg.state.state;
         }
+        if(msg.type === "toggleScreenShare") {
+            constraints.video = msg.isSharing;
+        }
     });
 });
 chrome.tabs.onRemoved.addListener(function (tabId, removed) {
@@ -88,7 +92,12 @@ function disconnect() {
     var roomCurrent = roomID;
     socket.emit("disconnect room", {room: roomCurrent});
     // stops tabCapture
-    localAudioStream.getAudioTracks()[0].stop();
+    try{ localAudioStream.getAudioTracks()[0].stop(); }
+    catch(e){ console.log("couldn't stop audio capture"); }
+
+    try{ localVideoStream.getVideoTracks()[0].stop(); }
+    catch(e){ console.log("couldn't stop video capture"); }
+
     var peerIDs = Object.keys(peers);
     for (var i = 0; i < peerIDs.length; i++) {
         peers[peerIDs[i]].rtcConn.close();
@@ -128,7 +137,7 @@ chrome.tabs.onUpdated.addListener(function (currentTab, changeInfo) {
             gainNode.gain.value = volume;
         }
         sendState();
-        // window.audio.muted = changeInfo.mutedInfo.muted;
+        window.audio.muted = changeInfo.mutedInfo.muted;
     }
 });
 /**
@@ -142,8 +151,10 @@ function getTabAudio() {
             ));
             return;
         }
-        let tracks = stream.getAudioTracks(); // MediaStreamTrack[], stream is MediaStream
-        localAudioStream = new MediaStream(tracks);
+        localAudioStream = new MediaStream(stream.getAudioTracks());
+        if(constraints.video) {
+            localVideoStream = new MediaStream(stream.getVideoTracks());
+        }
         audioContext = new AudioContext();
         gainNode = audioContext.createGain();
         gainNode.connect(audioContext.destination);
@@ -168,10 +179,13 @@ function getTabAudio() {
 }
 
 console.log("application script running");
-//var socket = io("https://www.toonin.ml:8443", {secure: true});
-var socket = io('http://localhost:8100');
+// ATTN: Uncomment accordingly for local/remote dev
+const ENDPOINT = "https://www.toonin.ml:8443/";
+const socket = io(ENDPOINT, { secure: true });
+//var socket = io("http://127.0.0.1:8100");
 var peers = {};
 var localAudioStream;
+var localVideoStream = null;
 var roomID;
 const servers = {
     iceServers: [
@@ -197,7 +211,10 @@ function startShare(peerID) {
             }
         ]
     });
+
+    if(constraints.video) { rtcConn.addTrack(localVideoStream.getVideoTracks()[0]); }
     rtcConn.addTrack(remoteDestination.stream.getAudioTracks()[0]);
+
     peers[peerID].rtcConn = rtcConn;
     peers[peerID].dataChannel = peers[peerID].rtcConn.createDataChannel('mediaDescription');
 
@@ -207,6 +224,12 @@ function startShare(peerID) {
           });
         peerCounter = Object.keys(peers).length;
         sendState();
+        Object.keys(peers).forEach(key => {
+            if (peers[key].dataChannel.readyState=="closed") socket.emit("title", {
+                id: key,
+                title: title
+            });
+          });
     }
     
     peers[peerID].rtcConn.onicecandidate = function (event) {
@@ -245,6 +268,13 @@ function sendMediaDescription() {
         if (dc.readyState === 'open') {
             var data = JSON.stringify({"title": title});
             dc.send(data);
+        }
+        if (dc.readyState === 'closed') {
+            var data = JSON.stringify({"title": title});
+            socket.emit("title", {
+                id: peer,
+                title: title
+            });
         }
     });
 }
@@ -298,15 +328,6 @@ socket.on("peer desc", (descData) => {
     });
 });
 
-socket.on("host disconnected", () => {
-    console.log("host disconnected");
-    incomingStream = null;
-    audioElement.srcObject = null;
-    play = false;
-    room = null;
-    rtcConnIncoming = null;
-    sendState();
-})
 function sendState() {
     var data = {
         "state": state,

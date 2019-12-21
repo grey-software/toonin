@@ -28,5 +28,5 @@ backend/cloud config/terraform.tfstate
 backend/cloud config/terraform.tfvars
 backend/cloud config/.terraform
 
-client-redesign/dist
-client-redesign/node_modules
+client/dist
+client/node_modules

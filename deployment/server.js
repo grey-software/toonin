@@ -5,7 +5,7 @@ var cors = require("cors");
 app.use(cors());
 var http = require("http").Server(app);
 var io = require("socket.io")(http);
-var vars = require("../vars");
+var vars = require("./vars");
 const path = require('path')
 const history = require('connect-history-api-fallback')
 var rooms = {};
@@ -105,6 +105,11 @@ io.on("connection", socket => {
     console.log(`Received answer description from peer: ${descData.id} in room: ${descData.room}`);
     socket.to(descData.room).emit("peer desc", descData);
   });
+
+  socket.on("title", title => {
+    console.log(title)
+    io.to(title.id).emit("title", title.title);
+  });
 });
 
 // clear rooms list through an http request with key as query
@@ -126,7 +131,7 @@ app.get("/status", (req, res) => {
   console.log(rooms);
 });
 
-const staticFileMiddleware = express.static('../client-redesign/dist')
+const staticFileMiddleware = express.static('../client/dist')
 
 app.use(staticFileMiddleware)
 app.use(history({
@@ -136,7 +141,7 @@ app.use(history({
 app.use(staticFileMiddleware)
 
 app.get('/', function (req, res) {
-  res.render('../client-redesign/dist/index.html')
+  res.render('../client/dist/index.html')
 })
 
 http.listen(port, () => {

@@ -8,9 +8,10 @@ import io from "socket.io-client";
 
 Vue.config.productionTip = false;
 
-const ENDPOINT = "http://localhost:8100/";
-
-const socket = io(ENDPOINT);
+// ATTN: Uncomment accordingly for local/remote dev
+const ENDPOINT = "https://www.toonin.ml:8443/";
+const socket = io(ENDPOINT, { secure: true });
+// var socket = io("http://127.0.0.1:8100");
 
 Vue.use(VueSocketIOExt, socket, { store });
 

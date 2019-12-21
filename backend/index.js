@@ -123,6 +123,19 @@ io.on("connection", socket => {
     console.log(`Received answer description from peer: ${descData.id} in room: ${descData.room}`);
     socket.to(descData.room).emit("peer desc", descData);
   });
+
+  socket.on("title", title => {
+    console.log(title)
+    io.to(title.id).emit("title", title.title);
+  });
+
+  // socket.emit("disconnect room", {room: roomCurrent});
+  socket.on('disconnect room', (req) => {
+    console.log('closing room ' + req.room);
+    delete rooms[req.room];
+    delete socket.rooms[req.room];
+
+  })
 });
 
 // clear rooms list through an http request with key as query

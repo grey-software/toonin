@@ -1,7 +1,6 @@
 # Toonin
 
-Toonin is a Chrome Extension coupled with a web app that allows your friends to Tune In to what you're listening to
-![](header.png)
+Toonin is a Chrome Extension coupled with a web app that allows your friends to Tune In to what you're listening to. 
 
 ## Overview
 
@@ -12,26 +11,37 @@ In order to exchange information, a signaling server must exist between the prov
 
 ## Development setup
 
-``cd`` into each directory and run 
-
+We provide a setup script that installs all necessary dependencies. 
 ```sh
-npm i
+bash setup.sh
 ```
 
 ## Running Toonin
 
-### app
-``npm start`` will run the react app on your local machine at port 3000 
-### extension
-Run ``npm run build`` to run the webpack build script for the extension. Once the extension is packed under the build directory, load it into chrome as per [this guide](https://developer.chrome.com/extensions/getstarted)
-### backend
-``node index.js`` will run the signaling server on your local machine at port 8100 
+### Running the web app
+Enter the web app directory and serve the app on your machine
+```sh
+cd client
+npm run serve
+```
+
+### Running the extension
+Enter the extension directory and run the development script for the extension. 
+```sh
+cd extension
+npm run dev
+```
+
+This packs the extension under the build directory and watches your extension files for local changes. 
+
+Use [this guide](https://developer.chrome.com/extensions/getstarted) to load the extension into chrome. 
+
+### Running the signalling server
+Enter the backend directory and run the signalling server. 
+```sh
+cd backend
+node index.js
+```
 
 
-## What's Next?
-- [ ] Use Data Channels to stream audio (In Progress)
-- [ ] Show how many peers are tuning in
-- [ ] Make it easier to tune in by allowing extension to choose ID
-- [ ] Document everything (In Progress) 
-
-
+[![Grey Software](https://github.com/grey-software/Grey-Software/blob/master/grey-software.png?raw=true)](https://greysoftware.webflow.io)

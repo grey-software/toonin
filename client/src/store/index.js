@@ -13,7 +13,8 @@ const store = new Vuex.Store({
     playing: false,
     rtcConn: null,
     peerID: null,
-    stream: null
+    audioStream: null,
+    videoStream: null
   },
   mutations: {
     SET_CONNECTED_STATUS: (state, payload) => {
@@ -37,8 +38,11 @@ const store = new Vuex.Store({
     SET_PEERID: (state, payload) => {
       state.peerID = payload;
     },
-    SET_STREAM: (state, payload) => {
-      state.stream = payload;
+    SET_AUDIO_STREAM: (state, payload) => {
+      state.audioStream = payload;
+    },
+    SET_VIDEO_STREAM: (state, payload) => {
+      state.videoStream = payload;
     }
   },
   actions: {
@@ -63,8 +67,11 @@ const store = new Vuex.Store({
     UPDATE_PEERID: (context, payload) => {
       context.commit("SET_PEERID", payload);
     },
-    UPDATE_STREAM: (context, payload) => {
-      context.commit("SET_STREAM", payload);
+    UPDATE_AUDIO_STREAM: (context, payload) => {
+      context.commit("SET_AUDIO_STREAM", payload);
+    },
+    UPDATE_VIDEO_STREAM: (context, payload) => {
+      context.commit("SET_VIDEO_STREAM", payload);
     }
   },
   getters: {
@@ -89,8 +96,11 @@ const store = new Vuex.Store({
     PEERID: state => {
       return state.peerID;
     },
-    STREAM: state => {
-      return state.stream;
+    AUDIO_STREAM: state => {
+      return state.audioStream;
+    },
+    VIDEO_STREAM: state => {
+      return state.videoStream;
     }
   }
 });
