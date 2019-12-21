@@ -16,8 +16,6 @@ class networkNode {
         this.socketID = socketID;
         this.maxClients = maxClients;
     }
-
-    hasSpace() { return this.clients.length < this.maxClients; }
 }
 
 class networkTree {
@@ -26,6 +24,8 @@ class networkTree {
         this.node = new networkNode(socketID, maxClients);
         this.subNodes = [];
     }
+
+    hasSpace() { return this.subNodes.length < this.node.maxClients; }
 
     /**
      * 
@@ -62,8 +62,7 @@ class networkTree {
         
         // list of networkNode that can accept clients in 
         // order of preference
-        var initHostPool = [];
-        var finalHostPool = []; // final list that will be sent
+        var hostPool = [];
 
         var openNodes = 0;
         var nodeQueue = new Queue();
@@ -72,30 +71,22 @@ class networkTree {
         while(!nodeQueue.isEmpty()) {
             var currNode = nodeQueue.dequeue();
 
-            if(currNode.node.hasSpace()) { openNodes++; }
-            initHostPool.push(currNode.node);
+            if(currNode.hasSpace()) {
+                hostPool.push(currNode.node);
+                openNodes++;
+            }
             
             for(var i = 0; i < currNode.subNodes.length; i++) {
                 nodeQueue.enqueue(currNode.subNodes[i]);
             }
         }
 
-        if(openNodes === 0) { return initHostPool; }
+        // What to do in this case? Prefer host or leaf?
+        // Leaf seems safer because overloading host would 
+        // degrade experience for all the clients in the room
+        // if(openNodes === 0) { return hostPool; }
 
-        for(var i = 0; i < initHostPool.length; i++) {
-            if(initHostPool[i].hasSpace()) { 
-                finalHostPool.push(initHostPool[i]);
-                initHostPool[i] = null;
-            }
-        }
-
-        for(var i = 0; i < initHostPool.length; i++) {
-            if(initHostPool[i] !== null) {
-                finalHostPool.push(initHostPool[i]);
-            }
-        }
-
-        return finalHostPool;
+        return hostPool;
     }
 }
 

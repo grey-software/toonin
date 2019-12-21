@@ -180,9 +180,9 @@ function getTabAudio() {
 
 console.log("application script running");
 // ATTN: Uncomment accordingly for local/remote dev
-const ENDPOINT = "https://www.toonin.ml:8443/";
-const socket = io(ENDPOINT, { secure: true });
-//var socket = io("http://127.0.0.1:8100");
+// const ENDPOINT = "https://www.toonin.ml:8443/";
+// const socket = io(ENDPOINT, { secure: true });
+var socket = io("http://127.0.0.1:8100");
 var peers = {};
 var localAudioStream;
 var localVideoStream = null;
@@ -220,7 +220,8 @@ function startShare(peerID) {
 
     peers[peerID].rtcConn.onconnectionstatechange = (event) => {
         Object.keys(peers).forEach(key => {
-            if (peers[key].rtcConn.connectionState=="failed" || peers[key].rtcConn.connectionState=="disconnected") delete peers[key];
+            if (peers[key].rtcConn.connectionState=="failed" || 
+            peers[key].rtcConn.connectionState=="disconnected") delete peers[key];
           });
         peerCounter = Object.keys(peers).length;
         sendState();
@@ -230,7 +231,7 @@ function startShare(peerID) {
                 title: title
             });
           });
-    }
+    };
     
     peers[peerID].rtcConn.onicecandidate = function (event) {
         if (! event.candidate) {
@@ -244,6 +245,7 @@ function startShare(peerID) {
             candidate: event.candidate
         });
     };
+
     rtcConn.createOffer(offerOptions).then((desc) => {
         opus.preferOpus(desc.sdp);
         rtcConn.setLocalDescription(new RTCSessionDescription(desc)).then(function () {
@@ -293,6 +295,11 @@ socket.on("room creation failed", (reason) => {
 });
 // new peer connection
 socket.on("peer joined", (peerData) => {
+    if(peerData.hostID !== socket.id) {
+        console.log("peer not for me");
+        return;
+    }
+    
     console.log("New peer has joined the room");
     peers[peerData.id] = {
         id: peerData.id,
@@ -306,13 +313,15 @@ socket.on("peer joined", (peerData) => {
 socket.on("peer ice", (iceData) => {
     console.log("Ice Candidate from peer: " + iceData.id + " in room: " + iceData.room);
     console.log("Ice Candidate: " + iceData.candidate);
-    if (roomID != iceData.room || !(iceData.id in peers)) {
+    if (roomID != iceData.room || !(iceData.id in peers) || (iceData.hostID !== socket.id)) {
         console.log("Ice Candidate not for me");
         return;
     }
-    peers[iceData.id].rtcConn.addIceCandidate(new RTCIceCandidate(iceData.candidate)).then(console.log("Ice Candidate added successfully for peer: " + iceData.id)).catch(function (err) {
-        console.log("Error on addIceCandidate: " + err);
-    });
+    peers[iceData.id].rtcConn.addIceCandidate(new RTCIceCandidate(iceData.candidate))
+        .then(console.log("Ice Candidate added successfully for peer: " + iceData.id))
+        .catch(function (err) {
+            console.log("Error on addIceCandidate: " + err);
+        });
 });
 socket.on("peer desc", (descData) => {
     console.log("Answer description from peer: " + descData.id + " in room: " + descData.room);

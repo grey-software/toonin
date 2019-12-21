@@ -8,7 +8,7 @@ var vars = require("./vars");
 var networkTree = require("./networkTree").networkTree;
 
 var rooms = {};
-const MAX_CLIENTS_PER_HOST = 8;
+const MAX_CLIENTS_PER_HOST = 1;
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -77,12 +77,10 @@ io.on("connection", socket => {
     if(rooms[room]){
 
       var potentialHosts = rooms[room].getConnectableNodes();
+      // console.log("poten hosts list:");
+      // console.log(potentialHosts);
       socket.emit("host pool", { potentialHosts: potentialHosts, room: room });
-      // socket.join(room, () => {
-      //   console.log("Peer connected successfully to room: " + room);
-      //   console.log(socket.id + " now in rooms ", socket.rooms);
-      //   socket.to(room).emit("peer joined", { room: room, id: socket.id });
-      // });
+      
     } else {
         console.log("invalid room");
         socket.emit("room null");
@@ -99,7 +97,13 @@ io.on("connection", socket => {
       socket.join(room, () => {
         console.log("Peer connected successfully to room: " + room);
 
-        socket.to(room).emit("peer joined", { room: room, id: socket.id });
+        socket.to(room).emit("peer joined", {
+          room: room, 
+          id: socket.id, 
+          hostID: res.evalResult.selectedHost 
+        });
+
+        rooms[room].addNode(socket.id, MAX_CLIENTS_PER_HOST, res.evalResult.selectedHost);
       });
     }
   });
