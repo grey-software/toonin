@@ -133,7 +133,15 @@ io.on("connection", socket => {
     io.to(title.id).emit("title", title.title);
   });
 
-  // socket.emit("disconnect room", {room: roomCurrent});
+  socket.on('logoff', (req) => {
+    console.log("peer logging off in room " + req.room);
+    if(rooms[req.room]) {
+      rooms[req.room].removeNode(socket, req.socketID, req.room);
+      console.log(rooms[req.room]);
+    }
+    
+  });
+
   socket.on('disconnect room', (req) => {
     console.log('closing room ' + req.room);
     delete rooms[req.room];

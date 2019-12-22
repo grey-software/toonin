@@ -4,11 +4,7 @@ class Queue {
 
     isEmpty() { return this.list.length === 0; }
     enqueue(elem) { this.list.push(elem); }
-    dequeue() {
-        if(!this.isEmpty()) {
-            return this.list.shift();
-        }
-    }
+    dequeue() { if(!this.isEmpty()) { return this.list.shift(); } }
 }
 
 class networkNode {
@@ -23,9 +19,20 @@ class networkTree {
     constructor(socketID, maxClients) {
         this.node = new networkNode(socketID, maxClients);
         this.subNodes = [];
+        this.transferringNodes = []; // nodes (& their children) which are in process of reconnecting
     }
 
     hasSpace() { return this.subNodes.length < this.node.maxClients; }
+
+    isTransferring(socketID) {
+        for(var i = 0; i < this.transferringNodes.length; i++) {
+            if(socketID === this.transferringNodes[i].node.socketID) {
+                return this.transferringNodes[i];
+            }
+        }
+
+        return null;
+    }
 
     /**
      * 
@@ -37,6 +44,7 @@ class networkTree {
         var socketIDs = [];
         for(var i = 0; i < node.subNodes.length; i++) {
             socketIDs.push(node.subNodes[i].node.socketID);
+            this.transferringNodes.push(node.subNodes[i]);
         }
 
         socket.to(room).emit("reconnect", { socketIDs: socketIDs });
@@ -52,7 +60,7 @@ class networkTree {
 
         for(var i = 0; i < this.subNodes.length; i++) {
             if(this.subNodes[i].node.socketID === socketID) {
-                this.notifyChildren(socket, this.subNodes.splice(i, 1), room);
+                this.notifyChildren(socket, this.subNodes.splice(i, 1)[0], room);
                 return;
             }
 
@@ -75,6 +83,13 @@ class networkTree {
         while(!nodeQueue.isEmpty()) {
             var currNode = nodeQueue.dequeue();
             if(currNode.node.socketID === hostSocketID) {
+                var isTransferringNode = this.isTransferring(socketID);
+                if(isTransferringNode !== null) {
+                    currNode.subNodes.push(isTransferringNode);
+                    this.transferringNodes.splice(this.transferringNodes.indexOf(isTransferringNode), 1);
+                    return true;
+                }
+
                 currNode.subNodes.push(new networkTree(socketID, maxClients));
                 return true;
             }

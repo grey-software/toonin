@@ -181,6 +181,12 @@ export default {
         });
       });
 
+      this.$socket.$subscribe('reconnect', req => {
+        // "reconnect", { socketIDs: socketIDs }
+        console.log("reconnecting.....");
+        if(this.$socket.client.id in req.socketIDs) { this.connectToRoom(); }
+      });
+
     },
     createAnswer() {
       this.rtcConn.createAnswer().then(desc => {
@@ -214,6 +220,24 @@ export default {
           this.$store.dispatch("UPDATE_CONNECTED_STATUS", SUCCESSFUL);
           this.roomName = "";
           this.rtcConn.createDataChannel('mediaDescription');
+
+          var keys = Object.keys(this.peers);
+          var videoStream = this.$store.getters.VIDEO_STREAM;
+          var audioStream = this.$store.getters.AUDIO_STREAM;
+
+          var oldTracks;
+
+          for(var i = 0; i < keys.length; i++) {
+            // delete old tracks from the stream
+            oldTracks = this.peers[keys[i]].rtcConn.getSenders();
+            for(var j = 0; j < oldTracks.length; j++) {
+              this.peers[keys[i]].rtcConn.removeTrack(oldTracks[j]);
+            }
+
+            // add new tracks
+            if(videoStream) { this.peers[keys[i]].rtcConn.addTrack(videoStream.getVideoTracks()[0]); }
+            this.peers[keys[i]].rtcConn.addTrack(audioStream.getAudioTracks()[0]);
+          }
         }
 
         if (

@@ -140,6 +140,7 @@ chrome.tabs.onUpdated.addListener(function (currentTab, changeInfo) {
         window.audio.muted = changeInfo.mutedInfo.muted;
     }
 });
+
 /**
  * capture user's tab audio for sharing with peers
  */
