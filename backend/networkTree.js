@@ -29,6 +29,39 @@ class networkTree {
 
     /**
      * 
+     * @param {SocketIO.Server} socket Socket to notify children of leaving node about disconnection
+     * @param {networkTree} node Node that has been removed from the tree
+     * @param {String} room Room in which this node (and its children) exist
+     */
+    notifyChildren(socket, node, room) {
+        var socketIDs = [];
+        for(var i = 0; i < node.subNodes.length; i++) {
+            socketIDs.push(node.subNodes[i].node.socketID);
+        }
+
+        socket.to(room).emit("reconnect", { socketIDs: socketIDs });
+    }
+
+    /**
+     * 
+     * @param {SocketIO.Server} socket Socket to notify children of leaving node about disconnection
+     * @param {String} socketID socketID of node that is leaving the tree
+     */
+    removeNode(socket, socketID, room) {
+        if(this.subNodes.length === 0) { return; }
+
+        for(var i = 0; i < this.subNodes.length; i++) {
+            if(this.subNodes[i].node.socketID === socketID) {
+                this.notifyChildren(socket, this.subNodes.splice(i, 1), room);
+                return;
+            }
+
+            this.subNodes[i].removeNode(socket, socketID, room);
+        }
+    }
+
+    /**
+     * 
      * @param {String} socketID socket ID of the new client
      * @param {Number} maxClients max client that this client can hold
      * @param {String} hostSocketID socket ID of host to connect to
