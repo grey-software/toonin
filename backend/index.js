@@ -75,10 +75,7 @@ io.on("connection", socket => {
 
   socket.on("new peer", room => {
     if(rooms[room]){
-
       var potentialHosts = rooms[room].getConnectableNodes();
-      // console.log("poten hosts list:");
-      // console.log(potentialHosts);
       socket.emit("host pool", { potentialHosts: potentialHosts, room: room });
       
     } else {
@@ -134,7 +131,6 @@ io.on("connection", socket => {
   });
 
   socket.on('logoff', (req) => {
-    console.log("peer logging off in room " + req.room);
     if(rooms[req.room]) {
       rooms[req.room].removeNode(socket, req.socketID, req.room, rooms[req.room]);
       console.log(rooms[req.room]);

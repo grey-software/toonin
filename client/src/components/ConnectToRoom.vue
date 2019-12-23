@@ -311,7 +311,6 @@ export default {
       this.$store.dispatch("UPDATE_PEERID", null);
       this.$store.dispatch("UPDATE_RTCCONN", null);
 
-      console.log("reconnecting.....");
       var roomKey = this.$store.getters.ROOM;
       this.roomName = roomKey;
       this.connectToRoom(true);

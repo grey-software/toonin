@@ -46,7 +46,7 @@ class networkTree {
             socketIDs.push(node.subNodes[i].node.socketID);
             root.transferringNodes.push(node.subNodes[i]);
         }
-        
+
         socket.to(room).emit("reconnect", { socketIDs: socketIDs });
     }
 
@@ -83,13 +83,15 @@ class networkTree {
         while(!nodeQueue.isEmpty()) {
             var currNode = nodeQueue.dequeue();
             if(currNode.node.socketID === hostSocketID) {
+                // check if this node is trying to reconnect due to fallen host
                 var isTransferringNode = this.checkTransferring(socketID);
                 if(isTransferringNode !== null) {
                     currNode.subNodes.push(isTransferringNode);
                     this.transferringNodes.splice(this.transferringNodes.indexOf(isTransferringNode), 1);
                     return true;
                 }
-
+                
+                // new node joining the tree
                 currNode.subNodes.push(new networkTree(socketID, maxClients));
                 return true;
             }
@@ -128,11 +130,6 @@ class networkTree {
                 nodeQueue.enqueue(currNode.subNodes[i]);
             }
         }
-
-        // What to do in this case? Prefer host or leaf?
-        // Leaf seems safer because overloading host would 
-        // degrade experience for all the clients in the room
-        // if(openNodes === 0) { return hostPool; }
 
         return hostPool;
     }
