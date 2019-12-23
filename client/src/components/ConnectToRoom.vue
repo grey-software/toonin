@@ -80,10 +80,10 @@ export default {
     toonin() {
       this.connectToRoom();
     },
-    connectToRoom() {
+    connectToRoom(reconnecting) {
       this.$store.dispatch("UPDATE_PEERID", this.$socket.client.id);
       this.$store.dispatch("UPDATE_ROOM", this.roomName);
-      this.setSocketListeners();
+      if(!reconnecting) { this.setSocketListeners(); }
       this.$socket.client.emit("new peer", this.roomName);
     },
     evaluateHosts(hostPool) { return { hostFound: true, selectedHost: hostPool[0].socketID }; },
@@ -182,9 +182,7 @@ export default {
       });
 
       this.$socket.$subscribe('reconnect', req => {
-        // "reconnect", { socketIDs: socketIDs }
-        console.log("reconnecting.....");
-        if(this.$socket.client.id in req.socketIDs) { this.connectToRoom(); }
+        if(req.socketIDs.includes(this.$socket.client.id)) { this.reconnect(); }
       });
 
     },
@@ -306,7 +304,20 @@ export default {
     logMessage() {
       // continue regardless of error
     },
+    reconnect() {
+      this.rtcConn.close();
+      this.$store.dispatch("UPDATE_AUDIO_STREAM", null);
+      this.$store.dispatch("UPDATE_VIDEO_STREAM", null);
+      this.$store.dispatch("UPDATE_PEERID", null);
+      this.$store.dispatch("UPDATE_RTCCONN", null);
+
+      console.log("reconnecting.....");
+      var roomKey = this.$store.getters.ROOM;
+      this.roomName = roomKey;
+      this.connectToRoom(true);
+    },
     disconnect() {
+      this.$socket.client.emit('logoff', { room: this.$store.getters.ROOM, socketID: this.$socket.client.id });
       this.rtcConn.close();
       this.$store.dispatch("UPDATE_AUDIO_STREAM", null);
       this.$store.dispatch("UPDATE_VIDEO_STREAM", null);
@@ -316,6 +327,7 @@ export default {
       this.$store.dispatch("UPDATE_STREAM_TITLE", "");
       this.$store.dispatch("UPDATE_PLAYING", false);
       this.$store.dispatch("UPDATE_RTCCONN", null);
+
     }
   },
   computed: {

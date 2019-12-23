@@ -136,7 +136,7 @@ io.on("connection", socket => {
   socket.on('logoff', (req) => {
     console.log("peer logging off in room " + req.room);
     if(rooms[req.room]) {
-      rooms[req.room].removeNode(socket, req.socketID, req.room);
+      rooms[req.room].removeNode(socket, req.socketID, req.room, rooms[req.room]);
       console.log(rooms[req.room]);
     }
     

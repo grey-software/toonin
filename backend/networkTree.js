@@ -24,7 +24,7 @@ class networkTree {
 
     hasSpace() { return this.subNodes.length < this.node.maxClients; }
 
-    isTransferring(socketID) {
+    checkTransferring(socketID) {
         for(var i = 0; i < this.transferringNodes.length; i++) {
             if(socketID === this.transferringNodes[i].node.socketID) {
                 return this.transferringNodes[i];
@@ -40,13 +40,13 @@ class networkTree {
      * @param {networkTree} node Node that has been removed from the tree
      * @param {String} room Room in which this node (and its children) exist
      */
-    notifyChildren(socket, node, room) {
+    notifyChildren(socket, node, room, root) {
         var socketIDs = [];
         for(var i = 0; i < node.subNodes.length; i++) {
             socketIDs.push(node.subNodes[i].node.socketID);
-            this.transferringNodes.push(node.subNodes[i]);
+            root.transferringNodes.push(node.subNodes[i]);
         }
-
+        
         socket.to(room).emit("reconnect", { socketIDs: socketIDs });
     }
 
@@ -55,16 +55,16 @@ class networkTree {
      * @param {SocketIO.Server} socket Socket to notify children of leaving node about disconnection
      * @param {String} socketID socketID of node that is leaving the tree
      */
-    removeNode(socket, socketID, room) {
+    removeNode(socket, socketID, room, root) {
         if(this.subNodes.length === 0) { return; }
 
         for(var i = 0; i < this.subNodes.length; i++) {
             if(this.subNodes[i].node.socketID === socketID) {
-                this.notifyChildren(socket, this.subNodes.splice(i, 1)[0], room);
+                this.notifyChildren(socket, this.subNodes.splice(i, 1)[0], room, root);
                 return;
             }
 
-            this.subNodes[i].removeNode(socket, socketID, room);
+            this.subNodes[i].removeNode(socket, socketID, room, root);
         }
     }
 
@@ -83,7 +83,7 @@ class networkTree {
         while(!nodeQueue.isEmpty()) {
             var currNode = nodeQueue.dequeue();
             if(currNode.node.socketID === hostSocketID) {
-                var isTransferringNode = this.isTransferring(socketID);
+                var isTransferringNode = this.checkTransferring(socketID);
                 if(isTransferringNode !== null) {
                     currNode.subNodes.push(isTransferringNode);
                     this.transferringNodes.splice(this.transferringNodes.indexOf(isTransferringNode), 1);
