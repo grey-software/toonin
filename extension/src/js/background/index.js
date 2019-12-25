@@ -26,6 +26,8 @@ var audioElement = document.createElement('audio');
 audioElement.setAttribute("preload", "auto");
 audioElement.load;
 
+var useDistStreamSys = false;
+
 
 // used by Gain Node
 var volume = 1;
@@ -34,7 +36,7 @@ chrome.runtime.onConnect.addListener(function (p) {
     p.onMessage.addListener(function (msg) {
         if (msg.type === "init") {
             // optional parameter roomName.
-            socket.emit("create room", msg.roomName);
+            socket.emit("create room", { room: msg.roomName, isDistributed: useDistStreamSys } );
             addTitleListener();
         }
         if (msg.type === "requestState") {
@@ -68,6 +70,9 @@ chrome.runtime.onConnect.addListener(function (p) {
         }
         if(msg.type === "toggleScreenShare") {
             constraints.video = msg.isSharing;
+        }
+        if(msg.type === "toggleDistStreamSys") {
+            useDistStreamSys = msg.useDistStreamSys;
         }
     });
 });
@@ -299,7 +304,7 @@ socket.on("room creation failed", (reason) => {
 
 // new peer connection
 socket.on("peer joined", (peerData) => {
-    if(peerData.hostID !== socket.id) {
+    if(peerData.hostID && peerData.hostID !== socket.id) {
         console.log("peer not for me");
         return;
     }

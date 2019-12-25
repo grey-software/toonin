@@ -24,10 +24,7 @@ const genRoomID = (socketID) => {
       Math.random()
         .toString(36)
         .substring(2, 5);
-    if (!(id in rooms)) {
-      rooms[id] = new networkTree(socketID, MAX_CLIENTS_PER_HOST);
-      return id;
-    }
+    if (!(id in rooms)) { return id; }
   }
 };
 
@@ -36,7 +33,7 @@ const genRoomID = (socketID) => {
  * @param {SocketIO.Socket} socket 
  * @param {string} roomName 
  */
-function createRoom(socket, roomName) {
+function createRoom(socket, roomName, isDistributed) {
     var newRoomID = "";
     console.log("Received request to create new room");
     const hasCustomRoomName = roomName.length > 0;
@@ -47,7 +44,9 @@ function createRoom(socket, roomName) {
         socket.emit("room creation failed", "name already exists");
       } else {
         newRoomID = roomName;
-        rooms[newRoomID] = new networkTree(socket.id, MAX_CLIENTS_PER_HOST);
+        if(isDistributed) {
+          rooms[newRoomID] = new networkTree(socket.id, MAX_CLIENTS_PER_HOST);
+        } else { rooms[newRoomID] = {}; }
         socket.join(newRoomID, () => {
           socket.emit("room created", newRoomID);
           console.log(rooms);
@@ -57,6 +56,9 @@ function createRoom(socket, roomName) {
       // if no custom room name, generate a random id
     } else {
       newRoomID = genRoomID(socket.id);
+      if(isDistributed) {
+        rooms[newRoomID] = new networkTree(socketID, MAX_CLIENTS_PER_HOST);
+      } else { rooms[newRoomID] = {}; }
       socket.join(newRoomID, () => {
         socket.emit("room created", newRoomID);
         console.log(rooms);
@@ -68,15 +70,29 @@ function createRoom(socket, roomName) {
 //Socket create a new "room" and listens for other connections
 io.on("connection", socket => {
 
-  socket.on("create room", (roomName) => {
-    createRoom(socket, roomName);
-    console.log(socket.rooms);
+  socket.on("create room", (req) => {
+    if(typeof(req) === 'string') { createRoom(socket, req, false); }
+    else {
+      createRoom(socket, req.room, req.isDistributed);
+    }
   });
 
   socket.on("new peer", room => {
     if(rooms[room]){
-      var potentialHosts = rooms[room].getConnectableNodes();
-      socket.emit("host pool", { potentialHosts: potentialHosts, room: room });
+      if(rooms[room].getConnectableNodes) {
+        var potentialHosts = rooms[room].getConnectableNodes();
+        socket.emit("host pool", { potentialHosts: potentialHosts, room: room });
+      } else {
+        socket.join(room, () => {
+          console.log("Peer connected successfully to room: " + room);
+  
+          socket.to(room).emit("peer joined", {
+            room: room, 
+            id: socket.id
+          });
+  
+        });
+      }
       
     } else {
         console.log("invalid room");
@@ -123,7 +139,9 @@ io.on("connection", socket => {
     console.log(`Received answer description from peer: ${descData.id} in room: ${descData.room}`);
     socket.to(descData.room).emit("peer desc", descData);
 
-    rooms[descData.room].addNode(descData.id, MAX_CLIENTS_PER_HOST, descData.selectedHost);
+    if(rooms[descData.room].addNode) {
+      rooms[descData.room].addNode(descData.id, MAX_CLIENTS_PER_HOST, descData.selectedHost);
+    }
   });
 
   socket.on("title", title => {
@@ -133,7 +151,9 @@ io.on("connection", socket => {
 
   socket.on('logoff', (req) => {
     if(rooms[req.room]) {
-      rooms[req.room].removeNode(socket, req.socketID, req.room, rooms[req.room]);
+      if(rooms[req.room].removeNode) {
+        rooms[req.room].removeNode(socket, req.socketID, req.room, rooms[req.room]);
+      }
       console.log(rooms[req.room]);
     }
     

@@ -22,6 +22,14 @@
       @change="toggleScreenShare"
       >
       </v-checkbox>
+
+      <v-checkbox 
+      style="margin-bottom: 0%; margin-top: -5%; margin-left: 5%;"
+      label="Distributed Streaming System (Experimental)"
+      color="primary"
+      @change="toggleDistStreamSys"
+      >
+      </v-checkbox>
     </div>
       
     <v-btn
@@ -48,7 +56,7 @@ export default {
     ...mapState(["roomName", "roomNameValid", "roomNameInputErrorMessages"])
   },
   methods: {
-    ...mapActions(["randomRoomName", "startShare", "toggleScreenShare"]),
+    ...mapActions(["randomRoomName", "startShare", "toggleScreenShare", "toggleDistStreamSys"]),
     ...mapMutations(["setRoomName"])
   }
 };
