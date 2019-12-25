@@ -34,7 +34,16 @@ export function startShare(peerID, vueRef) {
     vueRef.peers[peerID].rtcConn.onconnectionstatechange = () => {
         Object.keys(vueRef.peers).forEach(key => {
             if (vueRef.peers[key].rtcConn.connectionState=="failed" || 
-            vueRef.peers[key].rtcConn.connectionState=="disconnected") delete vueRef.peers[key];
+            vueRef.peers[key].rtcConn.connectionState=="disconnected") {
+                // notify backend of client leaving/failure to make sure that
+                // network tree is updated correctly
+                vueRef.$socket.client.emit('logoff', { 
+                    room: vueRef.$store.getters.ROOM, 
+                    socketID: key 
+                });
+
+                delete vueRef.peers[key]; 
+            }
         });
 
         Object.keys(vueRef.peers).forEach(key => {

@@ -100,7 +100,6 @@ io.on("connection", socket => {
           hostID: res.evalResult.selectedHost 
         });
 
-        rooms[room].addNode(socket.id, MAX_CLIENTS_PER_HOST, res.evalResult.selectedHost);
       });
     }
   });
@@ -123,6 +122,8 @@ io.on("connection", socket => {
   socket.on("peer new desc", descData => {
     console.log(`Received answer description from peer: ${descData.id} in room: ${descData.room}`);
     socket.to(descData.room).emit("peer desc", descData);
+
+    rooms[descData.room].addNode(descData.id, MAX_CLIENTS_PER_HOST, descData.selectedHost);
   });
 
   socket.on("title", title => {

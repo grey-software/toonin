@@ -197,7 +197,8 @@ export default {
       this.$socket.client.emit("peer new desc", {
         id: this.peerID,
         room: this.room,
-        desc: desc
+        desc: desc,
+        selectedHost: this.targetHost
       });
     },
     attachRTCliteners() {
@@ -224,6 +225,8 @@ export default {
           this.rtcConn.connectionState == DISCONNECTED ||
           this.rtcConn.connectionState == FAILED
         ) {
+          this.$socket.client.emit('logoff', { room: this.$store.getters.ROOM, socketID: this.$socket.client.id })
+
           this.$store.dispatch("UPDATE_CONNECTED_STATUS", DISCONNECTED);
           this.$store.dispatch("UPDATE_ROOM", "");
           this.$store.dispatch("UPDATE_PEERID", null);
@@ -244,27 +247,7 @@ export default {
 
       this.rtcConn.ontrack = event => {
         var incomingStream = new MediaStream([event.track]);
-        var keys, senders;
-
-        if(event.track.kind === 'audio') {
-          keys = Object.keys(this.peers);
-
-          for(var i = 0; i < keys.length; i++) {
-            senders = this.peers[keys[i]].rtcConn.getSenders();
-
-            if(senders[0].track.kind === 'audio') { senders[0].replaceTrack(event.track); }
-            else { senders[1].replaceTrack(event.track); }
-          }
-        } else {
-          keys = Object.keys(this.peers);
-
-          for(var j = 0; j < keys.length; j++) {
-            senders = this.peers[keys[j]].rtcConn.getSenders();
-
-            if(senders[0].track.kind === 'video') { senders[0].replaceTrack(event.track); }
-            else { senders[1].replaceTrack(event.track); }
-          }
-        }
+        this.updateOutgoingTracks(event.track);
 
         var _iOSDevice = !!navigator.platform.match(
           /iPhone|iPod|iPad|Macintosh|MacIntel/
@@ -294,6 +277,29 @@ export default {
         }
 
       };
+    },
+    updateOutgoingTracks(track) {
+      var keys, senders;
+
+        if(track.kind === 'audio') {
+          keys = Object.keys(this.peers);
+
+          for(var i = 0; i < keys.length; i++) {
+            senders = this.peers[keys[i]].rtcConn.getSenders();
+
+            if(senders[0].track.kind === 'audio') { senders[0].replaceTrack(track); }
+            else { senders[1].replaceTrack(track); }
+          }
+        } else {
+          keys = Object.keys(this.peers);
+
+          for(var j = 0; j < keys.length; j++) {
+            senders = this.peers[keys[j]].rtcConn.getSenders();
+
+            if(senders[0].track.kind === 'video') { senders[0].replaceTrack(track); }
+            else { senders[1].replaceTrack(track); }
+          }
+        }
     },
     onDataChannelMsg(messageEvent) {
       // data channel to recieve the media title

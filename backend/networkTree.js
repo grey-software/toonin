@@ -24,6 +24,14 @@ class networkTree {
 
     hasSpace() { return this.subNodes.length < this.node.maxClients; }
 
+    /**
+     * Check if the client is joining the network back from a previous failure or 
+     * if it is a new client. If joining back, return the reference to the saved tree in
+     * transferring nodes list with same socket id.
+     * 
+     * @param {String} socketID socket id of the connecting client
+     * @returns {networkTree} the saved tree in transferring nodes list with same socket id at the root node
+     */
     checkTransferring(socketID) {
         for(var i = 0; i < this.transferringNodes.length; i++) {
             if(socketID === this.transferringNodes[i].node.socketID) {
@@ -35,6 +43,9 @@ class networkTree {
     }
 
     /**
+     * Update nodes that their parent node is leaving and they need to reconnect to a new node in network
+     * The children (and their subnodes) are added to this.transferring nodes until they they 
+     * join the tree again and are availible for new peers to connect
      * 
      * @param {SocketIO.Server} socket Socket to notify children of leaving node about disconnection
      * @param {networkTree} node Node that has been removed from the tree
