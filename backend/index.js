@@ -8,7 +8,7 @@ var vars = require("./vars");
 var networkTree = require("./networkTree").networkTree;
 
 var rooms = {};
-const MAX_CLIENTS_PER_HOST = 1;
+const MAX_CLIENTS_PER_HOST = 3;
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
