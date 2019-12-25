@@ -218,16 +218,6 @@ export default {
           this.$store.dispatch("UPDATE_CONNECTED_STATUS", SUCCESSFUL);
           this.roomName = "";
           this.rtcConn.createDataChannel('mediaDescription');
-
-          var keys = Object.keys(this.peers);
-          var videoStream = this.$store.getters.VIDEO_STREAM;
-          var audioStream = this.$store.getters.AUDIO_STREAM;
-
-          for(var i = 0; i < keys.length; i++) {
-            // add new tracks
-            if(videoStream) { this.peers[keys[i]].rtcConn.addTrack(videoStream.getVideoTracks()[0]); }
-            this.peers[keys[i]].rtcConn.addTrack(audioStream.getAudioTracks()[0]);
-          }
         }
 
         if (
@@ -254,6 +244,27 @@ export default {
 
       this.rtcConn.ontrack = event => {
         var incomingStream = new MediaStream([event.track]);
+        var keys, senders;
+
+        if(event.track.kind === 'audio') {
+          keys = Object.keys(this.peers);
+
+          for(var i = 0; i < keys.length; i++) {
+            senders = this.peers[keys[i]].rtcConn.getSenders();
+
+            if(senders[0].track.kind === 'audio') { senders[0].replaceTrack(event.track); }
+            else { senders[1].replaceTrack(event.track); }
+          }
+        } else {
+          keys = Object.keys(this.peers);
+
+          for(var j = 0; j < keys.length; j++) {
+            senders = this.peers[keys[j]].rtcConn.getSenders();
+
+            if(senders[0].track.kind === 'video') { senders[0].replaceTrack(event.track); }
+            else { senders[1].replaceTrack(event.track); }
+          }
+        }
 
         var _iOSDevice = !!navigator.platform.match(
           /iPhone|iPod|iPad|Macintosh|MacIntel/
@@ -287,6 +298,13 @@ export default {
     onDataChannelMsg(messageEvent) {
       // data channel to recieve the media title
       try {
+        var keys = Object.keys(this.peers);
+        for(var i = 0; i < keys.length; i++) {
+          if(this.peers[keys[i]].dataChannel.readyState === 'open') {
+            this.peers[keys[i]].dataChannel.send(messageEvent.data);
+          }
+        }
+
         var mediaDescription = JSON.parse(messageEvent.data);
         this.$store.dispatch("UPDATE_STREAM_TITLE", mediaDescription.title);
       } catch (err) {

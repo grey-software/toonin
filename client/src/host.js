@@ -41,7 +41,7 @@ export function startShare(peerID, vueRef) {
             if (vueRef.peers[key].dataChannel.readyState=="closed") {
                 vueRef.$socket.client.emit("title", {
                     id: key,
-                    title: "EMPTY_TITLE"
+                    title: vueRef.$store.getters.STREAMTITLE
                 });
             }
             
@@ -76,7 +76,7 @@ export function startShare(peerID, vueRef) {
     vueRef.peers[peerID].dataChannel.addEventListener("open", () => {
         console.log("sending title to new peer");
         vueRef.peers[peerID].dataChannel.send(
-            JSON.stringify({"title": "EMPTY_TITLE"})
+            JSON.stringify({"title": vueRef.$store.getters.STREAMTITLE })
         );
     });
 }
