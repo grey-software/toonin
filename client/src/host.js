@@ -12,10 +12,10 @@ const servers = {
     ]
 };
 
-export function startShare(peerID, vueRef) {
+export function startShare(peerID, _this) {
     console.log("Starting new connection for peer: " + peerID);
-    var videoStream = vueRef.$store.getters.VIDEO_STREAM;
-    var audioStream = vueRef.$store.getters.AUDIO_STREAM;
+    var videoStream = _this.$store.getters.VIDEO_STREAM;
+    var audioStream = _this.$store.getters.AUDIO_STREAM;
 
     const rtcConn = new RTCPeerConnection(servers, {
         optional: [
@@ -28,44 +28,44 @@ export function startShare(peerID, vueRef) {
     if(videoStream) { rtcConn.addTrack(videoStream.getVideoTracks()[0]); }
     rtcConn.addTrack(audioStream.getAudioTracks()[0]);
 
-    vueRef.peers[peerID].rtcConn = rtcConn;
-    vueRef.peers[peerID].dataChannel = vueRef.peers[peerID].rtcConn.createDataChannel('mediaDescription');
+    _this.peers[peerID].rtcConn = rtcConn;
+    _this.peers[peerID].dataChannel = _this.peers[peerID].rtcConn.createDataChannel('mediaDescription');
 
-    vueRef.peers[peerID].rtcConn.onconnectionstatechange = () => {
-        Object.keys(vueRef.peers).forEach(key => {
-            if (vueRef.peers[key].rtcConn.connectionState=="failed" || 
-            vueRef.peers[key].rtcConn.connectionState=="disconnected") {
+    _this.peers[peerID].rtcConn.onconnectionstatechange = () => {
+        Object.keys(_this.peers).forEach(key => {
+            if (_this.peers[key].rtcConn.connectionState=="failed" || 
+            _this.peers[key].rtcConn.connectionState=="disconnected") {
                 // notify backend of client leaving/failure to make sure that
                 // network tree is updated correctly
-                vueRef.$socket.client.emit('logoff', { 
-                    room: vueRef.$store.getters.ROOM, 
+                _this.$socket.client.emit('logoff', { 
+                    room: _this.$store.getters.ROOM, 
                     socketID: key 
                 });
 
-                delete vueRef.peers[key]; 
+                delete _this.peers[key]; 
             }
         });
 
-        Object.keys(vueRef.peers).forEach(key => {
-            if (vueRef.peers[key].dataChannel.readyState=="closed") {
-                vueRef.$socket.client.emit("title", {
+        Object.keys(_this.peers).forEach(key => {
+            if (_this.peers[key].dataChannel.readyState=="closed") {
+                _this.$socket.client.emit("title", {
                     id: key,
-                    title: vueRef.$store.getters.STREAMTITLE
+                    title: _this.$store.getters.STREAMTITLE
                 });
             }
             
         });
     };
 
-    vueRef.peers[peerID].rtcConn.onicecandidate = function (event) {
+    _this.peers[peerID].rtcConn.onicecandidate = function (event) {
         if (! event.candidate) {
             console.log("No candidate for RTC connection");
             return;
         }
-        vueRef.peers[peerID].iceCandidates.push(event.candidate);
-        vueRef.$socket.client.emit("src new ice", {
+        _this.peers[peerID].iceCandidates.push(event.candidate);
+        _this.$socket.client.emit("src new ice", {
             id: peerID,
-            room: vueRef.$store.getters.ROOM,
+            room: _this.$store.getters.ROOM,
             candidate: event.candidate
         });
     };
@@ -73,19 +73,19 @@ export function startShare(peerID, vueRef) {
     rtcConn.createOffer({ offerToReceiveAudio: 1 }).then((desc) => {
         // opus.preferOpus(desc.sdp);
         rtcConn.setLocalDescription(new RTCSessionDescription(desc)).then(function () {
-            vueRef.peers[peerID].localDesc = desc;
-            vueRef.$socket.client.emit("src new desc", {
+            _this.peers[peerID].localDesc = desc;
+            _this.$socket.client.emit("src new desc", {
                 id: peerID,
-                room: vueRef.$store.getters.ROOM,
+                room: _this.$store.getters.ROOM,
                 desc: desc
             });
         });
     });
 
-    vueRef.peers[peerID].dataChannel.addEventListener("open", () => {
+    _this.peers[peerID].dataChannel.addEventListener("open", () => {
         console.log("sending title to new peer");
-        vueRef.peers[peerID].dataChannel.send(
-            JSON.stringify({"title": vueRef.$store.getters.STREAMTITLE })
+        _this.peers[peerID].dataChannel.send(
+            JSON.stringify({"title": _this.$store.getters.STREAMTITLE })
         );
     });
 }
