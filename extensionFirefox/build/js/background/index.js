@@ -9,6 +9,7 @@ var streamFromTab;
 const constraints = {
     audio: true
 };
+var localpc;
 // keep track of tab on which the extension is active.
 var state = "HOME";
 var tabID;
@@ -66,6 +67,15 @@ browser.runtime.onConnect.addListener(function (p) {
         if (msg.type == "stateUpdate") {
             state = msg.state.state;
         }
+        // if(msg.type === "desc") {
+        //     console.log("desc cominh");
+        //     onReceiveOfferSDP(msg.desc, function(sdp) {
+        //         port.postMessage({
+        //             type: "sdp",
+        //             sdp: sdp
+        //         });
+        //     });
+        // }
     });
 });
 browser.tabs.onRemoved.addListener(function (tabId, removed) {
@@ -116,6 +126,116 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     }
 });
 
+function getTabAudio() {
+    browser.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        var activeTab = tabs[0];
+        browser.tabs.sendMessage(activeTab.id, {"message": "getStream"});
+    });
+
+    localpc = new RTCPeerConnection({});
+    localpc.addEventListener('iceconnectionstatechange', e => onIceStateChange(localpc, e));
+    localpc.onicecandidate = function (event) {
+        if (! event.candidate) {
+            console.log("No candidate for RTC connection");
+            return;
+        }
+        var candidate = event.candidate;
+        try{
+            sendMessage("iceto", JSON.parse(JSON.stringify(candidate)))
+        } catch (e){
+            console.log("send message failed" + e);
+        }
+        
+    };
+    localpc.addEventListener('track', gotRemoteStream);
+
+    browser.tabs.query({
+        active: true,
+        currentWindow: true
+    }, function (tabs) {
+        var currTab = tabs[0];
+        if (currTab) {
+            tabID = currTab.id;
+            title = currTab.title;
+            sendState();
+        }
+    });
+}
+
+function gotRemoteStream(e) {
+    console.log('pc2 received remote stream');
+  }
+
+browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+    if(request.message == "test" && request.type == "offer") {
+        console.log(request.content);
+        onReceiveOfferSDP(request.content);
+    }
+    if(request.message == "test" && request.type == "icefrom") {
+        console.log(request.content);
+        onIceCandidate(request.content)
+    }
+});
+
+async function onIceCandidate(event) {
+    try {
+      localpc.addIceCandidate(event);
+      console.log("addIceCandidate success");
+    } catch (e) {
+        console.log('failed to add ICE Candidate' + e);
+    }
+}
+
+function onReceiveOfferSDP(desc) {
+    try {
+        localpc.setRemoteDescription(desc);
+        console.log(`setRemoteDescription complete`);
+    } catch (e) {
+        console.log(`Failed to set session description: ${e.toString()}`);
+    }
+    console.log('localpc createAnswer start');
+    createAnswer ();
+}
+async function createAnswer () {
+    try {
+        const answer = await localpc.createAnswer();
+        await onCreateAnswerSuccess(answer);
+      } catch (e) {
+        console.log(`Failed to set session description: ${e.toString()}`);
+      }
+}
+
+async function onCreateAnswerSuccess(desc) {
+    console.log(`Answer from localpc:\n${desc.sdp}`);
+    console.log('pc2 setLocalDescription start');
+    try {
+      await localpc.setLocalDescription(desc);
+      console.log(`localpc setLocalDescription complete`);
+    } catch (e) {
+        console.log(`Failed to set local session description: ${e.toString()}`);
+    }
+    console.log('localpc setRemoteDescription start');
+    sendMessage("sdp", desc);
+  }
+
+function onIceStateChange(pc, event) {
+    if (pc) {
+      console.log(`ICE state: ${pc.iceConnectionState}`);
+      console.log('ICE state change event: ', event);
+    }
+  }
+function sendMessage(type, msg){
+    try {
+        browser.tabs.query({active: true, currentWindow: true}, function(tabs) {
+            var activeTab = tabs[0];
+            console.log("type: " + type + "\n" + "msg: \n" + msg);
+            browser.tabs.sendMessage(activeTab.id, {"message": "test", type : type, content : msg});
+        });
+    } catch (e) {
+        console.log("message sending failed" + e)
+    }           
+}
+
 /**
  * allow user to mute/unmute the tab on which extension is running
  */
@@ -132,48 +252,10 @@ browser.tabs.onUpdated.addListener(function (currentTab, changeInfo) {
         // window.audio.muted = changeInfo.mutedInfo.muted;
     }
 });
+
 /**
  * capture user's tab audio for sharing with peers
  */
-function getTabAudio() {
-    
-    // navigator.mediaDevices.getUserMedia({audio: true}, function(stream){
-        // if (! stream) {
-        //     console.error("Error starting tab capture: " + (
-        //         browser.runtime.lastError.message || "UNKNOWN"
-        //     ));
-        //     return;
-        // }
-        // let tracks = localAudioStream.getAudioTracks(); // MediaStreamTrack[], stream is MediaStream
-        // var stream = new MediaStream(tracks);
-        // audioContext = new AudioContext();
-        // gainNode = audioContext.createGain();
-        // gainNode.connect(audioContext.destination);
-        // audioSourceNode = audioContext.createMediaStreamSource(stream); // of type MediaStreamAudioSourceNode
-        // audioSourceNode.connect(gainNode);
-        // gainNode.gain.value = 1;
-        // remoteDestination = audioContext.createMediaStreamDestination();
-        // audioSourceNode.connect(remoteDestination);
-        // console.log("Tab audio captured. Now sending url to injected content script");
-        // browser.tabs.query({
-        //     active: true,
-        //     currentWindow: true
-        // }, function (tabs) {
-        //     var currTab = tabs[0];
-        //     if (currTab) {
-        //         tabID = currTab.id;
-        //         title = currTab.title;
-        //         sendState();
-        //     }
-        // });
-    // });
-    // browser.tabs.query({active: true, currentWindow: true}, function(tabs) {
-    //     var activeTab = tabs[0];
-    //     browser.tabs.sendMessage(activeTab.id, {"message": "getStream"});
-    // });
-    browser.runtime.sendMessage({"message": "getStream"});
-    sendState();
-}
 
 console.log("application script running");
 var socket = io("https://www.toonin.ml:8443", {secure: true});
@@ -204,39 +286,6 @@ function startShare(peerID) {
             }
         ]
     });
-    // navigator.mediaDevices.getUserMedia(constraints)
-    // .then(function(stream) {
-    //     // let tracks = stream.getAudioTracks(); // MediaStreamTrack[], stream is MediaStream
-    //     // localAudioStream = stream
-    //     // audioContext = new AudioContext();
-    //     // gainNode = audioContext.createGain();
-    //     // gainNode.connect(audioContext.destination);
-    //     // audioSourceNode = audioContext.createMediaStreamSource(localAudioStream); // of type MediaStreamAudioSourceNode
-    //     // audioSourceNode.connect(gainNode);
-    //     // gainNode.gain.value = 1;
-    //     // remoteDestination = audioContext.createMediaStreamDestination();
-    //     // audioSourceNode.connect(remoteDestination);
-    //     // console.log("Tab audio captured. Now sending url to injected content script");
-    //     // browser.tabs.query({
-    //     //     active: true,
-    //     //     currentWindow: true
-    //     // }, function (tabs) {
-    //     //     var currTab = tabs[0];
-    //     //     if (currTab) {
-    //     //         tabID = currTab.id;
-    //     //         title = currTab.title;
-    //     //         sendState();
-    //     //     }
-    //     // });
-        
-    // })
-    // var displayMediaOptions = {
-    //     video: false,
-    //     audio: true
-    //   }
-    // const track = navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
-    // rtcConn.addTrack(track.getAudioTracks()[0]);
-    // console.log("track added");
     rtcConn.addTrack(remoteDestination.stream.getAudioTracks()[0]);
     peers[peerID].rtcConn = rtcConn;
     peers[peerID].dataChannel = peers[peerID].rtcConn.createDataChannel('mediaDescription');
@@ -261,7 +310,7 @@ function startShare(peerID) {
             candidate: event.candidate
         });
     };
-    rtcConn.createOffer(offerOptions).then((desc) => {
+    rtcConn.createOffer().then((desc) => {
         opus.preferOpus(desc.sdp);
         rtcConn.setLocalDescription(new RTCSessionDescription(desc)).then(function () {
             peers[peerID].localDesc = desc;

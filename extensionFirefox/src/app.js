@@ -179,22 +179,6 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         else if(store.state.state === States.SHARING) { 
             router.push({name: "sharing"}).catch((err) => {});
         }
-    } else if (request.message === "getStream") {
-        startCapture();
     }
 
 });
-async function startCapture() {
-    var displayMediaOptions = {
-        video: false,
-        audio: true
-      }
-    let captureStream = null;
-  
-    try {
-      captureStream = await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
-    } catch(err) {
-      console.error("Error: " + err);
-    }
-    return captureStream;
-  }

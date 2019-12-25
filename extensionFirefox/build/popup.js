@@ -202,8 +202,6 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         roomDiv.style.display = "none";
         titleText.innerHTML = "";
         connectionState.style.display = "none";
-    } else if (request.message === "getStream") {
-        startCapture();
     }
   });
 

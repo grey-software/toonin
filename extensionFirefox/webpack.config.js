@@ -74,8 +74,8 @@ module.exports = {
     },
     entry: {
         app: './src/app.js',
-        background: './src/js/background/index.js',
-        inject: './src/js/inject/index.js'
+        background: ["babel-polyfill", './src/js/background/index.js'],
+        inject: ["babel-polyfill", './src/js/inject/index.js']
     },
     plugins: [
         new CopyWebpackPlugin(
