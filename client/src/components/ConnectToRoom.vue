@@ -311,6 +311,11 @@ export default {
           }
         }
 
+        if(messageEvent.data === 'close') {
+          this.disconnect();
+          return;
+        }
+
         var mediaDescription = JSON.parse(messageEvent.data);
         this.$store.dispatch("UPDATE_STREAM_TITLE", mediaDescription.title);
       } catch (err) {

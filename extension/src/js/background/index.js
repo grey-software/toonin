@@ -100,6 +100,7 @@ function disconnect() {
 
     var peerIDs = Object.keys(peers);
     for (var i = 0; i < peerIDs.length; i++) {
+        peers[peerIDs[i]].dataChannel.send('close');
         peers[peerIDs[i]].rtcConn.close();
         delete peers[peerIDs[i]];
     }
@@ -290,10 +291,12 @@ socket.on("room created", (newRoomID) => {
     port.postMessage({ type: "room created" });
     getTabAudio();
 });
+
 // server unable to create a room
 socket.on("room creation failed", (reason) => {
     port.postMessage({type: "room creation fail", reason: reason});
 });
+
 // new peer connection
 socket.on("peer joined", (peerData) => {
     if(peerData.hostID !== socket.id) {
@@ -311,6 +314,7 @@ socket.on("peer joined", (peerData) => {
     sendState();
     startShare(peerData.id);
 });
+
 socket.on("peer ice", (iceData) => {
     console.log("Ice Candidate from peer: " + iceData.id + " in room: " + iceData.room);
     console.log("Ice Candidate: " + iceData.candidate);
@@ -324,6 +328,7 @@ socket.on("peer ice", (iceData) => {
             console.log("Error on addIceCandidate: " + err);
         });
 });
+
 socket.on("peer desc", (descData) => {
     console.log("Answer description from peer: " + descData.id + " in room: " + descData.room);
     console.log("Answer description: " + descData.desc);
