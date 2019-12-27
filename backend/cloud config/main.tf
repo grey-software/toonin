@@ -33,7 +33,6 @@ resource "aws_launch_configuration" "toonin_backend_config" {
               cd /home/app
               aws s3 cp s3://toonin-server-src/app.zip ./app.zip
               unzip app.zip
-              wait
               NODE_ENV=production node server.js
               EOF
   
@@ -84,9 +83,9 @@ resource "aws_elb" "toonin-backend-elb" {
 
   listener {
     lb_port = 443
-    lb_protocol = "ssl"
-    instance_port = 443
-    instance_protocol = "tcp"
+    lb_protocol = "https"
+    instance_port = 80
+    instance_protocol = "http"
     ssl_certificate_id = "${var.cert_arn}"
   }
   
