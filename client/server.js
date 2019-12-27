@@ -13,6 +13,14 @@ app.get('/elb-health-check', (req, res) => {
 
 const staticFileMiddleware = express.static(path.join(__dirname + '/dist'))
 
+app.use(function(req, res, next) {
+  if((!req.secure) && (req.get('X-Forwarded-Proto') !== 'https')) {
+    res.redirect('https://' + req.get('Host') + req.url);
+  } else { 
+    next(); 
+  }
+})
+
 app.use(staticFileMiddleware)
 app.use(history({
   disableDotRule: true,
