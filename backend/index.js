@@ -154,7 +154,8 @@ io.on("connection", socket => {
       if(rooms[req.room].removeNode) {
         rooms[req.room].removeNode(socket, req.socketID, req.room, rooms[req.room]);
       }
-      console.log(rooms[req.room]);
+
+      if(socket.id === req.socketID) { socket.leave(req.room); }
     }
     
   });
