@@ -1,4 +1,8 @@
+[![Toonin](https://github.com/grey-software/toonin/raw/master/assets/icon.png)](https://toonin.ml) 
+
 # Toonin
+
+[![CircleCI](https://circleci.com/gh/grey-software/toonin/tree/master.svg?style=svg)](https://circleci.com/gh/grey-software/toonin/tree/master)
 
 Toonin is a Chrome Extension coupled with a web app that allows your friends to Tune In to what you're listening to. 
 
