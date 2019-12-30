@@ -1,4 +1,12 @@
+<p align="center">
+  <a href="https://toonin.ml" target="_blank">
+    <img alt="Toonin Icon" width="100" src="https://github.com/grey-software/toonin/raw/master/assets/icon.png">
+  </a>
+</p>
+
 # Toonin
+
+[![CircleCI](https://circleci.com/gh/grey-software/toonin/tree/master.svg?style=svg)](https://circleci.com/gh/grey-software/toonin/tree/master) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/d7e992618c424b9a8f1604bf7bb00403)](https://www.codacy.com/gh/grey-software/toonin?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=grey-software/toonin&amp;utm_campaign=Badge_Grade)
 
 Toonin is a Chrome Extension coupled with a web app that allows your friends to Tune In to what you're listening to. 
 
