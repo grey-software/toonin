@@ -102,7 +102,7 @@ export default {
 
       this.$socket.$subscribe("host pool", (hostPool) => {
         console.log("recieved host pool to evaluate");
-        var evalResult = this.evaluateHosts(hostPool.potentialHosts);
+        const evalResult = this.evaluateHosts(hostPool.potentialHosts);
         evalResult.room = hostPool.room;
         if(evalResult.hostFound) {
             console.log("sending eval result");
