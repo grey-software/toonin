@@ -26,7 +26,7 @@ var audioElement = document.createElement('audio');
 audioElement.setAttribute("preload", "auto");
 audioElement.load;
 
-var useDistStreamSys = false;
+var useDistributedStreaming = false;
 
 
 // used by Gain Node
@@ -36,7 +36,7 @@ chrome.runtime.onConnect.addListener(function (p) {
     p.onMessage.addListener(function (msg) {
         if (msg.type === "init") {
             // optional parameter roomName.
-            socket.emit("create room", { room: msg.roomName, isDistributed: useDistStreamSys } );
+            socket.emit("create room", { room: msg.roomName, isDistributed: useDistributedStreaming } );
             addTitleListener();
         }
         if (msg.type === "requestState") {
@@ -72,7 +72,7 @@ chrome.runtime.onConnect.addListener(function (p) {
             constraints.video = msg.isSharing;
         }
         if(msg.type === "toggleDistStreamSys") {
-            useDistStreamSys = msg.useDistStreamSys;
+            useDistributedStreaming = msg.useDistributedStreaming;
         }
     });
 });

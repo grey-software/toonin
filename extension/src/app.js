@@ -155,7 +155,7 @@ const store = new Vuex.Store({
         },
         toggleDistStreamSys(context, checked) {
             if(this.state.state === States.HOME) {
-                port.postMessage({ type: 'toggleDistStreamSys', useDistStreamSys: checked });
+                port.postMessage({ type: 'toggleDistStreamSys', useDistributedStreaming: checked });
             }
         }
     }
