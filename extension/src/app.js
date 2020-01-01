@@ -153,9 +153,9 @@ const store = new Vuex.Store({
                 port.postMessage({ type: 'toggleScreenShare', isSharing: checked });
             }
         },
-        toggleDistStreamSys(context, checked) {
+        toggleDistributedStreaming(context, checked) {
             if(this.state.state === States.HOME) {
-                port.postMessage({ type: 'toggleDistStreamSys', useDistributedStreaming: checked });
+                port.postMessage({ type: 'toggleDistributedStreaming', useDistributedStreaming: checked });
             }
         }
     }

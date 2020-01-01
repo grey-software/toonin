@@ -68,6 +68,7 @@ export default {
     return {
       roomName: null,
       targetHost: "",
+      failedHosts: [],
       peers: {}
     };
   },
@@ -86,7 +87,13 @@ export default {
       if(!reconnecting) { this.setSocketListeners(); }
       this.$socket.client.emit("new peer", this.roomName);
     },
-    evaluateHosts(hostPool) { return { hostFound: true, selectedHost: hostPool[0].socketID }; },
+    evaluateHosts(hostPool) {
+      for(var i = 0; i < hostPool.length; i++) {
+        if(!this.failedHosts.includes(hostPool[i].socketID)) {
+          return { hostFound: true, selectedHost: hostPool[i].socketID };
+        }
+      }
+    },
     setSocketListeners() {
       this.$socket.$subscribe("room null", () => {
         this.roomName = "";
@@ -95,7 +102,7 @@ export default {
 
       this.$socket.$subscribe("host pool", (hostPool) => {
         console.log("recieved host pool to evaluate");
-        var evalResult = this.evaluateHosts(hostPool.potentialHosts);
+        const evalResult = this.evaluateHosts(hostPool.potentialHosts);
         evalResult.room = hostPool.room;
         if(evalResult.hostFound) {
             console.log("sending eval result");
@@ -225,7 +232,9 @@ export default {
           this.rtcConn.connectionState == DISCONNECTED ||
           this.rtcConn.connectionState == FAILED
         ) {
-          this.$socket.client.emit('logoff', { room: this.$store.getters.ROOM, socketID: this.$socket.client.id })
+          this.failedHosts.push(this.targetHost);
+          this.$socket.client.emit('logoff', { room: this.$store.getters.ROOM, socketID: this.$socket.client.id });
+          this.reconnect();
 
           this.$store.dispatch("UPDATE_CONNECTED_STATUS", DISCONNECTED);
           this.$store.dispatch("UPDATE_ROOM", "");

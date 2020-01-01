@@ -71,7 +71,7 @@ chrome.runtime.onConnect.addListener(function (p) {
         if(msg.type === "toggleScreenShare") {
             constraints.video = msg.isSharing;
         }
-        if(msg.type === "toggleDistStreamSys") {
+        if(msg.type === "toggleDistributedStreaming") {
             useDistributedStreaming = msg.useDistributedStreaming;
         }
     });

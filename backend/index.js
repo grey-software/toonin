@@ -4,8 +4,7 @@ var cors = require("cors");
 app.use(cors());
 var http = require("http").Server(app);
 var io = require("socket.io")(http);
-var vars = require("./vars");
-var networkTree = require("./networkTree").networkTree;
+const NetworkTree = require("./NetworkTree").NetworkTree;
 
 var rooms = {};
 const MAX_CLIENTS_PER_HOST = 3;
@@ -45,7 +44,7 @@ function createRoom(socket, roomName, isDistributed) {
       } else {
         newRoomID = roomName;
         if(isDistributed) {
-          rooms[newRoomID] = new networkTree(socket.id, MAX_CLIENTS_PER_HOST);
+          rooms[newRoomID] = new NetworkTree(socket.id, MAX_CLIENTS_PER_HOST);
         } else { rooms[newRoomID] = {}; }
         socket.join(newRoomID, () => {
           socket.emit("room created", newRoomID);
@@ -57,7 +56,7 @@ function createRoom(socket, roomName, isDistributed) {
     } else {
       newRoomID = genRoomID(socket.id);
       if(isDistributed) {
-        rooms[newRoomID] = new networkTree(socketID, MAX_CLIENTS_PER_HOST);
+        rooms[newRoomID] = new NetworkTree(socketID, MAX_CLIENTS_PER_HOST);
       } else { rooms[newRoomID] = {}; }
       socket.join(newRoomID, () => {
         socket.emit("room created", newRoomID);
@@ -71,7 +70,7 @@ function createRoom(socket, roomName, isDistributed) {
 io.on("connection", socket => {
 
   socket.on("create room", (req) => {
-    if(typeof(req) === 'string') { createRoom(socket, req, false); }
+    if(req.isDistributed === undefined) { createRoom(socket, req, false); }
     else {
       createRoom(socket, req.room, req.isDistributed);
     }
@@ -80,7 +79,7 @@ io.on("connection", socket => {
   socket.on("new peer", room => {
     if(rooms[room]){
       if(rooms[room].getConnectableNodes) {
-        var potentialHosts = rooms[room].getConnectableNodes();
+        const potentialHosts = rooms[room].getConnectableNodes();
         socket.emit("host pool", { potentialHosts: potentialHosts, room: room });
       } else {
         socket.join(room, () => {
@@ -103,9 +102,7 @@ io.on("connection", socket => {
 
   socket.on("host eval res", (res) => {
     if(res.evalResult.hostFound) {
-
-      var room = res.evalResult.room;
-      console.log('res room: ' + room)
+      const room = res.evalResult.room;
 
       socket.join(room, () => {
         console.log("Peer connected successfully to room: " + room);
@@ -154,7 +151,8 @@ io.on("connection", socket => {
       if(rooms[req.room].removeNode) {
         rooms[req.room].removeNode(socket, req.socketID, req.room, rooms[req.room]);
       }
-      console.log(rooms[req.room]);
+
+      if(socket.id === req.socketID) { socket.leave(req.room); }
     }
     
   });
@@ -165,20 +163,6 @@ io.on("connection", socket => {
     delete socket.rooms[req.room];
 
   })
-});
-
-// clear rooms list through an http request with key as query
-app.get("/clearRooms", (req, res) => {
-  var key = req.query.key;
-  if (key === vars.deleteKey) {
-    rooms = {};
-    res.status(200);
-    res.send("Success! Rooms list reset");
-  }
-  else {
-    res.status(403);
-    res.send("Request Failed. Incorrect Key");
-  }
 });
 
 app.get("/:roomID", (req, res) => {
@@ -193,6 +177,7 @@ app.get("/:roomID", (req, res) => {
 });
 
 app.get("/", (req, res) => {
+  res.status(200);
   res.send("Server is alive");
   console.log(rooms);
 });
