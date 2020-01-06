@@ -58,7 +58,7 @@ class NetworkTree {
             root.reconnectingNodes.push(node.childNodes[i]);
         }
 
-        if(socketIDs.length > 0) { socket.to(room).emit("reconnect", { socketIDs: socketIDs }); }
+        if(socketIDs.length > 0) { socket.to(room).emit("reconnect", { socketIDs }); }
     }
 
     /**

@@ -14,7 +14,7 @@ function sleep(ms) {
 }
 
 // reduced the gen room id length to 6 characters (2, 15) -> (2, 5)
-const genRoomID = (socketID) => {
+const genRoomID = () => {
   while (true) {
     const id =
       Math.random()
@@ -80,7 +80,7 @@ io.on("connection", socket => {
     if(rooms[room]){
       if(rooms[room].getConnectableNodes) {
         const potentialHosts = rooms[room].getConnectableNodes();
-        socket.emit("host pool", { potentialHosts: potentialHosts, room: room });
+        socket.emit("host pool", { potentialHosts: potentialHosts, room });
       } else {
         socket.join(room, () => {
           console.log("Peer connected successfully to room: " + room);
@@ -108,7 +108,7 @@ io.on("connection", socket => {
         console.log("Peer connected successfully to room: " + room);
 
         socket.to(room).emit("peer joined", {
-          room: room, 
+          room, 
           id: socket.id, 
           hostID: res.evalResult.selectedHost 
         });
@@ -146,7 +146,7 @@ io.on("connection", socket => {
     io.to(title.id).emit("title", title.title);
   });
 
-  socket.on('logoff', (req) => {
+  socket.on("logoff", (req) => {
     if(rooms[req.room]) {
       if(rooms[req.room].removeNode) {
         rooms[req.room].removeNode(socket, req.socketID, req.room, rooms[req.room]);

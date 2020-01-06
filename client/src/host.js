@@ -29,7 +29,7 @@ export function startShare(peerID, _this) {
     rtcConn.addTrack(audioStream.getAudioTracks()[0]);
 
     _this.peers[peerID].rtcConn = rtcConn;
-    _this.peers[peerID].dataChannel = _this.peers[peerID].rtcConn.createDataChannel('mediaDescription');
+    _this.peers[peerID].dataChannel = _this.peers[peerID].rtcConn.createDataChannel("mediaDescription");
 
     _this.peers[peerID].rtcConn.onconnectionstatechange = () => {
         Object.keys(_this.peers).forEach(key => {
@@ -37,7 +37,7 @@ export function startShare(peerID, _this) {
             _this.peers[key].rtcConn.connectionState=="disconnected") {
                 // notify backend of client leaving/failure to make sure that
                 // network tree is updated correctly
-                _this.$socket.client.emit('logoff', { 
+                _this.$socket.client.emit("logoff", { 
                     room: _this.$store.getters.ROOM, 
                     socketID: key 
                 });
@@ -46,8 +46,8 @@ export function startShare(peerID, _this) {
             }
         });
 
-        Object.keys(_this.peers).forEach(key => {
-            if (_this.peers[key].dataChannel.readyState=="closed") {
+        Object.keys(_this.peers).forEach( (key) => {
+            if (_this.peers[key].dataChannel.readyState === "closed") {
                 _this.$socket.client.emit("title", {
                     id: key,
                     title: _this.$store.getters.STREAMTITLE
@@ -77,7 +77,7 @@ export function startShare(peerID, _this) {
             _this.$socket.client.emit("src new desc", {
                 id: peerID,
                 room: _this.$store.getters.ROOM,
-                desc: desc
+                desc
             });
         });
     });
