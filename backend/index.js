@@ -54,7 +54,7 @@ function createRoom(socket, roomName, isDistributed) {
 
       // if no custom room name, generate a random id
     } else {
-      newRoomID = genRoomID(socket.id);
+      newRoomID = genRoomID();
       if(isDistributed) {
         rooms[newRoomID] = new NetworkTree(socketID, MAX_CLIENTS_PER_HOST);
       } else { rooms[newRoomID] = {}; }
