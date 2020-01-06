@@ -56,7 +56,7 @@ function createRoom(socket, roomName, isDistributed) {
     } else {
       newRoomID = genRoomID();
       if(isDistributed) {
-        rooms[newRoomID] = new NetworkTree(socketID, MAX_CLIENTS_PER_HOST);
+        rooms[newRoomID] = new NetworkTree(socket.id, MAX_CLIENTS_PER_HOST);
       } else { rooms[newRoomID] = {}; }
       socket.join(newRoomID, () => {
         socket.emit("room created", newRoomID);

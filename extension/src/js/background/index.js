@@ -324,6 +324,8 @@ socket.on("peer joined", (peerData) => {
 socket.on("peer ice", (iceData) => {
     console.log("Ice Candidate from peer: " + iceData.id + " in room: " + iceData.room);
     console.log("Ice Candidate: " + iceData.candidate);
+    
+    // check if this ice data is for us
     if (roomID != iceData.room || !(iceData.id in peers) || (iceData.hostID !== socket.id)) {
         console.log("Ice Candidate not for me");
         return;

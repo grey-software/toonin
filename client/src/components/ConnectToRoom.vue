@@ -162,6 +162,8 @@ export default {
       this.$socket.$subscribe("peer ice", iceData => {
         console.log("Ice Candidate from peer: " + iceData.id + " in room: " + iceData.room);
         console.log("Ice Candidate: " + iceData.candidate);
+
+        // check if this ice data is for us or someone else in the room
         if (this.$store.getters.ROOM != iceData.room ||
           !(iceData.id in this.peers) || (iceData.hostID !== this.$socket.client.id)) {
           console.log("Ice Candidate not for me");
