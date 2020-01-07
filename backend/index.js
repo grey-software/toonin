@@ -4,89 +4,33 @@ var cors = require("cors");
 app.use(cors());
 var http = require("http").Server(app);
 var io = require("socket.io")(http);
-const NetworkTree = require("./NetworkTree").NetworkTree;
-
-var rooms = {};
+const RoomManager = require('./RoomManager').RoomManager;
 const MAX_CLIENTS_PER_HOST = 3;
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-// reduced the gen room id length to 6 characters (2, 15) -> (2, 5)
-const genRoomID = () => {
-  while (true) {
-    const id =
-      Math.random()
-        .toString(36)
-        .substring(2, 5) +
-      Math.random()
-        .toString(36)
-        .substring(2, 5);
-    if (!(id in rooms)) { return id; }
-  }
-};
-
-/**
- * 
- * @param {SocketIO.Socket} socket 
- * @param {string} roomName 
- */
-function createRoom(socket, roomName, isDistributed) {
-    var newRoomID = "";
-    console.log("Received request to create new room");
-    const hasCustomRoomName = roomName.length > 0;
-
-    if (hasCustomRoomName) {
-
-      if (roomName in rooms) {
-        socket.emit("room creation failed", "name already exists");
-      } else {
-        newRoomID = roomName;
-        if(isDistributed) {
-          rooms[newRoomID] = new NetworkTree(socket.id, MAX_CLIENTS_PER_HOST);
-        } else { rooms[newRoomID] = {}; }
-        socket.join(newRoomID, () => {
-          socket.emit("room created", newRoomID);
-          console.log(rooms);
-        });
-      }
-
-      // if no custom room name, generate a random id
-    } else {
-      newRoomID = genRoomID();
-      if(isDistributed) {
-        rooms[newRoomID] = new NetworkTree(socket.id, MAX_CLIENTS_PER_HOST);
-      } else { rooms[newRoomID] = {}; }
-      socket.join(newRoomID, () => {
-        socket.emit("room created", newRoomID);
-        console.log(rooms);
-      });
-    }
-
-}
+const roomManager = new RoomManager();
 
 //Socket create a new "room" and listens for other connections
 io.on("connection", socket => {
 
   socket.on("create room", (req) => {
-    if(req.isDistributed === undefined) { createRoom(socket, req, false); }
+    if(req.isDistributed === undefined) { roomManager.createRoom(socket, req, false); }
     else {
-      createRoom(socket, req.room, req.isDistributed);
+      roomManager.createRoom(socket, req.room, req.isDistributed);
     }
   });
 
-  socket.on("new peer", room => {
-    if(rooms[room]){
-      if(rooms[room].getConnectableNodes) {
-        const potentialHosts = rooms[room].getConnectableNodes();
-        socket.emit("host pool", { potentialHosts: potentialHosts, room });
+  socket.on("new peer", roomID => {
+    const room = roomManager.getRoom(roomID);
+    if(room){
+      if(room.getConnectableNodes) {
+        const potentialHosts = room.getConnectableNodes();
+        socket.emit("host pool", { potentialHosts: potentialHosts, roomID });
       } else {
-        socket.join(room, () => {
-          console.log("Peer connected successfully to room: " + room);
+        socket.join(roomID, () => {
+          console.log("Peer connected successfully to room: " + roomID);
   
-          socket.to(room).emit("peer joined", {
-            room: room, 
+          socket.to(roomID).emit("peer joined", {
+            room: roomID, 
             id: socket.id
           });
   
@@ -103,6 +47,7 @@ io.on("connection", socket => {
   socket.on("host eval res", (res) => {
     if(res.evalResult.hostFound) {
       const room = res.evalResult.room;
+      console.log('res room: ' + room);
 
       socket.join(room, () => {
         console.log("Peer connected successfully to room: " + room);
@@ -136,8 +81,9 @@ io.on("connection", socket => {
     console.log(`Received answer description from peer: ${descData.id} in room: ${descData.room}`);
     socket.to(descData.room).emit("peer desc", descData);
 
-    if(rooms[descData.room].addNode) {
-      rooms[descData.room].addNode(descData.id, MAX_CLIENTS_PER_HOST, descData.selectedHost);
+    const room = roomManager.getRoom(descData.room);
+    if(room.addNode) {
+      room.addNode(descData.id, MAX_CLIENTS_PER_HOST, descData.selectedHost);
     }
   });
 
@@ -147,9 +93,10 @@ io.on("connection", socket => {
   });
 
   socket.on("logoff", (req) => {
-    if(rooms[req.room]) {
-      if(rooms[req.room].removeNode) {
-        rooms[req.room].removeNode(socket, req.socketID, req.room, rooms[req.room]);
+    const room = roomManager.getRoom(req.room);
+    if(room) {
+      if(room.removeNode) {
+        room.removeNode(socket, req.socketID, req.room, room);
       }
 
       if(socket.id === req.socketID) { socket.leave(req.room); }
@@ -159,7 +106,9 @@ io.on("connection", socket => {
 
   socket.on('disconnect room', (req) => {
     console.log('closing room ' + req.room);
-    delete rooms[req.room];
+    
+    roomManager.deleteRoom(req.room);
+    console.log(roomManager.rooms);
     delete socket.rooms[req.room];
 
   })
@@ -168,7 +117,7 @@ io.on("connection", socket => {
 app.get("/:roomID", (req, res) => {
   console.log(rooms);
   const roomID = req.params.roomID;
-  if (roomID in rooms) {
+  if (roomManager.getRoom(roomID)) {
     console.log("Room with id: " + roomID + " found!");
     return res.send(JSON.stringify("SUCCESS"));
   }
@@ -179,7 +128,6 @@ app.get("/:roomID", (req, res) => {
 app.get("/", (req, res) => {
   res.status(200);
   res.send("Server is alive");
-  console.log(rooms);
 });
 
 http.listen(8100, () => {
