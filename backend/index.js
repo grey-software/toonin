@@ -4,7 +4,7 @@ var cors = require("cors");
 app.use(cors());
 var http = require("http").Server(app);
 var io = require("socket.io")(http);
-const RoomManager = require('./RoomManager').RoomManager;
+const RoomManager = require("./RoomManager").RoomManager;
 const MAX_CLIENTS_PER_HOST = 3;
 
 const roomManager = new RoomManager();
@@ -19,7 +19,7 @@ io.on("connection", socket => {
     }
   });
 
-  socket.on("new peer", roomID => {
+  socket.on("new peer", (roomID) => {
     const room = roomManager.getRoom(roomID);
     if(room){
       if(room.getConnectableNodes) {
@@ -62,22 +62,22 @@ io.on("connection", socket => {
     }
   });
 
-  socket.on("src new ice", iceData => {
+  socket.on("src new ice", (iceData) => {
     console.log(`Received new ICE Candidate from src for peer: ${iceData.id} in room: ${iceData.room}`);
     socket.to(iceData.room).emit("src ice", iceData);
   });
 
-  socket.on("peer new ice", iceData => {
+  socket.on("peer new ice", (iceData) => {
     console.log(`Received new ICE Candidate from peer: ${iceData.id} in room: ${iceData.room}`);
     socket.to(iceData.room).emit("peer ice", iceData);
   });
 
-  socket.on("src new desc", descData => {
+  socket.on("src new desc", (descData) => {
     console.log(`Received description from src for peer: ${descData.id} in room: ${descData.room}`);
     socket.to(descData.room).emit("src desc", descData);
   });
 
-  socket.on("peer new desc", descData => {
+  socket.on("peer new desc", (descData) => {
     console.log(`Received answer description from peer: ${descData.id} in room: ${descData.room}`);
     socket.to(descData.room).emit("peer desc", descData);
 
@@ -87,7 +87,7 @@ io.on("connection", socket => {
     }
   });
 
-  socket.on("title", title => {
+  socket.on("title", (title) => {
     console.log(title)
     io.to(title.id).emit("title", title.title);
   });
