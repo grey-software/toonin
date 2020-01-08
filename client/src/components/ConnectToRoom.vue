@@ -42,6 +42,7 @@
 
 <script>
 import { mapState } from "vuex";
+import { startShare } from "../host";
 const SUCCESSFUL = "connected";
 const DISCONNECTED = "disconnected";
 const FAILED = "failed";
@@ -58,12 +59,17 @@ const servers = {
   ]
 };
 
+/* eslint no-console: ["error", { allow: ["log"] }] */
+
 export default {
   name: "connect-to-room",
   props: {},
   data() {
     return {
-      roomName: null
+      roomName: null,
+      targetHost: "",
+      failedHosts: [],
+      peers: {}
     };
   },
   methods: {
@@ -75,17 +81,37 @@ export default {
     toonin() {
       this.connectToRoom();
     },
-    connectToRoom() {
+    connectToRoom(reconnecting) {
       this.$store.dispatch("UPDATE_PEERID", this.$socket.client.id);
       this.$store.dispatch("UPDATE_ROOM", this.roomName);
-      this.setSocketListeners();
+      if(!reconnecting) { this.setSocketListeners(); }
       this.$socket.client.emit("new peer", this.roomName);
+    },
+    evaluateHosts(hostPool) {
+      for(var i = 0; i < hostPool.length; i++) {
+        if(!this.failedHosts.includes(hostPool[i].socketID)) {
+          return { hostFound: true, selectedHost: hostPool[i].socketID };
+        }
+      }
     },
     setSocketListeners() {
       this.$socket.$subscribe("room null", () => {
         this.roomName = "";
         this.$store.dispatch("UPDATE_ROOM", "");
       });
+
+      this.$socket.$subscribe("host pool", (hostPool) => {
+        console.log("recieved host pool to evaluate");
+        const evalResult = this.evaluateHosts(hostPool.potentialHosts);
+        evalResult.room = hostPool.roomID;
+        console.log(evalResult);
+        if(evalResult.hostFound) {
+            console.log("sending eval result");
+            this.$socket.client.emit("host eval res", { evalResult: evalResult });
+            this.targetHost = evalResult.selectedHost;
+        }
+      });
+
       this.$socket.$subscribe("src ice", iceData => {
         if (iceData.room !== this.room || iceData.id !== this.peerID) {
           return;
@@ -109,9 +135,66 @@ export default {
             this.createAnswer();
           });
       });
+
       this.$socket.$subscribe("title", title => {
         this.$store.dispatch("UPDATE_STREAM_TITLE", title);
       });
+
+
+      /* Listeners to convert this client into host for new peers */
+
+
+      this.$socket.$subscribe("peer joined", peerData => {
+        if(peerData.hostID !== this.$socket.client.id) {
+          console.log("peer not for me");
+          return;
+        }
+
+
+        this.peers[peerData.id] = {
+          id: peerData.id,
+          room: peerData.room,
+          iceCandidates: []
+        };
+
+        startShare(peerData.id, this);
+      });
+
+      this.$socket.$subscribe("peer ice", iceData => {
+        console.log("Ice Candidate from peer: " + iceData.id + " in room: " + iceData.room);
+        console.log("Ice Candidate: " + iceData.candidate);
+
+        // check if this ice data is for us or someone else in the room
+        if (this.$store.getters.ROOM != iceData.room ||
+          !(iceData.id in this.peers) || (iceData.hostID !== this.$socket.client.id)) {
+          console.log("Ice Candidate not for me");
+          return;
+        }
+        this.peers[iceData.id].rtcConn.addIceCandidate(new RTCIceCandidate(iceData.candidate))
+          .then(console.log("Ice Candidate added successfully for peer: " + iceData.id))
+          .catch(function (err) {
+              console.log("Error on addIceCandidate: " + err);
+          });
+      });
+
+      this.$socket.$subscribe("peer desc", descData => {
+        console.log("Answer description from peer: " + descData.id + " in room: " + descData.room);
+        console.log("Answer description: " + descData.desc);
+        if (this.$store.getters.ROOM !== descData.room || !(descData.id in this.peers)) {
+            console.log("Answer Description not for me");
+            return;
+        }
+        this.peers[descData.id].rtcConn.setRemoteDescription(new RTCSessionDescription(descData.desc)).then(function () {
+            console.log("Remote description set successfully for peer: " + descData.id);
+        }).catch(function (err) {
+            console.log("Error on setRemoteDescription: " + err);
+        });
+      });
+
+      this.$socket.$subscribe('reconnect', req => {
+        if(req.socketIDs.includes(this.$socket.client.id)) { this.reconnect(); }
+      });
+
     },
     createAnswer() {
       this.rtcConn.createAnswer().then(desc => {
@@ -124,7 +207,8 @@ export default {
       this.$socket.client.emit("peer new desc", {
         id: this.peerID,
         room: this.room,
-        desc: desc
+        desc: desc,
+        selectedHost: this.targetHost
       });
     },
     attachRTCliteners() {
@@ -135,7 +219,8 @@ export default {
         this.$socket.client.emit("peer new ice", {
           id: this.peerID,
           room: this.room,
-          candidate: event.candidate
+          candidate: event.candidate,
+          hostID: this.targetHost
         });
       };
 
@@ -150,6 +235,10 @@ export default {
           this.rtcConn.connectionState == DISCONNECTED ||
           this.rtcConn.connectionState == FAILED
         ) {
+          this.failedHosts.push(this.targetHost);
+          this.$socket.client.emit('logoff', { room: this.$store.getters.ROOM, socketID: this.$socket.client.id });
+          this.reconnect();
+
           this.$store.dispatch("UPDATE_CONNECTED_STATUS", DISCONNECTED);
           this.$store.dispatch("UPDATE_ROOM", "");
           this.$store.dispatch("UPDATE_PEERID", null);
@@ -170,22 +259,27 @@ export default {
 
       this.rtcConn.ontrack = event => {
         var incomingStream = new MediaStream([event.track]);
+        this.updateOutgoingTracks(event.track);
 
         var _iOSDevice = !!navigator.platform.match(
           /iPhone|iPod|iPad|Macintosh|MacIntel/
         );
+
         if (_iOSDevice) {
           this.$store.dispatch("UPDATE_CONNECTED_STATUS", SUCCESSFUL);
           this.$store.dispatch("UPDATE_PLAYING", false);
+
           if(incomingStream.getAudioTracks().length > 0) {
             this.$store.dispatch("UPDATE_AUDIO_STREAM", incomingStream);
           }
           else {
             this.$store.dispatch("UPDATE_VIDEO_STREAM", incomingStream);
           }
+
         } else {
           this.$store.dispatch("UPDATE_CONNECTED_STATUS", SUCCESSFUL);
           this.$store.dispatch("UPDATE_PLAYING", true);
+
           if(incomingStream.getAudioTracks().length > 0) {
             this.$store.dispatch("UPDATE_AUDIO_STREAM", incomingStream);
           }
@@ -194,12 +288,46 @@ export default {
           }
         }
 
-        // disconnectBtn.$refs.link.hidden = false;
       };
+    },
+    updateOutgoingTracks(track) {
+      var keys, senders;
+
+        if(track.kind === 'audio') {
+          keys = Object.keys(this.peers);
+
+          for(var i = 0; i < keys.length; i++) {
+            senders = this.peers[keys[i]].rtcConn.getSenders();
+
+            if(senders[0].track.kind === 'audio') { senders[0].replaceTrack(track); }
+            else { senders[1].replaceTrack(track); }
+          }
+        } else {
+          keys = Object.keys(this.peers);
+
+          for(var j = 0; j < keys.length; j++) {
+            senders = this.peers[keys[j]].rtcConn.getSenders();
+
+            if(senders[0].track.kind === 'video') { senders[0].replaceTrack(track); }
+            else { senders[1].replaceTrack(track); }
+          }
+        }
     },
     onDataChannelMsg(messageEvent) {
       // data channel to recieve the media title
       try {
+        var keys = Object.keys(this.peers);
+        for(var i = 0; i < keys.length; i++) {
+          if(this.peers[keys[i]].dataChannel.readyState === 'open') {
+            this.peers[keys[i]].dataChannel.send(messageEvent.data);
+          }
+        }
+
+        if(messageEvent.data === 'close') {
+          this.disconnect();
+          return;
+        }
+
         var mediaDescription = JSON.parse(messageEvent.data);
         this.$store.dispatch("UPDATE_STREAM_TITLE", mediaDescription.title);
       } catch (err) {
@@ -209,7 +337,19 @@ export default {
     logMessage() {
       // continue regardless of error
     },
+    reconnect() {
+      this.rtcConn.close();
+      this.$store.dispatch("UPDATE_AUDIO_STREAM", null);
+      this.$store.dispatch("UPDATE_VIDEO_STREAM", null);
+      this.$store.dispatch("UPDATE_PEERID", null);
+      this.$store.dispatch("UPDATE_RTCCONN", null);
+
+      var roomKey = this.$store.getters.ROOM;
+      this.roomName = roomKey;
+      this.connectToRoom(true);
+    },
     disconnect() {
+      this.$socket.client.emit('logoff', { room: this.$store.getters.ROOM, socketID: this.$socket.client.id });
       this.rtcConn.close();
       this.$store.dispatch("UPDATE_AUDIO_STREAM", null);
       this.$store.dispatch("UPDATE_VIDEO_STREAM", null);
@@ -219,6 +359,7 @@ export default {
       this.$store.dispatch("UPDATE_STREAM_TITLE", "");
       this.$store.dispatch("UPDATE_PLAYING", false);
       this.$store.dispatch("UPDATE_RTCCONN", null);
+
     }
   },
   computed: {

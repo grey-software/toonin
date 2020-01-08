@@ -1,6 +1,10 @@
 // used by client.
 import opus from './opus';
 
+// ATTN: Uncomment accordingly for local/remote dev
+const ENDPOINT = "https://www.toonin.ml:8443/";
+const socket = io(ENDPOINT, { secure: true });
+// var socket = io("http://127.0.0.1:8100");
 
 var remoteDestination,
     audioSourceNode,
@@ -26,6 +30,9 @@ var audioElement = document.createElement('audio');
 audioElement.setAttribute("preload", "auto");
 audioElement.load;
 
+var useDistributedStreaming = false;
+
+var peers = {};
 
 // used by Gain Node
 var volume = 1;
@@ -34,19 +41,19 @@ chrome.runtime.onConnect.addListener(function (p) {
     p.onMessage.addListener(function (msg) {
         if (msg.type === "init") {
             // optional parameter roomName.
-            socket.emit("create room", msg.roomName);
+            socket.emit("create room", { room: msg.roomName, isDistributed: useDistributedStreaming } );
             addTitleListener();
         }
         if (msg.type === "requestState") {
             sendState()
         }
-        if (msg.type == "stopToonin") {
+        if (msg.type === "stopToonin") {
             stopListening();
         }
-        if (msg.type == "stopSharing") {
+        if (msg.type === "stopSharing") {
             disconnect();
         }
-        if (msg.type == "toggleMute") {
+        if (msg.type === "toggleMute") {
             muteState = ! msg.value;
             if (muteState) {
                 Object.keys(peers).forEach(function (peer) {
@@ -60,14 +67,17 @@ chrome.runtime.onConnect.addListener(function (p) {
                 });
             }
         }
-        if (msg.type == "volume") {
+        if (msg.type === "volume") {
             changeVolume(msg.value);
         }
-        if (msg.type == "stateUpdate") {
+        if (msg.type === "stateUpdate") {
             state = msg.state.state;
         }
         if(msg.type === "toggleScreenShare") {
             constraints.video = msg.isSharing;
+        }
+        if(msg.type === "toggleDistributedStreaming") {
+            useDistributedStreaming = msg.useDistributedStreaming;
         }
     });
 });
@@ -100,6 +110,7 @@ function disconnect() {
 
     var peerIDs = Object.keys(peers);
     for (var i = 0; i < peerIDs.length; i++) {
+        peers[peerIDs[i]].dataChannel.send("close");
         peers[peerIDs[i]].rtcConn.close();
         delete peers[peerIDs[i]];
     }
@@ -140,6 +151,7 @@ chrome.tabs.onUpdated.addListener(function (currentTab, changeInfo) {
         window.audio.muted = changeInfo.mutedInfo.muted;
     }
 });
+
 /**
  * capture user's tab audio for sharing with peers
  */
@@ -179,11 +191,7 @@ function getTabAudio() {
 }
 
 console.log("application script running");
-// ATTN: Uncomment accordingly for local/remote dev
-const ENDPOINT = "https://www.toonin.ml:8443/";
-const socket = io(ENDPOINT, { secure: true });
-//var socket = io("http://127.0.0.1:8100");
-var peers = {};
+
 var localAudioStream;
 var localVideoStream = null;
 var roomID;
@@ -216,21 +224,22 @@ function startShare(peerID) {
     rtcConn.addTrack(remoteDestination.stream.getAudioTracks()[0]);
 
     peers[peerID].rtcConn = rtcConn;
-    peers[peerID].dataChannel = peers[peerID].rtcConn.createDataChannel('mediaDescription');
+    peers[peerID].dataChannel = peers[peerID].rtcConn.createDataChannel("mediaDescription");
 
     peers[peerID].rtcConn.onconnectionstatechange = (event) => {
         Object.keys(peers).forEach(key => {
-            if (peers[key].rtcConn.connectionState=="failed" || peers[key].rtcConn.connectionState=="disconnected") delete peers[key];
+            if (peers[key].rtcConn.connectionState==="failed" || 
+            peers[key].rtcConn.connectionState==="disconnected") delete peers[key];
           });
         peerCounter = Object.keys(peers).length;
         sendState();
         Object.keys(peers).forEach(key => {
-            if (peers[key].dataChannel.readyState=="closed") socket.emit("title", {
+            if (peers[key].dataChannel.readyState==="closed") socket.emit("title", {
                 id: key,
                 title: title
             });
           });
-    }
+    };
     
     peers[peerID].rtcConn.onicecandidate = function (event) {
         if (! event.candidate) {
@@ -244,6 +253,7 @@ function startShare(peerID) {
             candidate: event.candidate
         });
     };
+
     rtcConn.createOffer(offerOptions).then((desc) => {
         opus.preferOpus(desc.sdp);
         rtcConn.setLocalDescription(new RTCSessionDescription(desc)).then(function () {
@@ -287,12 +297,19 @@ socket.on("room created", (newRoomID) => {
     port.postMessage({ type: "room created" });
     getTabAudio();
 });
+
 // server unable to create a room
 socket.on("room creation failed", (reason) => {
     port.postMessage({type: "room creation fail", reason: reason});
 });
+
 // new peer connection
 socket.on("peer joined", (peerData) => {
+    if(peerData.hostID && peerData.hostID !== socket.id) {
+        console.log("peer not for me");
+        return;
+    }
+    
     console.log("New peer has joined the room");
     peers[peerData.id] = {
         id: peerData.id,
@@ -303,17 +320,23 @@ socket.on("peer joined", (peerData) => {
     sendState();
     startShare(peerData.id);
 });
+
 socket.on("peer ice", (iceData) => {
     console.log("Ice Candidate from peer: " + iceData.id + " in room: " + iceData.room);
     console.log("Ice Candidate: " + iceData.candidate);
-    if (roomID != iceData.room || !(iceData.id in peers)) {
+    
+    // check if this ice data is for us
+    if (roomID != iceData.room || !(iceData.id in peers) || (iceData.hostID !== socket.id)) {
         console.log("Ice Candidate not for me");
         return;
     }
-    peers[iceData.id].rtcConn.addIceCandidate(new RTCIceCandidate(iceData.candidate)).then(console.log("Ice Candidate added successfully for peer: " + iceData.id)).catch(function (err) {
-        console.log("Error on addIceCandidate: " + err);
-    });
+    peers[iceData.id].rtcConn.addIceCandidate(new RTCIceCandidate(iceData.candidate))
+        .then(console.log("Ice Candidate added successfully for peer: " + iceData.id))
+        .catch(function (err) {
+            console.log("Error on addIceCandidate: " + err);
+        });
 });
+
 socket.on("peer desc", (descData) => {
     console.log("Answer description from peer: " + descData.id + " in room: " + descData.room);
     console.log("Answer description: " + descData.desc);

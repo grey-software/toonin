@@ -148,9 +148,14 @@ const store = new Vuex.Store({
             console.log('state requested from background');
             port.postMessage({type: "requestState"});
         },
-        toggleScreenShare(state, checked=false) {
+        toggleScreenShare(context, checked=false) {
             if(this.state.state === States.HOME) {
                 port.postMessage({ type: 'toggleScreenShare', isSharing: checked });
+            }
+        },
+        toggleDistributedStreaming(context, checked) {
+            if(this.state.state === States.HOME) {
+                port.postMessage({ type: 'toggleDistributedStreaming', useDistributedStreaming: checked });
             }
         }
     }
