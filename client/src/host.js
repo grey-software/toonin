@@ -32,9 +32,9 @@ export function startShare(peerID, _this) {
     _this.peers[peerID].dataChannel = _this.peers[peerID].rtcConn.createDataChannel("mediaDescription");
 
     _this.peers[peerID].rtcConn.onconnectionstatechange = () => {
-        Object.keys(_this.peers).forEach(key => {
-            if (_this.peers[key].rtcConn.connectionState=="failed" || 
-            _this.peers[key].rtcConn.connectionState=="disconnected") {
+        Object.keys(_this.peers).forEach((key) => {
+            if (_this.peers[key].rtcConn.connectionState==="failed" || 
+            _this.peers[key].rtcConn.connectionState==="disconnected") {
                 // notify backend of client leaving/failure to make sure that
                 // network tree is updated correctly
                 _this.$socket.client.emit("logoff", { 

@@ -24,7 +24,7 @@ io.on("connection", socket => {
     if(room){
       if(room.getConnectableNodes) {
         const potentialHosts = room.getConnectableNodes();
-        socket.emit("host pool", { potentialHosts: potentialHosts, roomID });
+        socket.emit("host pool", { potentialHosts, roomID });
       } else {
         socket.join(roomID, () => {
           console.log("Peer connected successfully to room: " + roomID);
@@ -47,7 +47,7 @@ io.on("connection", socket => {
   socket.on("host eval res", (res) => {
     if(res.evalResult.hostFound) {
       const room = res.evalResult.room;
-      console.log('res room: ' + room);
+      console.log("Res room: " + room);
 
       socket.join(room, () => {
         console.log("Peer connected successfully to room: " + room);

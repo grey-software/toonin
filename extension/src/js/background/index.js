@@ -32,6 +32,7 @@ audioElement.load;
 
 var useDistributedStreaming = false;
 
+var peers = {};
 
 // used by Gain Node
 var volume = 1;
@@ -109,7 +110,7 @@ function disconnect() {
 
     var peerIDs = Object.keys(peers);
     for (var i = 0; i < peerIDs.length; i++) {
-        peers[peerIDs[i]].dataChannel.send('close');
+        peers[peerIDs[i]].dataChannel.send("close");
         peers[peerIDs[i]].rtcConn.close();
         delete peers[peerIDs[i]];
     }
@@ -191,7 +192,6 @@ function getTabAudio() {
 
 console.log("application script running");
 
-var peers = {};
 var localAudioStream;
 var localVideoStream = null;
 var roomID;
