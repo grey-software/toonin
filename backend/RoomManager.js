@@ -2,7 +2,7 @@ const NetworkTree = require("./NetworkTree").NetworkTree;
 const MAX_CLIENTS_PER_HOST = 3;
 
 const genRoomID = (rooms) => {
-    while (true) {
+    for (;;) {
       const id =
         Math.random()
           .toString(36)

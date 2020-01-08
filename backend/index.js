@@ -115,7 +115,6 @@ io.on("connection", socket => {
 });
 
 app.get("/:roomID", (req, res) => {
-  console.log(rooms);
   const roomID = req.params.roomID;
   if (roomManager.getRoom(roomID)) {
     console.log("Room with id: " + roomID + " found!");

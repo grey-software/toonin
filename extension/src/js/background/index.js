@@ -47,13 +47,13 @@ chrome.runtime.onConnect.addListener(function (p) {
         if (msg.type === "requestState") {
             sendState()
         }
-        if (msg.type == "stopToonin") {
+        if (msg.type === "stopToonin") {
             stopListening();
         }
-        if (msg.type == "stopSharing") {
+        if (msg.type === "stopSharing") {
             disconnect();
         }
-        if (msg.type == "toggleMute") {
+        if (msg.type === "toggleMute") {
             muteState = ! msg.value;
             if (muteState) {
                 Object.keys(peers).forEach(function (peer) {
@@ -67,10 +67,10 @@ chrome.runtime.onConnect.addListener(function (p) {
                 });
             }
         }
-        if (msg.type == "volume") {
+        if (msg.type === "volume") {
             changeVolume(msg.value);
         }
-        if (msg.type == "stateUpdate") {
+        if (msg.type === "stateUpdate") {
             state = msg.state.state;
         }
         if(msg.type === "toggleScreenShare") {
@@ -224,17 +224,17 @@ function startShare(peerID) {
     rtcConn.addTrack(remoteDestination.stream.getAudioTracks()[0]);
 
     peers[peerID].rtcConn = rtcConn;
-    peers[peerID].dataChannel = peers[peerID].rtcConn.createDataChannel('mediaDescription');
+    peers[peerID].dataChannel = peers[peerID].rtcConn.createDataChannel("mediaDescription");
 
     peers[peerID].rtcConn.onconnectionstatechange = (event) => {
         Object.keys(peers).forEach(key => {
-            if (peers[key].rtcConn.connectionState=="failed" || 
-            peers[key].rtcConn.connectionState=="disconnected") delete peers[key];
+            if (peers[key].rtcConn.connectionState==="failed" || 
+            peers[key].rtcConn.connectionState==="disconnected") delete peers[key];
           });
         peerCounter = Object.keys(peers).length;
         sendState();
         Object.keys(peers).forEach(key => {
-            if (peers[key].dataChannel.readyState=="closed") socket.emit("title", {
+            if (peers[key].dataChannel.readyState==="closed") socket.emit("title", {
                 id: key,
                 title: title
             });
