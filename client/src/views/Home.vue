@@ -20,7 +20,7 @@
     </v-content>
     <v-footer app>
       <v-spacer></v-spacer>
-      <span>&copy; Toonin 2019</span>
+      <span id="footerBar">&copy; Toonin 2019</span>
     </v-footer>
   </v-app>
 </template>
@@ -47,6 +47,9 @@ export default {
     volumeHandler(volume) {
       this.volume = volume;
     }
+  },
+  mounted() {
+    document.getElementById('footerBar').innerHTML = '&copy; Toonin ' + (new Date()).getFullYear();
   }
 };
 </script>
