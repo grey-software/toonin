@@ -15,21 +15,18 @@ const roomManager = new RoomManager();
 // var rooms = {};
 const port = process.env.PORT || 8443;
 
-app.get('*',function(req,res,next){
-  if(req.headers['x-forwarded-proto']!='https')
-    res.redirect("https://" + req.headers.host + req.url)
-  else
-    next() /* Continue to other routes if we're not redirecting */
-});
+// app.get('*',function(req,res,next){
+//   if(req.headers['x-forwarded-proto']!='https')
+//     res.redirect("https://" + req.headers.host + req.url)
+//   else
+//     next() /* Continue to other routes if we're not redirecting */
+// });
 
 //Socket create a new "room" and listens for other connections
 io.on("connection", socket => {
 
   socket.on("create room", (req) => {
-    if(req.isDistributed === false) { roomManager.createRoom(socket, req, false); }
-    else {
-      roomManager.createRoom(socket, req.room, req.isDistributed);
-    }
+    roomManager.createRoom(socket, req.room, req.isDistributed);
   });
 
   socket.on("new peer", (roomID) => {
@@ -37,6 +34,7 @@ io.on("connection", socket => {
     if(room){
       if(room.getConnectableNodes) {
         const potentialHosts = room.getConnectableNodes();
+        console.log(potentialHosts);
         socket.emit("host pool", { potentialHosts, roomID });
       } else {
         socket.join(roomID, () => {
