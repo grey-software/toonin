@@ -1,11 +1,10 @@
 "use strict";
-var express = require("express")
+var express = require("express");
 var app = express();
 var cors = require("cors");
 app.use(cors());
 var http = require("http").Server(app);
 var io = require("socket.io")(http);
-var vars = require("./vars");
 const history = require('connect-history-api-fallback')
 const RoomManager = require("./RoomManager").RoomManager;
 const MAX_CLIENTS_PER_HOST = 3;
@@ -15,12 +14,12 @@ const roomManager = new RoomManager();
 // var rooms = {};
 const port = process.env.PORT || 8443;
 
-// app.get('*',function(req,res,next){
-//   if(req.headers['x-forwarded-proto']!='https')
-//     res.redirect("https://" + req.headers.host + req.url)
-//   else
-//     next() /* Continue to other routes if we're not redirecting */
-// });
+app.get('*',function(req,res,next){
+  if(req.headers['x-forwarded-proto']!='https')
+    res.redirect("https://" + req.headers.host + req.url)
+  else
+    next() /* Continue to other routes if we're not redirecting */
+});
 
 //Socket create a new "room" and listens for other connections
 io.on("connection", socket => {
@@ -34,7 +33,6 @@ io.on("connection", socket => {
     if(room){
       if(room.getConnectableNodes) {
         const potentialHosts = room.getConnectableNodes();
-        console.log(potentialHosts);
         socket.emit("host pool", { potentialHosts, roomID });
       } else {
         socket.join(roomID, () => {

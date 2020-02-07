@@ -32,7 +32,7 @@ class RoomManager {
      */
     createRoom(socket, roomName, isDistributed) {
         var newRoomID = "";
-        console.log("Received request to create new room" + JSON.stringify(roomName));
+        console.log("Received request to create new room" + roomName);
         const hasCustomRoomName = roomName.length > 0;
 
         if (hasCustomRoomName) {
@@ -60,13 +60,10 @@ class RoomManager {
             });
             
         }
-        console.log(this.rooms);
     }
 
     getRoom(roomID) {
-        console.log(roomID);
         var returnRoom = this.rooms.filter((room) => room.roomID === roomID );
-        console.log(returnRoom);
         if(returnRoom.length > 0){
             return returnRoom[0];
         }
