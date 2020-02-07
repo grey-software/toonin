@@ -62,7 +62,7 @@ class RoomManager {
     }
 
     getRoom(roomID) {
-        var returnRoom = this.rooms.filter(room => room.id === roomID);
+        var returnRoom = this.rooms.filter((room) => { room.id === roomID } );
         if(returnRoom.length > 0){
             return returnRoom[0];
         }
@@ -70,7 +70,7 @@ class RoomManager {
     }
 
     deleteRoom(roomID) {
-        this.rooms = this.rooms.filter(room => room.id !== roomID);
+        this.rooms = this.rooms.filter((room) => { room.id !== roomID });
     }
 }
 

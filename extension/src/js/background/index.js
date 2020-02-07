@@ -280,7 +280,6 @@ function sendMediaDescription() {
             dc.send(data);
         }
         if (dc.readyState === 'closed') {
-            var data = JSON.stringify({"title": title});
             socket.emit("title", {
                 id: peer,
                 title: title
