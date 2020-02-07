@@ -1,6 +1,7 @@
 // used by client.
 import opus from './opus';
 
+var lastFPSSetting = 30;
 // ATTN: Uncomment accordingly for local/remote dev
 const ENDPOINT = "https://www.toonin.ml:8443/";
 const socket = io(ENDPOINT, { secure: true });
@@ -11,7 +12,12 @@ var remoteDestination,
     gainNode;
 const constraints = {
     video: false,
-    audio: true
+    audio: true,
+    videoConstraints: {
+        mandatory: {
+            minFrameRate: 60
+        }
+    }
 };
 // keep track of tab on which the extension is active.
 var state = "HOME";
@@ -75,9 +81,20 @@ chrome.runtime.onConnect.addListener(function (p) {
         }
         if(msg.type === "toggleScreenShare") {
             constraints.video = msg.isSharing;
+            if(!msg.isSharing) {
+                lastFPSSetting = constraints.videoConstraints.mandatory.minFrameRate;
+                constraints.videoConstraints = null;
+            } else {
+                constraints.videoConstraints = { mandatory: { minFrameRate: lastFPSSetting } }
+            }
         }
         if(msg.type === "toggleDistributedStreaming") {
             useDistributedStreaming = msg.useDistributedStreaming;
+        }
+        if(msg.type === "toggle60Fps") {
+            if(constraints.videoConstraints !== null) {
+                constraints.videoConstraints.mandatory.minFrameRate = msg.selected ? 60 : 30;
+            }
         }
     });
 });

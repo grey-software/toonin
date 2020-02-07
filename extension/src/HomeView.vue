@@ -15,18 +15,26 @@
       @keydown.enter="startShare"
     ></v-text-field>
 
-    <v-checkbox 
+      <v-checkbox 
       style="margin-bottom: 0%; margin-top: -5%; margin-left: 5%;"
       label="Share Screen"
       color="primary"
       @change="toggleScreenShare"
       >
       </v-checkbox>
+      
+      <v-switch
+      label="60 FPS"
+      style="margin-bottom: 0%; margin-left: 5%; margin-top: -5%;"
+      color="primary"
+      @change="toggle60FpsVideo"
+      >
+      </v-switch>
 
       <v-checkbox 
       style="margin-bottom: 0%; margin-top: -5%; margin-left: 5%;"
-      label="Distributed Streaming System (Experimental)"
-      color="primary"
+      label="Distributed Streaming (Experimental)"
+      color="red"
       @change="toggleDistributedStreaming"
       >
       </v-checkbox>
@@ -56,7 +64,7 @@ export default {
     ...mapState(["roomName", "roomNameValid", "roomNameInputErrorMessages"])
   },
   methods: {
-    ...mapActions(["randomRoomName", "startShare", "toggleScreenShare", "toggleDistributedStreaming"]),
+    ...mapActions(["randomRoomName", "startShare", "toggleScreenShare", "toggleDistributedStreaming", "toggle60FpsVideo"]),
     ...mapMutations(["setRoomName"])
   }
 };

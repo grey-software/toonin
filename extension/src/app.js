@@ -157,6 +157,11 @@ const store = new Vuex.Store({
             if(this.state.state === States.HOME) {
                 port.postMessage({ type: 'toggleDistributedStreaming', useDistributedStreaming: checked });
             }
+        },
+        toggle60FpsVideo(context, value) {
+            if(this.state.state === States.HOME) {
+                port.postMessage({ type: "toggle60Fps", selected: value });
+            }
         }
     }
 })
@@ -186,10 +191,13 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         store.commit("setState", request.data);
         if(store.state.state === States.HOME) { 
             router.push({name: 'home'}).catch((err) => {});
+            // reset states of media variables to match state of selection controls
             store.dispatch("toggleScreenShare", false);
+            store.dispatch("toggle60FpsVideo", false);
         }
         else if(store.state.state === States.SHARING) { 
             router.push({name: "sharing"}).catch((err) => {});
+            app.$el.getElementsByClassName('v-application--wrap')[0].style.minHeight = "50vH"
         }
     }
 });
