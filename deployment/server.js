@@ -25,7 +25,7 @@ app.get('*',function(req,res,next){
 io.on("connection", socket => {
 
   socket.on("create room", (req) => {
-    if(req.isDistributed === undefined) { roomManager.createRoom(socket, req, false); }
+    if(req.isDistributed === false) { roomManager.createRoom(socket, req, false); }
     else {
       roomManager.createRoom(socket, req.room, req.isDistributed);
     }

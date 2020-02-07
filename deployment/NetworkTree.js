@@ -72,7 +72,7 @@ class NetworkTree {
             } else {
                 node.removeNode(socket, socketID, room, root);
             }
-        })
+        });
     }
 
     /**
@@ -103,10 +103,7 @@ class NetworkTree {
                 currNode.childNodes.push(new NetworkTree(socketID, maxClients));
                 return true;
             }
-
-            for(var i = 0; i < currNode.childNodes.length; i++) {
-                nodeQueue.enqueue(currNode.childNodes[i]);
-            }
+            currNode.childNodes.forEach((childNode) => nodeQueue.enqueue(childNode));
         }
 
         return false;
