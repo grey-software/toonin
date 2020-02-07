@@ -1,5 +1,6 @@
 "use strict";
-var app = require("express")();
+var express = require("express")
+var app = express();
 var cors = require("cors");
 app.use(cors());
 var http = require("http").Server(app);
