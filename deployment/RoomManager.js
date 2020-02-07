@@ -62,22 +62,15 @@ class RoomManager {
     }
 
     getRoom(roomID) {
-        for(var i = 0; i < this.rooms.length; i++) { 
-            if(this.rooms[i].roomID === roomID) {
-                return this.rooms[i].room; 
-            }
+        var returnRoom = this.rooms.filter(room => room.id === roomID);
+        if(returnRoom.length > 0){
+            return returnRoom[0];
         }
-
         return null;
     }
 
     deleteRoom(roomID) {
-        for(var i = 0; i < this.rooms.length; i++) {
-            if(this.rooms[i].roomID === roomID) {
-                this.rooms.splice(i, 1);
-                return;
-            }
-        }
+        this.rooms = this.rooms.filter(room => room.id !== roomID);
     }
 }
 

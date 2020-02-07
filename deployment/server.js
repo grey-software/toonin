@@ -116,8 +116,8 @@ io.on("connection", socket => {
     
   });
 
-  socket.on('disconnect room', (req) => {
-    console.log('closing room ' + req.room);
+  socket.on("disconnect room", (req) => {
+    console.log("closing room " + req.room);
     
     roomManager.deleteRoom(req.room);
     console.log(roomManager.rooms);
@@ -126,23 +126,8 @@ io.on("connection", socket => {
   })
 });
 
-// clear rooms list through an http request with key as query
-app.get("/clearRooms", (req, res) => {
-  var key = req.query.key;
-  if (key === vars.deleteKey) {
-    rooms = {};
-    res.status(200);
-    res.send("Success! Rooms list reset");
-  }
-  else {
-    res.status(403);
-    res.send("Request Failed. Incorrect Key");
-  }
-});
-
 app.get("/status", (req, res) => {
   res.send("Server is alive");
-  console.log(rooms);
 });
 
 const staticFileMiddleware = express.static('../client/dist')
@@ -159,5 +144,5 @@ app.get('/', function (req, res) {
 })
 
 http.listen(port, () => {
-  console.log('http listening on '+port);
+  console.log("http listening on " +port);
 })
