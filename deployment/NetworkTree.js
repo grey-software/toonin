@@ -33,7 +33,7 @@ class NetworkTree {
      * @returns {NetworkTree} the saved tree in transferring nodes list with same socket id at the root node
      */
     isReconnecting(socketID) {
-        var returnNode = this.reconnectingNodes.filter((node) => { node.socketID === socketID });
+        var returnNode = this.reconnectingNodes.filter((node) =>  node.socketID === socketID );
         if(returnNode.length > 0) {
             return returnNode[0];
         }
@@ -130,7 +130,7 @@ class NetworkTree {
 
             if(currNode.hasSpace()) { hostPool.push(currNode.node); }
             
-            currNode.childNodes.forEach((node) => { nodeQueue.enqueue(node) });
+            currNode.childNodes.forEach((node) => nodeQueue.enqueue(node) );
         }
 
         return hostPool;
