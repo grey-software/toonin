@@ -132,7 +132,7 @@ const store = new Vuex.Store({
             context.commit("saveState");
         },
         copyLinkToClipboard(context) {
-            copyToClipboard(`https://app.toonin.ml/${context.state.roomName}`)
+            copyToClipboard(`https://www.toonin.ml/${context.state.roomName}`)
         },
         copyIdToClipboard(context) {
             copyToClipboard(context.state.roomName)

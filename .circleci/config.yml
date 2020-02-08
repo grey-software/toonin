@@ -68,7 +68,7 @@ jobs:
       - run:
           name: "Publish Release on GitHub"
           command: |
-            VERSION=0.3.0
+            VERSION=0.4.0
             ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -b "Toonin Chrome extension build. To use, unzip and enable developer tools in chrome -> load unpacked -> select unzipped extension/build folder." -delete ${VERSION}  /tmp/workspace/extension.zip
   Deploy-App:
     docker:
@@ -109,7 +109,9 @@ workflows:
             - Build-App
           filters:
             branches:
-              only: master
+              only: 
+                - master
+                - heroku
 notify:
   webhooks:
     - url: https://outlook.office.com/webhook/04e18692-6efb-49e9-9028-139bf917ab16@78aac226-2f03-4b4d-9037-b46d56c55210/CircleCI/30437ffdcb3e400baa80214e81552edc/5b046f8c-07ba-4e2f-a006-653143830ede

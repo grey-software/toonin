@@ -3,7 +3,7 @@ import opus from './opus';
 
 var lastFPSSetting = 30;
 // ATTN: Uncomment accordingly for local/remote dev
-const ENDPOINT = "https://www.toonin.ml:8443/";
+const ENDPOINT = "https://www.toonin.ml:443/";
 const socket = io(ENDPOINT, { secure: true });
 // var socket = io("http://127.0.0.1:8100");
 
@@ -297,7 +297,6 @@ function sendMediaDescription() {
             dc.send(data);
         }
         if (dc.readyState === 'closed') {
-            var data = JSON.stringify({"title": title});
             socket.emit("title", {
                 id: peer,
                 title: title
