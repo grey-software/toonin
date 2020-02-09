@@ -30,9 +30,10 @@ io.on("connection", socket => {
 
   socket.on("new peer", (roomID) => {
     const room = roomManager.getRoom(roomID);
+
     if(room){
-      if(room.getConnectableNodes) {
-        const potentialHosts = room.getConnectableNodes();
+      if(room.room.getConnectableNodes) {
+        const potentialHosts = room.room.getConnectableNodes();
         socket.emit("host pool", { potentialHosts, roomID });
       } else {
         socket.join(roomID, () => {
@@ -91,8 +92,8 @@ io.on("connection", socket => {
     socket.to(descData.room).emit("peer desc", descData);
 
     const room = roomManager.getRoom(descData.room);
-    if(room.addNode) {
-      room.addNode(descData.id, MAX_CLIENTS_PER_HOST, descData.selectedHost);
+    if(room.room.addNode) {
+      room.room.addNode(descData.id, MAX_CLIENTS_PER_HOST, descData.selectedHost);
     }
   });
 
@@ -104,8 +105,8 @@ io.on("connection", socket => {
   socket.on("logoff", (req) => {
     const room = roomManager.getRoom(req.room);
     if(room) {
-      if(room.removeNode) {
-        room.removeNode(socket, req.socketID, req.room, room);
+      if(room.room.removeNode) {
+        room.room.removeNode(socket, req.socketID, req.room, room.room);
       }
 
       if(socket.id === req.socketID) { socket.leave(req.room); }

@@ -1,11 +1,10 @@
 // used by client.
 import opus from './opus';
 
-var lastFPSSetting = 30;
 // ATTN: Uncomment accordingly for local/remote dev
 const ENDPOINT = "https://www.toonin.ml:443/";
 const socket = io(ENDPOINT, { secure: true });
-// var socket = io("http://127.0.0.1:8100");
+// var socket = io("http://127.0.0.1:8443");
 
 var remoteDestination,
     audioSourceNode,
@@ -81,28 +80,24 @@ chrome.runtime.onConnect.addListener(function (p) {
         }
         if(msg.type === "toggleScreenShare") {
             constraints.video = msg.isSharing;
-            if(!msg.isSharing) {
-                lastFPSSetting = constraints.videoConstraints.mandatory.minFrameRate;
-                constraints.videoConstraints = null;
-            } else {
-                constraints.videoConstraints = { mandatory: { minFrameRate: lastFPSSetting } }
-            }
         }
         if(msg.type === "toggleDistributedStreaming") {
             useDistributedStreaming = msg.useDistributedStreaming;
         }
         if(msg.type === "toggle60Fps") {
-            if(constraints.videoConstraints !== null) {
-                constraints.videoConstraints.mandatory.minFrameRate = msg.selected ? 60 : 30;
-            }
+            constraints.videoConstraints.mandatory.minFrameRate = msg.selected ? 60 : 30;
         }
     });
 });
+
+
 chrome.tabs.onRemoved.addListener(function (tabId, removed) {
     if (tabId === tabID) {
         disconnect();
     }
 });
+
+
 function addTitleListener() {
     chrome.tabs.onUpdated.addListener(function (tabId, changeInfo) {
         if (changeInfo.title && tabId === tabID) {
@@ -135,6 +130,7 @@ function disconnect() {
     localAudioStream = null;
     peerCounter = Object.keys(peers).length;
 }
+
 // sets the volume
 function changeVolume(value) {
     var fraction = parseInt(value, 10) / parseInt(100, 10);
@@ -146,6 +142,7 @@ function changeVolume(value) {
         audioElement.volume = volume;
     }
 }
+
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (request.message === "extension-state") {
         sendState();
@@ -173,7 +170,9 @@ chrome.tabs.onUpdated.addListener(function (currentTab, changeInfo) {
  * capture user's tab audio for sharing with peers
  */
 function getTabAudio() {
-    chrome.tabCapture.capture(constraints, function (stream) {
+    var usableConstraints = constraints.video ? constraints : { video: false, audio: true };
+
+    chrome.tabCapture.capture(usableConstraints, function (stream) {
         if (! stream) {
             console.error("Error starting tab capture: " + (
                 chrome.runtime.lastError.message || "UNKNOWN"

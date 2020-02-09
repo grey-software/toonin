@@ -55,7 +55,7 @@ class NetworkTree {
             socketIDs.push(childNode.node.socketID);
             root.reconnectingNodes.push(childNode);
         });
-
+        
         if(socketIDs.length > 0) { socket.to(room).emit("reconnect", { socketIDs }); }
     }
 
@@ -66,13 +66,15 @@ class NetworkTree {
      */
     removeNode(socket, socketID, room, root) {
         if(this.childNodes.length === 0) { return; }
-        this.childNodes.forEach((node) => {
-            if(node.socketID === socketID) {
-                this.notifyChildren(socket, node, room, root);
-            } else {
-                node.removeNode(socket, socketID, room, root);
+
+        for(var i = 0; i < this.childNodes.length; i++) {
+            if(this.childNodes[i].node.socketID === socketID) {
+                this.notifyChildren(socket, this.childNodes.splice(i, 1)[0], room, root);
+                return;
             }
-        });
+
+            this.childNodes[i].removeNode(socket, socketID, room, root);
+        }
     }
 
     /**
