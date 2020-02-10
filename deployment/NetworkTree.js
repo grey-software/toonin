@@ -67,13 +67,18 @@ class NetworkTree {
     removeNode(socket, socketID, room, root) {
         if(this.childNodes.length === 0) { return; }
 
-        for(var i = 0; i < this.childNodes.length; i++) {
-            if(this.childNodes[i].node.socketID === socketID) {
-                this.notifyChildren(socket, this.childNodes.splice(i, 1)[0], room, root);
+        var childIndex = -1;
+        this.childNodes.forEach((childNode, index) => {
+            if(childNode.node.socketID === socketID) {
+                childIndex = index;
                 return;
             }
 
-            this.childNodes[i].removeNode(socket, socketID, room, root);
+            childNode.removeNode(socket, socketID, room, root);
+        });
+
+        if(childIndex !== -1) {
+            this.notifyChildren(socket, this.childNodes.splice(childIndex, 1)[0], room, root);
         }
     }
 
