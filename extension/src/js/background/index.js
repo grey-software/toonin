@@ -1,3 +1,4 @@
+/*global chrome*/
 // used by client.
 import opus from './opus';
 
