@@ -45,7 +45,7 @@ export default {
       if (this.errors.length > 0) {
         return this.errors;
       } else {
-        return this.errors;
+        return [];
       }
     },
   },

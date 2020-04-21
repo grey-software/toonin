@@ -16,7 +16,7 @@ const roomManager = new RoomManager();
 const port = process.env.PORT || 8443;
 
 app.get("*", function(req, res, next) {
-  if (req.headers["x-forwarded-proto"] != "https") {
+  if (req.headers["x-forwarded-proto"] !== "https") {
     res.redirect("https://" + req.headers.host + req.url);
   } else {
     next(); /* Continue to other routes if we're not redirecting */
@@ -131,8 +131,8 @@ io.on("connection", (socket) => {
       // delete socket.rooms[req.room];
       io.in(req.room).clients((err, clients) => {
         clients.forEach((element) => {
-          console.log(element);
-          io.sockets.connected[element].disconnect(true);
+          var disconnectSocket = io.sockets.connected[element];
+          disconnectSocket.disconnect(true);
         });
       });
 
