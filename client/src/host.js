@@ -112,7 +112,7 @@ class StartShare {
       if (evalResult.hostFound) {
         console.log("sending eval result");
         this.socket.emit("host eval res", {
-          evalResult: evalResult,
+          evalResult,
           name: this.app.$store.getters.NAME,
         });
         this.app.targetHost = evalResult.selectedHost;
@@ -189,7 +189,7 @@ class StartShare {
 
       // check if this ice data is for us or someone else in the room
       if (
-        this.app.$store.getters.ROOM != iceData.room ||
+        this.app.$store.getters.ROOM !== iceData.room ||
         iceData.hostID !== this.socket.id
       ) {
         console.log("Ice Candidate not for me");
@@ -278,7 +278,7 @@ class StartShare {
 
       // check if this ice data is for us
       if (
-        this.app.$store.getters.CONNECTED_ROOM != iceData.room ||
+        this.app.$store.getters.CONNECTED_ROOM !== iceData.room ||
         iceData.hostID !== this.socket.id
       ) {
         // eslint-disable-next-line no-console
@@ -297,7 +297,7 @@ class StartShare {
       // );
       // eslint-disable-next-line no-console
       console.log("Answer description: " + descData.desc);
-      if (this.app.$store.getters.CONNECTED_ROOM != descData.room) {
+      if (this.app.$store.getters.CONNECTED_ROOM !== descData.room) {
         // eslint-disable-next-line no-console
         console.log("Answer Description not for me");
       }

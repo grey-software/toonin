@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-const NetworkTree = require('./NetworkTree').NetworkTree;
+const NetworkTree = require("./NetworkTree").NetworkTree;
 const MAX_CLIENTS_PER_HOST = 2;
 
 const genRoomID = (rooms) => {
@@ -35,13 +35,13 @@ class RoomManager {
    * @param {string} roomName
    */
   createRoom(socket, roomName, isDistributed) {
-    var newRoomID = '';
-    console.log('Received request to create new room ' + roomName);
+    var newRoomID = "";
+    console.log("Received request to create new room " + roomName);
     const hasCustomRoomName = roomName.length > 0;
 
     if (hasCustomRoomName) {
       if (this.getRoom(roomName)) {
-        socket.emit('room creation failed', 'name already exists');
+        socket.emit("room creation failed", "name already exists");
       } else {
         newRoomID = roomName;
         if (isDistributed) {
@@ -57,7 +57,7 @@ class RoomManager {
         }
 
         socket.join(newRoomID, () => {
-          socket.emit('room created', newRoomID);
+          socket.emit("room created", newRoomID);
         });
       }
 
@@ -76,7 +76,7 @@ class RoomManager {
         this.rooms.push(new Room(newRoomID, {}));
       }
       socket.join(newRoomID, () => {
-        socket.emit('room created', newRoomID);
+        socket.emit("room created", newRoomID);
       });
     }
   }

@@ -69,7 +69,7 @@ class NetworkTree {
     });
 
     if (socketIDs.length > 0) {
-      socket.to(room).emit('reconnect', { socketIDs });
+      socket.to(room).emit("reconnect", { socketIDs });
     }
   }
 
