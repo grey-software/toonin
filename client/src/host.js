@@ -233,6 +233,9 @@ class StartShare {
 
     this.socket.on("chatFromServer", (message) => {
       this.app.$store.dispatch("UPDATE_MESSAGES", "Admin : " + message);
+      if (message === "room being closed.") {
+        this.app.disconnect();
+      }
     });
   }
 
@@ -310,7 +313,6 @@ class StartShare {
 
     this.socket.on("chatIncoming", (message) => {
       // eslint-disable-next-line no-console
-      console.log("message came");
       this.app.$store.dispatch(
         "UPDATE_MESSAGES",
         message.name + ": " + message.message

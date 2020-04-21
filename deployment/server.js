@@ -127,13 +127,13 @@ io.on("connection", (socket) => {
     if (roomManager.deleteRoom(socket.id)) {
       console.log("closing room " + req.room);
       socket.to(req.room).emit("chatFromServer", "room being closed.");
-      io.in(req.room).clients((err, clients) => {
-        clients.forEach((element) => {
-          io.sockets.connected[element].disconnect();
-        });
-      });
-
-      console.log(io.in(req.room).clients.length);
+      // io.in(req.room).clients((err, clients) => {
+      //   clients.forEach((element) => {
+      //     io.sockets.connected.forEach(sc =>)
+      //     io.sockets.connected[element].disconnect();
+      //   });
+      // });
+      // console.log(io.in(req.room).clients.length);
     }
   });
 
