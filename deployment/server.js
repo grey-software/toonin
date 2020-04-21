@@ -12,7 +12,6 @@ const MAX_CLIENTS_PER_HOST = 2;
 
 const roomManager = new RoomManager();
 
-// var rooms = {};
 const port = process.env.PORT || 8443;
 
 app.get("*", function(req, res, next) {
@@ -128,11 +127,9 @@ io.on("connection", (socket) => {
     if (roomManager.deleteRoom(socket.id)) {
       console.log("closing room " + req.room);
       socket.to(req.room).emit("chatFromServer", "room being closed.");
-      // delete socket.rooms[req.room];
       io.in(req.room).clients((err, clients) => {
         clients.forEach((element) => {
-          var disconnectSocket = io.sockets.connected[element];
-          disconnectSocket.disconnect(true);
+          io.sockets.connected[element].disconnect();
         });
       });
 
@@ -142,9 +139,6 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     console.log("user disconnected " + socket.id);
-    // if(roomManager.deleteRoom(socket.id)) {
-    //   delete socket.rooms[req.room];
-    // }
   });
 
   socket.on("message", (req) => {
