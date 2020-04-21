@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 "use strict";
 var express = require("express");
 var app = express();
@@ -38,12 +39,10 @@ io.on("connection", socket => {
       } else {
         socket.join(roomID, () => {
           console.log("Peer connected successfully to room: " + roomID);
-  
           socket.to(roomID).emit("peer joined", {
             room: roomID, 
             id: socket.id
           });
-  
         });
       }
       
@@ -61,13 +60,13 @@ io.on("connection", socket => {
 
       socket.join(room, () => {
         console.log("Peer connected successfully to room: " + room);
-
-        socket.to(room).emit("peer joined", {
+        io.to(res.evalResult.selectedHost).emit("peer joined", {
           room, 
           id: socket.id, 
           hostID: res.evalResult.selectedHost 
         });
-
+        socket.to(room).emit('chatFromServer', res.name+" has joined.");
+        socket.emit('chatFromServer', "You have joined the room "+room+".");
       });
     }
   });
@@ -108,19 +107,38 @@ io.on("connection", socket => {
       if(room.room.removeNode) {
         room.room.removeNode(socket, req.socketID, req.room, room.room);
       }
-
       if(socket.id === req.socketID) { socket.leave(req.room); }
+      socket.to(room).emit('chatFromServer', req.name + " has left.");
     }
     
   });
 
   socket.on("disconnect room", (req) => {
-    console.log("closing room " + req.room);
-    
-    roomManager.deleteRoom(req.room);
-    console.log(roomManager.rooms);
-    delete socket.rooms[req.room];
+    if(roomManager.deleteRoom(socket.id)) {
+      console.log("closing room " + req.room);
+      socket.to(req.room).emit('chatFromServer', "room being closed.");
+      // delete socket.rooms[req.room];
+      io.in(req.room).clients((err , clients) => {
+        clients.forEach(element => {
+          console.log(element);
+          io.sockets.connected[element].disconnect(true);
+        });
+    });
 
+    console.log(io.in(req.room).clients.length)
+
+    }
+  })
+
+  socket.on('disconnect', () => {
+    console.log('user disconnected ' + socket.id);
+    // if(roomManager.deleteRoom(socket.id)) {
+    //   delete socket.rooms[req.room];
+    // }
+  });
+
+  socket.on("message", (req) => {
+    socket.to(req.room).emit("chatIncoming", req);
   })
 });
 

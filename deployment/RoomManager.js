@@ -1,5 +1,6 @@
+/* eslint-disable no-console */
 const NetworkTree = require("./NetworkTree").NetworkTree;
-const MAX_CLIENTS_PER_HOST = 3;
+const MAX_CLIENTS_PER_HOST = 2;
 
 const genRoomID = (rooms) => {
     for (;;) {
@@ -15,9 +16,10 @@ const genRoomID = (rooms) => {
 };
 
 class Room {
-    constructor(roomID, room) {
+    constructor(roomID, room, hostId) {
         this.roomID = roomID;
         this.room = room;
+        this.hostId = hostId;
     }
 }
 
@@ -32,7 +34,7 @@ class RoomManager {
      */
     createRoom(socket, roomName, isDistributed) {
         var newRoomID = "";
-        console.log("Received request to create new room" + roomName);
+        console.log("Received request to create new room " + roomName);
         const hasCustomRoomName = roomName.length > 0;
 
         if (hasCustomRoomName) {
@@ -41,7 +43,7 @@ class RoomManager {
             else {
                 newRoomID = roomName;
                 if(isDistributed) {
-                    this.rooms.push(new Room(newRoomID, new NetworkTree(socket.id, MAX_CLIENTS_PER_HOST)));
+                    this.rooms.push(new Room(newRoomID, new NetworkTree(socket.id, MAX_CLIENTS_PER_HOST), socket.id));
                 } else { this.rooms.push(new Room(newRoomID, {})); }
 
                 socket.join(newRoomID, () => {
@@ -53,7 +55,7 @@ class RoomManager {
         } else {
             newRoomID = genRoomID(this.rooms);
             if(isDistributed) {
-                this.rooms.push(new Room(newRoomID, new NetworkTree(socket.id, MAX_CLIENTS_PER_HOST)));
+                this.rooms.push(new Room(newRoomID, new NetworkTree(socket.id, MAX_CLIENTS_PER_HOST), socket.id));
             } else { this.rooms.push(new Room(newRoomID, {})); }
             socket.join(newRoomID, () => {
                 socket.emit("room created", newRoomID);
@@ -70,8 +72,13 @@ class RoomManager {
         return null;
     }
 
-    deleteRoom(roomID) {
-        this.rooms = this.rooms.filter((room) =>  room.roomID !== roomID );
+    deleteRoom(id) {
+        var size = this.rooms.length;
+        this.rooms = this.rooms.filter((room) => room.hostId !==id );
+        if( size > this.rooms.length ) {
+            return true;
+        }
+        return false;
     }
 }
 

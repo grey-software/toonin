@@ -1,28 +1,21 @@
 <template>
-  <v-app>
-    <v-content>
-      <v-container>
-        <v-layout row wrap align-center justify-center>
-          <div style="padding: 5px">
-            <connect-to-room />
-          </div>
-          <div style="padding: 5px">
-            <connection-status />
-          </div>
-        </v-layout>
-      </v-container>
-      <v-container>
-        <video-player></video-player><br>
-        <player-controls @volume-change="volumeHandler" />
-        <Title />
-      </v-container>
-
-    </v-content>
-    <v-footer app>
-      <v-spacer></v-spacer>
-      <span id="footerBar">&copy; Toonin 2019</span>
-    </v-footer>
-  </v-app>
+  <v-content>
+    <v-container>
+      <v-layout row wrap align-center justify-center>
+        <div style="padding: 5px">
+          <connect-to-room />
+        </div>
+        <div style="padding: 5px">
+          <connection-status />
+        </div>
+      </v-layout>
+    </v-container>
+    <v-container v-show="connectedStatus === 'connected'">
+      <video-player></video-player><br />
+      <player-controls @volume-change="volumeHandler" />
+      <Title />
+    </v-container>
+  </v-content>
 </template>
 
 <script>
@@ -31,6 +24,7 @@ import ConnectionStatus from "@/components/Connection.vue";
 import PlayerControls from "@/components/PlayerControls.vue";
 import Title from "@/components/Title.vue";
 import VideoPlayer from "@/components/VideoPlayer.vue";
+import { mapState } from "vuex";
 export default {
   name: "Home",
   data: () => ({
@@ -48,11 +42,10 @@ export default {
       this.volume = volume;
     }
   },
-  mounted() {
-    document.getElementById('footerBar').innerHTML = '&copy; Toonin ' + (new Date()).getFullYear();
+  computed: {
+    ...mapState(["name", "connectedStatus"])
   }
 };
 </script>
 
-<style>
-</style>
+<style></style>

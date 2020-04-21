@@ -11,8 +11,8 @@
       </v-col>
       <v-col cols="3">
         <v-btn
-          v-show="playing==false"
-          :disabled="audioStream? false : true"
+          v-show="playing == false"
+          :disabled="audioStream || videoStream ? false : true"
           outlined
           fab
           color="light-blue"
@@ -21,7 +21,7 @@
           <v-icon large>play_arrow</v-icon>
         </v-btn>
         <v-btn
-          v-show="connectedStatus=='connected' && playing==true"
+          v-show="connectedStatus == 'connected' && playing == true"
           outlined
           fab
           color="light-blue"
@@ -31,7 +31,7 @@
         </v-btn>
       </v-col>
       <audio
-        :srcObject.prop="playing? audioStream : null"
+        :srcObject.prop="playing ? audioStream : null"
         style="display: none;"
         preload="auto"
         autoplay
@@ -90,7 +90,6 @@ export default {
 </script>
 
 <style scoped>
-
 .controls-container {
   max-width: 400px;
   border-radius: 16px !important;

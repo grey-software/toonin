@@ -14,7 +14,12 @@ const store = new Vuex.Store({
     rtcConn: null,
     peerID: null,
     audioStream: null,
-    videoStream: null
+    videoStream: null,
+    name: "",
+    connectedRoom: null,
+    sharing: false,
+    peers: null,
+    messages: []
   },
   mutations: {
     SET_CONNECTED_STATUS: (state, payload) => {
@@ -43,6 +48,21 @@ const store = new Vuex.Store({
     },
     SET_VIDEO_STREAM: (state, payload) => {
       state.videoStream = payload;
+    },
+    SET_NAME: (state, payload) => {
+      state.name = payload;
+    },
+    SET_CONNECTED_ROOM: (state, payload) => {
+      state.connectedRoom = payload;
+    },
+    SET_SHARING: (state, payload) => {
+      state.sharing = payload;
+    },
+    SET_PEERS: (state, payload) => {
+      state.peers = payload;
+    },
+    SET_MESSAGE: (state, payload) => {
+      state.messages.push(payload);
     }
   },
   actions: {
@@ -72,6 +92,21 @@ const store = new Vuex.Store({
     },
     UPDATE_VIDEO_STREAM: (context, payload) => {
       context.commit("SET_VIDEO_STREAM", payload);
+    },
+    UPDATE_NAME: (context, payload) => {
+      context.commit("SET_NAME", payload);
+    },
+    UPDATE_CONNECTED_ROOM: (context, payload) => {
+      context.commit("SET_CONNECTED_ROOM", payload);
+    },
+    UPDATE_SHARING: (context, payload) => {
+      context.commit("SET_SHARING", payload);
+    },
+    UPDATE_PEERS: (context, payload) => {
+      context.commit("SET_PEERS", payload);
+    },
+    UPDATE_MESSAGES: (context, payload) => {
+      context.commit("SET_MESSAGE", payload);
     }
   },
   getters: {
@@ -101,6 +136,21 @@ const store = new Vuex.Store({
     },
     VIDEO_STREAM: state => {
       return state.videoStream;
+    },
+    NAME: state => {
+      return state.name;
+    },
+    CONNECTED_ROOM: state => {
+      return state.connectedRoom;
+    },
+    SHARING: state => {
+      return state.sharing;
+    },
+    PEERS: state => {
+      return state.peers;
+    },
+    MESSAGES: state => {
+      return state.messages;
     }
   }
 });
