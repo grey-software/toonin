@@ -35,7 +35,7 @@ export default {
   name: "Chat",
   data: () => ({
     message: "",
-    errors: []
+    errors: [],
   }),
   computed: {
     cardTitle() {
@@ -66,21 +66,21 @@ export default {
       "room",
       "connectedRoom",
       "peers",
-      "messages"
-    ])
+      "messages",
+    ]),
   },
   watch: {
     messages() {
       setTimeout(() => {
         this.$refs.chat.$el.scrollTop = this.$refs.chat.$el.scrollHeight;
       }, 0);
-    }
+    },
   },
   methods: {
     sendMessage() {
       if (this.message === "logoff") {
         this.peers.socket.emit("disconnect room", {
-          room: this.roomname
+          room: this.roomname,
         });
         this.message = "";
         return;
@@ -96,15 +96,15 @@ export default {
           this.peers.socket.emit("message", {
             room: this.roomname,
             message: this.message,
-            name: this.name
+            name: this.name,
           });
           this.$store.dispatch("UPDATE_MESSAGES", "You: " + this.message);
           this.message = "";
         }
       }
-    }
+    },
   },
-  mounted() {}
+  mounted() {},
 };
 </script>
 

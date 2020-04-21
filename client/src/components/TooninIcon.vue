@@ -74,6 +74,6 @@
 
 <script>
 export default {
-  name: "toonin-icon"
+  name: "toonin-icon",
 };
 </script>

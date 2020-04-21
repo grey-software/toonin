@@ -64,7 +64,7 @@ export default {
     mute() {
       this.audio.volume = 0;
       this.$store.dispatch("UPDATE_VOLUME", 0);
-    }
+    },
   },
   computed: {
     ...mapState([
@@ -72,7 +72,7 @@ export default {
       "connectedStatus",
       "audioStream",
       "videoStream",
-      "playing"
+      "playing",
     ]),
     volume: {
       get: function() {
@@ -80,12 +80,12 @@ export default {
       },
       set: function(value) {
         this.$store.dispatch("UPDATE_VOLUME", value);
-      }
-    }
+      },
+    },
   },
   mounted() {
     this.audio = this.$refs.audio;
-  }
+  },
 };
 </script>
 

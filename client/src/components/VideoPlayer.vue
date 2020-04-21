@@ -26,7 +26,7 @@ export default {
     return { videoTag: null };
   },
   computed: {
-    ...mapState(["videoStream", "playing"])
+    ...mapState(["videoStream", "playing"]),
   },
   methods: {
     requestFullScreen() {
@@ -42,11 +42,11 @@ export default {
         /* IE/Edge */
         this.videoTag.msRequestFullscreen();
       }
-    }
+    },
   },
   mounted() {
     this.videoTag = this.$refs.videoPlayer;
-  }
+  },
 };
 </script>
 

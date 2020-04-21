@@ -22,16 +22,23 @@
           :error-messages="errorMessages"
         ></v-text-field>
       </v-card-actions>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn @click="enterName" color="primary" rounded outlined>
+          Enter
+        </v-btn>
+        <v-spacer></v-spacer>
+      </v-card-actions>
     </v-container>
   </v-card>
 </template>
 
 <script>
 export default {
-  name: "Name",
+  name: 'Name',
   data: () => ({
-    nameInput: "",
-    errors: []
+    nameInput: '',
+    errors: [],
   }),
   computed: {
     errorMessages() {
@@ -40,22 +47,22 @@ export default {
       } else {
         return this.errors;
       }
-    }
+    },
   },
   methods: {
     enterName() {
       if (this.nameInput.length > 1) {
         this.$store.dispatch(
-          "UPDATE_NAME",
-          this.nameInput.replace(/(^\w{1})|(\s{1}\w{1})/g, match =>
+          'UPDATE_NAME',
+          this.nameInput.replace(/(^\w{1})|(\s{1}\w{1})/g, (match) =>
             match.toUpperCase()
           )
         );
       } else {
-        this.errors.push("Nickname has to be longer");
+        this.errors.push('Nickname has to be longer');
       }
-    }
-  }
+    },
+  },
 };
 </script>
 

@@ -21,8 +21,8 @@ import { mapState } from "vuex";
 export default {
   name: "Title",
   computed: {
-    ...mapState(["streamTitle"])
-  }
+    ...mapState(["streamTitle"]),
+  },
 };
 </script>
 

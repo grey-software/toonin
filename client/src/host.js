@@ -8,10 +8,10 @@ const servers = {
         "stun:stun1.l.google.com:19302",
         "stun:stun2.l.google.com:19302",
         "stun:stun3.l.google.com:19302",
-        "stun:stun4.l.google.com:19302"
-      ]
-    }
-  ]
+        "stun:stun4.l.google.com:19302",
+      ],
+    },
+  ],
 };
 
 import io from "socket.io-client";
@@ -103,7 +103,7 @@ class StartShare {
       this.app.$store.dispatch("UPDATE_ROOM", "");
     });
 
-    this.socket.on("host pool", hostPool => {
+    this.socket.on("host pool", (hostPool) => {
       this.app.errors = [];
       console.log("recieved host pool to evaluate");
       const evalResult = this.app.evaluateHosts(hostPool.potentialHosts);
@@ -113,13 +113,13 @@ class StartShare {
         console.log("sending eval result");
         this.socket.emit("host eval res", {
           evalResult: evalResult,
-          name: this.app.$store.getters.NAME
+          name: this.app.$store.getters.NAME,
         });
         this.app.targetHost = evalResult.selectedHost;
       }
     });
 
-    this.socket.on("src ice", iceData => {
+    this.socket.on("src ice", (iceData) => {
       console.log("src ice message came");
       if (
         iceData.room !== this.app.$store.getters.ROOM ||
@@ -132,7 +132,7 @@ class StartShare {
       );
     });
 
-    this.socket.on("src desc", descData => {
+    this.socket.on("src desc", (descData) => {
       console.log("src desc message came");
       if (
         descData.room !== this.app.$store.getters.ROOM ||
@@ -141,7 +141,7 @@ class StartShare {
         return;
       }
       const rtc = new RTCPeerConnection(servers, {
-        optional: [{ RtpDataChannels: true }]
+        optional: [{ RtpDataChannels: true }],
       });
       this.app.$store.dispatch("UPDATE_RTCCONN", rtc);
       this.app.attachRTCliteners();
@@ -149,7 +149,7 @@ class StartShare {
         new RTCSessionDescription(descData.desc)
       )
         .then(() => this.app.$store.getters.RTCCONN.createAnswer())
-        .then(answer =>
+        .then((answer) =>
           this.app.$store.getters.RTCCONN.setLocalDescription(answer)
         )
         .then(() => {
@@ -157,7 +157,7 @@ class StartShare {
             id: this.app.$store.getters.PEERID,
             room: this.app.$store.getters.ROOM,
             desc: this.app.$store.getters.RTCCONN.localDescription,
-            selectedHost: this.app.targetHost
+            selectedHost: this.app.targetHost,
           });
           console.log(
             "sending answer now" +
@@ -166,13 +166,13 @@ class StartShare {
         });
     });
 
-    this.socket.on("title", title => {
+    this.socket.on("title", (title) => {
       this.app.$store.dispatch("UPDATE_STREAM_TITLE", title);
     });
 
     /* Listeners to convert this client into host for new peers */
 
-    this.socket.on("peer joined", peerData => {
+    this.socket.on("peer joined", (peerData) => {
       if (peerData.hostID !== this.socket.id) {
         console.log("peer not for me");
         return;
@@ -181,7 +181,7 @@ class StartShare {
       this.initPeer(peerData);
     });
 
-    this.socket.on("peer ice", iceData => {
+    this.socket.on("peer ice", (iceData) => {
       console.log(
         "Ice Candidate from peer: " + iceData.id + " in room: " + iceData.room
       );
@@ -197,7 +197,7 @@ class StartShare {
       this.addPeerIceCandidate(iceData);
     });
 
-    this.socket.on("peer desc", descData => {
+    this.socket.on("peer desc", (descData) => {
       console.log(
         "Answer description from peer: " +
           descData.id +
@@ -211,7 +211,7 @@ class StartShare {
       this.addPeerDesc(descData);
     });
 
-    this.socket.on("reconnect", req => {
+    this.socket.on("reconnect", (req) => {
       if (req.socketIDs.includes(this.socket.id)) {
         this.app.reconnect();
       }
@@ -222,7 +222,7 @@ class StartShare {
       this.app.disconnect();
     });
 
-    this.socket.on("chatIncoming", message => {
+    this.socket.on("chatIncoming", (message) => {
       // eslint-disable-next-line no-console
       console.log("message came");
       this.app.$store.dispatch(
@@ -231,13 +231,13 @@ class StartShare {
       );
     });
 
-    this.socket.on("chatFromServer", message => {
+    this.socket.on("chatFromServer", (message) => {
       this.app.$store.dispatch("UPDATE_MESSAGES", "Admin : " + message);
     });
   }
 
   setSocketListeners() {
-    this.socket.on("room created", newRoomID => {
+    this.socket.on("room created", (newRoomID) => {
       // eslint-disable-next-line no-console
       console.log("New room created with ID: " + newRoomID);
       this.app.$store.dispatch("UPDATE_CONNECTED_ROOM", newRoomID);
@@ -245,7 +245,7 @@ class StartShare {
       this.app.$store.dispatch("UPDATE_MESSAGES", "Room created successfully.");
     });
 
-    this.socket.on("room creation failed", reason => {
+    this.socket.on("room creation failed", (reason) => {
       // eslint-disable-next-line no-console
       console.log(reason);
       this.app.roomNameInputErrorMessages.push(
@@ -257,7 +257,7 @@ class StartShare {
     });
 
     // new peer connection
-    this.socket.on("peer joined", peerData => {
+    this.socket.on("peer joined", (peerData) => {
       if (peerData.hostID && peerData.hostID !== this.socket.id) {
         // eslint-disable-next-line no-console
         console.log("peer not for me");
@@ -268,7 +268,7 @@ class StartShare {
       }
     });
 
-    this.socket.on("peer ice", iceData => {
+    this.socket.on("peer ice", (iceData) => {
       // eslint-disable-next-line no-console
       // console.log(
       //   "Ice Candidate from peer: " + iceData.id + " in room: " + iceData.room
@@ -287,7 +287,7 @@ class StartShare {
       this.addPeerIceCandidate(iceData);
     });
 
-    this.socket.on("peer desc", descData => {
+    this.socket.on("peer desc", (descData) => {
       // eslint-disable-next-line no-console
       // console.log(
       //   "Answer description from peer: " +
@@ -308,7 +308,7 @@ class StartShare {
       console.log("user disconnected from server.");
     });
 
-    this.socket.on("chatIncoming", message => {
+    this.socket.on("chatIncoming", (message) => {
       // eslint-disable-next-line no-console
       console.log("message came");
       this.app.$store.dispatch(
@@ -317,7 +317,7 @@ class StartShare {
       );
     });
 
-    this.socket.on("chatFromServer", message => {
+    this.socket.on("chatFromServer", (message) => {
       this.app.$store.dispatch("UPDATE_MESSAGES", "Admin : " + message);
     });
   }
@@ -334,9 +334,9 @@ class StartShare {
     const rtcConn = new RTCPeerConnection(servers, {
       optional: [
         {
-          RtpDataChannels: true
-        }
-      ]
+          RtpDataChannels: true,
+        },
+      ],
     });
 
     if (this.app.$store.getters.VIDEO_STREAM) {
@@ -361,7 +361,7 @@ class StartShare {
       if (peer.dataChannel.readyState === "closed") {
         this.app.$socket.emit("title", {
           id: peer,
-          title: this.app.$store.getters.STREAMTITLE
+          title: this.app.$store.getters.STREAMTITLE,
         });
       }
       if (
@@ -371,13 +371,13 @@ class StartShare {
         this.socket.emit("logoff", {
           room: this.app.$store.getters.ROOM,
           socketID: peer.id,
-          name: this.app.$store.getters.NAME
+          name: this.app.$store.getters.NAME,
         });
-        this.peers = this.peers.filter(pr => pr.id !== peer.id);
+        this.peers = this.peers.filter((pr) => pr.id !== peer.id);
       }
     };
 
-    peer.rtcConn.onicecandidate = event => {
+    peer.rtcConn.onicecandidate = (event) => {
       if (!event.candidate) {
         console.log("No candidate for RTC connection");
         return;
@@ -387,13 +387,13 @@ class StartShare {
       this.socket.emit("src new ice", {
         id: peer.id,
         room: this.app.$store.getters.ROOM,
-        candidate: event.candidate
+        candidate: event.candidate,
       });
     };
 
     peer.rtcConn
       .createOffer({ offerToReceiveAudio: 1 })
-      .then(offer => {
+      .then((offer) => {
         // opus.preferOpus(desc.sdp);
         return peer.rtcConn.setLocalDescription(offer);
       })
@@ -401,7 +401,7 @@ class StartShare {
         this.socket.emit("src new desc", {
           id: peer.id,
           room: this.app.$store.getters.ROOM,
-          desc: peer.rtcConn.localDescription
+          desc: peer.rtcConn.localDescription,
         });
         console.log("sending desc now" + peer.rtcConn.localDescription);
       });
@@ -424,9 +424,9 @@ class StartShare {
     const rtcConn = new RTCPeerConnection(servers, {
       optional: [
         {
-          RtpDataChannels: true
-        }
-      ]
+          RtpDataChannels: true,
+        },
+      ],
     });
 
     if (this.app.videoSrc.getVideoTracks().length > 0) {
@@ -448,7 +448,7 @@ class StartShare {
       if (peer.dataChannel.readyState === "closed") {
         this.socket.emit("title", {
           id: peer,
-          title: this.app.$store.getters.STREAMTITLE
+          title: this.app.$store.getters.STREAMTITLE,
         });
       }
       if (
@@ -456,30 +456,30 @@ class StartShare {
         peer.rtcConn.connectionState === "disconnected"
       ) {
         console.log("deleting peer " + peer.id);
-        this.peers = this.peers.filter(pr => pr.id !== peer.id);
+        this.peers = this.peers.filter((pr) => pr.id !== peer.id);
       }
     };
 
-    peer.rtcConn.onicecandidate = event => {
+    peer.rtcConn.onicecandidate = (event) => {
       if (event.candidate) {
         this.socket.emit("src new ice", {
           id: peer.id,
           room: this.app.$store.getters.CONNECTED_ROOM,
-          candidate: event.candidate
+          candidate: event.candidate,
         });
       }
     };
 
     peer.rtcConn
       .createOffer({ offerToReceiveAudio: 1 })
-      .then(offer => {
+      .then((offer) => {
         return peer.rtcConn.setLocalDescription(offer);
       })
       .then(() => {
         this.socket.emit("src new desc", {
           id: peer.id,
           room: this.app.$store.getters.CONNECTED_ROOM,
-          desc: peer.rtcConn.localDescription
+          desc: peer.rtcConn.localDescription,
         });
         console.log("sending desc now" + peer.rtcConn.localDescription);
       });
@@ -492,58 +492,58 @@ class StartShare {
 
   addPeerIceCandidate(iceData) {
     new Promise((resolve, reject) => {
-      const el = this.peers.find(peer => peer.id === iceData.id);
+      const el = this.peers.find((peer) => peer.id === iceData.id);
       if (el) {
         resolve(el);
       } else {
         reject(new Error("icedata not for our peer."));
       }
     })
-      .then(peer => {
+      .then((peer) => {
         peer.addIceCandidate(iceData);
       })
-      .catch(err => console.log(err));
+      .catch((err) => console.log(err));
   }
 
   addPeerDesc(descData) {
     new Promise((resolve, reject) => {
-      const el = this.peers.find(peer => peer.id === descData.id);
+      const el = this.peers.find((peer) => peer.id === descData.id);
       if (el) {
         resolve(el);
       } else {
         reject(new Error("peer desc not for our peer."));
       }
     })
-      .then(peer => {
+      .then((peer) => {
         peer.addRemoteDesc(descData);
       })
-      .catch(err => console.log(err));
+      .catch((err) => console.log(err));
   }
 
   updateOutgoingTracks(track) {
     if (this.getPeerCount() > 0) {
       if (track.kind === "audio") {
-        this.peers.forEach(peer => peer.updateOutgoingAudioTrack(track));
+        this.peers.forEach((peer) => peer.updateOutgoingAudioTrack(track));
       } else {
-        this.peers.forEach(peer => peer.updateOutgoingVideoTrack(track));
+        this.peers.forEach((peer) => peer.updateOutgoingVideoTrack(track));
       }
     }
   }
 
   dataChannelMsgEvent(data) {
     if (this.getPeerCount() > 0) {
-      this.peers.forEach(peer => peer.sendDCData(data));
+      this.peers.forEach((peer) => peer.sendDCData(data));
     }
   }
 
   async removeAllPeersAndClose() {
     if (this.getPeerCount() > 0) {
-      this.peers.forEach(peer => peer.rtcConn.close());
+      this.peers.forEach((peer) => peer.rtcConn.close());
       this.peers.length = 0;
     }
     if (this.app.$store.getters.SHARING) {
       await this.socket.emit("disconnect room", {
-        room: this.app.$store.getters.CONNECTED_ROOM
+        room: this.app.$store.getters.CONNECTED_ROOM,
       });
     }
     console.log("All peers removed: " + this.peers.length);

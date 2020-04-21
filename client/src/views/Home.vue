@@ -19,32 +19,32 @@
 </template>
 
 <script>
-import ConnectToRoom from "@/components/ConnectToRoom.vue";
-import ConnectionStatus from "@/components/Connection.vue";
-import PlayerControls from "@/components/PlayerControls.vue";
-import Title from "@/components/Title.vue";
-import VideoPlayer from "@/components/VideoPlayer.vue";
-import { mapState } from "vuex";
+import ConnectToRoom from '@/components/ConnectToRoom.vue';
+import ConnectionStatus from '@/components/Connection.vue';
+import PlayerControls from '@/components/PlayerControls.vue';
+import Title from '@/components/Title.vue';
+import VideoPlayer from '@/components/VideoPlayer.vue';
+import { mapState } from 'vuex';
 export default {
-  name: "Home",
+  name: 'Home',
   data: () => ({
-    volume: 50
+    volume: 50,
   }),
   components: {
     ConnectToRoom,
     ConnectionStatus,
     PlayerControls,
     Title,
-    VideoPlayer
+    VideoPlayer,
   },
   methods: {
     volumeHandler(volume) {
       this.volume = volume;
-    }
+    },
   },
   computed: {
-    ...mapState(["name", "connectedStatus"])
-  }
+    ...mapState(['name', 'connectedStatus']),
+  },
 };
 </script>
 

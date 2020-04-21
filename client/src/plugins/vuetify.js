@@ -10,8 +10,8 @@ export default new Vuetify({
     iconfont: "mdi",
     values: {
       toonin: {
-        component: TooninIcon // you can use string here if component is registered globally
-      }
-    }
-  }
+        component: TooninIcon, // you can use string here if component is registered globally
+      },
+    },
+  },
 });

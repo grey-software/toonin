@@ -19,7 +19,7 @@ const store = new Vuex.Store({
     connectedRoom: null,
     sharing: false,
     peers: null,
-    messages: []
+    messages: [],
   },
   mutations: {
     SET_CONNECTED_STATUS: (state, payload) => {
@@ -63,7 +63,7 @@ const store = new Vuex.Store({
     },
     SET_MESSAGE: (state, payload) => {
       state.messages.push(payload);
-    }
+    },
   },
   actions: {
     UPDATE_CONNECTED_STATUS: (context, payload) => {
@@ -107,52 +107,52 @@ const store = new Vuex.Store({
     },
     UPDATE_MESSAGES: (context, payload) => {
       context.commit("SET_MESSAGE", payload);
-    }
+    },
   },
   getters: {
-    CONNECTEDSTATUS: state => {
+    CONNECTEDSTATUS: (state) => {
       return state.connectedStatus;
     },
-    ROOM: state => {
+    ROOM: (state) => {
       return state.room;
     },
-    STREAMTITLE: state => {
+    STREAMTITLE: (state) => {
       return state.streamTitle;
     },
-    VOLUME: state => {
+    VOLUME: (state) => {
       return state.volume;
     },
-    PLAYING: state => {
+    PLAYING: (state) => {
       return state.playing;
     },
-    RTCCONN: state => {
+    RTCCONN: (state) => {
       return state.rtcConn;
     },
-    PEERID: state => {
+    PEERID: (state) => {
       return state.peerID;
     },
-    AUDIO_STREAM: state => {
+    AUDIO_STREAM: (state) => {
       return state.audioStream;
     },
-    VIDEO_STREAM: state => {
+    VIDEO_STREAM: (state) => {
       return state.videoStream;
     },
-    NAME: state => {
+    NAME: (state) => {
       return state.name;
     },
-    CONNECTED_ROOM: state => {
+    CONNECTED_ROOM: (state) => {
       return state.connectedRoom;
     },
-    SHARING: state => {
+    SHARING: (state) => {
       return state.sharing;
     },
-    PEERS: state => {
+    PEERS: (state) => {
       return state.peers;
     },
-    MESSAGES: state => {
+    MESSAGES: (state) => {
       return state.messages;
-    }
-  }
+    },
+  },
 });
 
 export default store;

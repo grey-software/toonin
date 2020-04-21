@@ -40,27 +40,27 @@
 </template>
 
 <script>
-import ScreenCap from "@/components/ScreenCap.vue";
-import Chat from "@/components/Chat.vue";
-import Name from "@/components/Name.vue";
-import Home from "@/views/Home.vue";
-import { mapState } from "vuex";
+import ScreenCap from '@/components/ScreenCap.vue';
+import Chat from '@/components/Chat.vue';
+import Name from '@/components/Name.vue';
+import Home from '@/views/Home.vue';
+import { mapState } from 'vuex';
 export default {
-  name: "Create",
+  name: 'Create',
   data() {
     return {
-      tab: null
+      tab: null,
     };
   },
   components: {
     ScreenCap,
     Chat,
     Name,
-    Home
+    Home,
   },
   computed: {
-    ...mapState(["name"])
-  }
+    ...mapState(['name']),
+  },
 };
 </script>
 

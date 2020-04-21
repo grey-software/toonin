@@ -123,7 +123,7 @@ function makeid(length) {
 }
 const VALID_ROOM_REGEX = /^[a-z0-9_-]{4,16}$/;
 
-const copyToClipboard = str => {
+const copyToClipboard = (str) => {
   const el = document.createElement("textarea");
   el.value = str;
   el.setAttribute("readonly", "");
@@ -144,7 +144,7 @@ export default {
     roomName: "",
     roomNameInputErrorMessages: [],
     userVideo: null,
-    userAudio: null
+    userAudio: null,
   }),
   computed: {
     cardTitle() {
@@ -183,7 +183,7 @@ export default {
         return 0;
       }
     },
-    ...mapState(["connectedRoom", "connectedStatus", "sharing", "peers"])
+    ...mapState(["connectedRoom", "connectedStatus", "sharing", "peers"]),
   },
   watch: {
     videoSrc: function(newValue) {
@@ -192,7 +192,7 @@ export default {
       } else {
         this.stopCapture();
       }
-    }
+    },
   },
   methods: {
     shareVideo() {
@@ -200,24 +200,24 @@ export default {
       console.log("called shareVideo.");
       this.peers.getSocket().emit("create room", {
         room: this.roomName,
-        isDistributed: true
+        isDistributed: true,
       });
     },
     async startCapture() {
       var displayMediaOptions = {
         video: {
-          cursor: "motion"
+          cursor: "motion",
         },
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
-          sampleRate: 44100
+          sampleRate: 44100,
         },
         videoConstraints: {
           mandatory: {
-            minFrameRate: 60
-          }
-        }
+            minFrameRate: 60,
+          },
+        },
       };
       let captureStream = null;
       try {
@@ -249,7 +249,7 @@ export default {
       if (this.videoSrc) {
         let tracks = this.videoSrc.getTracks();
 
-        tracks.forEach(track => track.stop());
+        tracks.forEach((track) => track.stop());
         this.videoSrc = null;
       }
       this.disconnect();
@@ -293,7 +293,7 @@ export default {
 
         try {
           stream = await navigator.mediaDevices.getUserMedia({
-            audio: true
+            audio: true,
           });
           /* use the stream */
         } catch (err) {
@@ -306,7 +306,7 @@ export default {
       } else {
         let tracks = this.userAudio.getTracks();
 
-        tracks.forEach(track => track.stop());
+        tracks.forEach((track) => track.stop());
         this.userAudio = null;
         // eslint-disable-next-line no-console
         console.log("Audio off");
@@ -318,7 +318,7 @@ export default {
 
         try {
           stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "user" }
+            video: { facingMode: "user" },
           });
           /* use the stream */
         } catch (err) {
@@ -331,12 +331,12 @@ export default {
       } else {
         let tracks = this.userVideo.getTracks();
 
-        tracks.forEach(track => track.stop());
+        tracks.forEach((track) => track.stop());
         this.userVideo = null;
         // eslint-disable-next-line no-console
         console.log("Video off");
       }
-    }
+    },
   },
   mounted() {
     this.videoTag = this.$refs.videoPlayer;
@@ -345,7 +345,7 @@ export default {
         this.peers.socket.emit("disconnect room", { room: this.connectedRoom });
       }
     };
-  }
+  },
 };
 </script>
 

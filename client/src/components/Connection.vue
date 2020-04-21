@@ -46,11 +46,11 @@ export default {
   methods: {
     consoleClick() {
       alert("Button clicked");
-    }
+    },
   },
   computed: {
-    ...mapState(["playing", "connectedStatus", "room"])
-  }
+    ...mapState(["playing", "connectedStatus", "room"]),
+  },
 };
 </script>
 
