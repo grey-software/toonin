@@ -1,21 +1,19 @@
 <template>
-  <v-card 
-  style="height: 50%; width: 50%; margin-left: 25%; padding: 0%;" 
-  :hidden="playing ? false : true"
-  :elevation="20"
-  v-show="videoStream !== null"
-  >
-
-    <video 
-    ref="videoPlayer"
+  <v-card
+    style="height: 50%; width: 50%; margin-left: 25%; padding: 0%;"
+    :hidden="playing ? false : true"
+    :elevation="20"
     v-show="videoStream !== null"
-    style="margin: 0%; width: 100%; height: 100%;"
-    :srcObject.prop="playing? videoStream : null"
-    @click="requestFullScreen"
-    preload="auto"
-    autoplay
+  >
+    <video
+      ref="videoPlayer"
+      v-show="videoStream !== null"
+      style="margin: 0%; width: 100%; height: 100%;"
+      :srcObject.prop="playing ? videoStream : null"
+      @click="requestFullScreen"
+      preload="auto"
+      autoplay
     ></video>
-
   </v-card>
 </template>
 
@@ -28,24 +26,28 @@ export default {
     return { videoTag: null };
   },
   computed: {
-    ...mapState(["videoStream", "playing"])
+    ...mapState(["videoStream", "playing"]),
   },
   methods: {
     requestFullScreen() {
       if (this.videoTag.requestFullscreen) {
         this.videoTag.requestFullscreen();
-      } else if (this.videoTag.mozRequestFullScreen) { /* Firefox */
+      } else if (this.videoTag.mozRequestFullScreen) {
+        /* Firefox */
         this.videoTag.mozRequestFullScreen();
-      } else if (this.videoTag.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+      } else if (this.videoTag.webkitRequestFullscreen) {
+        /* Chrome, Safari and Opera */
         this.videoTag.webkitRequestFullscreen();
-      } else if (this.videoTag.msRequestFullscreen) { /* IE/Edge */
+      } else if (this.videoTag.msRequestFullscreen) {
+        /* IE/Edge */
         this.videoTag.msRequestFullscreen();
       }
-    }
+    },
   },
-  mounted() { this.videoTag = this.$refs.videoPlayer; }
+  mounted() {
+    this.videoTag = this.$refs.videoPlayer;
+  },
 };
 </script>
 
-<style>
-</style>
+<style></style>

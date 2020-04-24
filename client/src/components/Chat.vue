@@ -1,0 +1,116 @@
+<template>
+  <v-card class="mx-auto" max-width="900px" :elevation="40">
+    <v-card-title class="toonin-title">{{ cardTitle }}</v-card-title>
+    <v-container fluid>
+      <v-card>
+        <v-card-text>
+          <v-list ref="chat" id="logs">
+            <template v-for="(item, index) in messages">
+              <v-subheader v-if="item" :key="index">{{ item }}</v-subheader>
+            </template>
+          </v-list>
+        </v-card-text>
+      </v-card>
+      <v-card-actions>
+        <v-text-field
+          v-model="message"
+          style="color: white;"
+          label="Messages"
+          outlined
+          rounded
+          autofocus
+          append-icon="mdi-send-circle"
+          @click:append="sendMessage"
+          @keydown.enter="sendMessage"
+          :error-messages="errorMessages"
+        />
+      </v-card-actions>
+    </v-container>
+  </v-card>
+</template>
+
+<script>
+import { mapState } from "vuex";
+export default {
+  name: "Chat",
+  data: () => ({
+    message: "",
+    errors: [],
+  }),
+  computed: {
+    cardTitle() {
+      return "Messages";
+    },
+    errorMessages() {
+      if (this.errors > 0) {
+        return this.errors;
+      } else if (!this.sharing && this.connectedStatus !== "connected") {
+        return ["Not Connected to a room."];
+      } else {
+        return this.errors;
+      }
+    },
+    roomname() {
+      if (this.sharing) {
+        return this.connectedRoom;
+      }
+      if (this.room.length > 0) {
+        return this.room;
+      }
+      return "";
+    },
+    ...mapState([
+      "sharing",
+      "name",
+      "connectedStatus",
+      "room",
+      "connectedRoom",
+      "peers",
+      "messages",
+    ]),
+  },
+  watch: {
+    messages() {
+      setTimeout(() => {
+        this.$refs.chat.$el.scrollTop = this.$refs.chat.$el.scrollHeight;
+      }, 0);
+    },
+  },
+  methods: {
+    sendMessage() {
+      if (this.message === "logoff") {
+        this.peers.socket.emit("disconnect room", {
+          room: this.roomname,
+        });
+        this.message = "";
+        return;
+      }
+      if (this.message.length < 1) {
+        this.errors.push("Invalid message");
+      } else if (!this.name) {
+        this.errors.push("name not defined.");
+      } else {
+        // eslint-disable-next-line no-console
+        this.errors = [];
+        if (this.peers) {
+          this.peers.socket.emit("message", {
+            room: this.roomname,
+            message: this.message,
+            name: this.name,
+          });
+          this.$store.dispatch("UPDATE_MESSAGES", "You: " + this.message);
+          this.message = "";
+        }
+      }
+    },
+  },
+  mounted() {},
+};
+</script>
+
+<style>
+#logs {
+  height: 300px;
+  overflow: auto;
+}
+</style>
