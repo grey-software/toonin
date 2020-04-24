@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 <template>
   <q-card
-    class="screen-capture"
+    class="main-card"
   >
     <q-card-section class="toonin-title">{{ cardTitle }}</q-card-section>
     <div>
@@ -389,7 +389,4 @@ export default {
   border: 3px solid #999;
   width: 95%;
   height: 480px;
-.screen-capture
-  width: 90%
-  max-width: 900px
 </style>

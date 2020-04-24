@@ -23,27 +23,32 @@
           </q-btn>
         </div>
       </q-toolbar>
-
-      <q-tabs align="center">
-        <q-route-tab
-          to="/toonin"
-          label="Toonin"
-        />
-        <q-route-tab
-          to="/share"
-          label="Share"
-        />
-        <q-route-tab
-          to="/chat"
-          label="Chat"
-        />
-      </q-tabs>
     </q-header>
+    <div style="padding-top: 100px" align="center" >
+      <q-card class="my-card q-pa-md" v-if="name">
 
-    <q-page-container>
-      <router-view />
-    </q-page-container>
+        <q-tabs v-model="tab" class="text-teal">
+          <q-tab label="Toonin" name="toonin" />
+          <q-tab label="Share" name="share" />
+          <q-tab label="Chat" name="chat" />
+        </q-tabs>
 
+        <q-separator />
+
+        <q-tab-panels v-model="tab" animated>
+          <q-tab-panel name="toonin">
+            <TooninPage />
+          </q-tab-panel>
+          <q-tab-panel name="share">
+            <SharePage />
+          </q-tab-panel>
+          <q-tab-panel name="chat">
+            <ChatPage />
+          </q-tab-panel>
+        </q-tab-panels>
+      </q-card>
+      <Name v-else />
+    </div>
     <q-footer
       elevated
       class="bg-grey-8 text-white"
@@ -62,23 +67,47 @@
 </template>
 
 <script>
+import SharePage from '../pages/SharePage'
+import TooninPage from '../pages/TooninPage'
+import ChatPage from '../pages/ChatPage'
+import Name from '../components/Name'
+import { mapState } from 'vuex'
 export default {
   data () {
     return {
+      tab: 'share'
     }
+  },
+  components: {
+    SharePage,
+    TooninPage,
+    ChatPage,
+    Name
+  },
+  computed: {
+    ...mapState(['name'])
   },
   methods: {
     onDarkModeChange () {
       this.$q.dark.toggle()
-      window.localStorage.setItem('isDark', this.$q.dark.isActive ? 1 : 0)
+      window.localStorage.setItem('isDark', this.$q.dark.isActive)
     }
   },
-  created () {
-    window.localStorage.getItem('isDark') === 1 ? this.$q.dark.set(true) : this.$q.dark.set(false)
+  mounted () {
+    this.$q.dark.set(window.localStorage.getItem('isDark'))
   }
 }
 </script>
 
+<style lang="sass">
+.my-card
+  width: 100%
+  max-width: 1366px
+  max-height: 700px
+.main-card
+  width: 90%
+  max-width: 900px
+</style>
 <style>
 @import url('https://fonts.googleapis.com/css?family=Nunito+Sans:800&display=swap');
 :root {

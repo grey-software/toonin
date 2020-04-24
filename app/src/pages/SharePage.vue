@@ -1,16 +1,10 @@
 /* eslint-disable no-console */
 <template>
-<div>
+  <div>
     <div>
-      <q-layout
-        row
-        wrap
-        align="center"
-      >
-        <div style="padding-top: 50px">
-          <ScreenCap/>
-        </div>
-      </q-layout>
+      <div style="padding-top: 30px">
+        <ScreenCap/>
+      </div>
     </div>
   </div>
 </template>
