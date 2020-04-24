@@ -1,18 +1,14 @@
 /* eslint-disable no-console */
 <template>
   <q-card
-    class="mx-auto"
-    max-width="900px"
-    :elevation="40"
+    class="screen-capture"
   >
     <q-card-section class="toonin-title">{{ cardTitle }}</q-card-section>
     <div>
       <q-card
-        class="mx-auto"
-        max-width="854px"
       >
         <video
-          id="video"
+          class="video-player"
           ref="videoPlayer"
           :srcObject.prop="videoSrc"
           @click="requestFullScreen"
@@ -33,14 +29,25 @@
           v-model="roomName"
           style="color: white;"
           autofocus
+          text-weight-regular
           label="Name your room"
           outlined
           rounded
-          append-icon="mdi-cached"
-          @click:append="randomRoomName"
-          :error-messages="errorMessages"
+          :error="errorMessages.length > 0"
           v-show="!connectedRoom"
-        />
+        >
+        <template v-slot:append>
+          <q-btn
+            icon="mdi-cached"
+            round
+            flat
+            @click="randomRoomName"
+          />
+        </template>
+        <template v-slot:error>
+          {{ errorMessages[0] }}
+        </template>
+        </q-input>
       </q-card-section>
       <q-card-actions>
         <span v-show="connectedRoom">
@@ -63,7 +70,6 @@
           class="mx-2"
           @click="copyLinkToClipboard"
           icon
-          color="primary"
           v-show="connectedRoom"
         >
           <q-icon
@@ -71,13 +77,15 @@
             color="primary"
           >mdi-earth</q-icon>
         </q-btn>
+      </q-card-actions>
+      <q-card-actions align="right" style="padding: 20px">
         <q-btn
           @click="startCapture"
           class="btn-share pr-4"
-          height="42"
-          outlined
-          color="primary"
+          outline
           rounded
+          color="primary"
+          height="42"
           v-show="videoSrc == null"
           :disabled="!roomNameValid || tooninHappening"
         >
@@ -87,9 +95,7 @@
           @click="getUserVideo"
           disabled
           outlined
-          color="primary"
           rounded
-          icon
         >
           <q-icon
             v-if="userVideo"
@@ -106,8 +112,6 @@
           disabled
           outlined
           rounded
-          icon
-          color="primary"
         >
           <q-icon
             v-if="userAudio"
@@ -128,9 +132,8 @@
           color="warning"
           rounded
           v-show="videoSrc !== null"
-        >
-          <q-icon>mdi-stop</q-icon>
-          Disconnect
+          icon="mdi-stop"
+        > Disconnect
         </q-btn>
       </q-card-actions>
     </div>
@@ -138,7 +141,7 @@
 </template>
 
 <script>
-import TooninIcon from './TooninIcon'
+import TooninIcon from '../components/TooninIcon'
 
 function makeid (length) {
   var result = ''
@@ -311,6 +314,7 @@ export default {
     randomRoomName () {
       const newname = makeid(8)
       this.roomName = newname
+      this.roomNameInputErrorMessages = []
     },
     copyLinkToClipboard () {
       copyToClipboard(`${window.location.origin}/${this.connectedRoom}`)
@@ -380,10 +384,12 @@ export default {
 }
 </script>
 
-<style>
-#video {
-  border: 1px solid #999;
-  width: 100%;
+<style lang="sass" scoped>
+.video-player
+  border: 3px solid #999;
+  width: 95%;
   height: 480px;
-}
+.screen-capture
+  width: 90%
+  max-width: 900px
 </style>
