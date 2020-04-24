@@ -1,10 +1,20 @@
-
 const routes = [
   {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/Index.vue') }
+      {
+        path: 'toonin',
+        component: () => import('pages/TooninPage.vue')
+      },
+      {
+        path: 'share',
+        component: () => import('pages/SharePage.vue')
+      },
+      {
+        path: 'chat',
+        component: () => import('pages/ChatPage.vue')
+      }
     ]
   }
 ]

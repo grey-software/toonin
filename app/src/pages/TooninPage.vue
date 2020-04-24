@@ -15,7 +15,7 @@
         </div>
       </q-layout>
     </div>
-    <div q-show="connectedStatus === 'connected'">
+    <div v-show="connectedStatus === 'connected'">
       <video-player></video-player>
       <br />
       <player-controls @volume-change="volumeHandler" />

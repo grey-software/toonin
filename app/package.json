@@ -8,6 +8,7 @@
     "author": "software.grey@protonmail.com",
     "private": true,
     "scripts": {
+        "start": "quasar dev",
         "lint": "eslint --ext .js,.vue --ignore-path .gitignore ./ --fix",
         "test": "echo \"No test specified\" && exit 0"
     },
@@ -33,9 +34,7 @@
         "npm": ">= 6.13.4",
         "yarn": ">= 1.21.1"
     },
-    "browserslist": [
-        "last 1 version, not dead, ie >= 11"
-    ],
+    "browserslist": ["last 1 version, not dead, ie >= 11"],
     "resolutions": {
         "@babel/parser": "7.7.5"
     }
