@@ -20,7 +20,7 @@ export default function (/* { ssrContext } */) {
       connectedStatus: 'disconnected',
       room: '',
       streamTitle: '',
-      volume: 0.5,
+      volume: 50,
       playing: false,
       rtcConn: null,
       peerID: null,

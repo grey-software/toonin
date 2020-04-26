@@ -7,7 +7,7 @@
     <div>
         <video
           class="video-player"
-          ref="videoPlayer"
+          ref="videoPlayerShare"
           :srcObject.prop="sharingStream"
           @click="requestFullScreen"
           preload="auto"
@@ -270,10 +270,15 @@ export default {
         )
       }
       if (captureStream) {
+        var localStream = new MediaStream(captureStream.getAudioTracks())
+        var audioContext = new AudioContext()
+        var audioSourceNode = audioContext.createMediaStreamSource(localStream)
+        var remoteDestination = audioContext.createMediaStreamDestination()
+        audioSourceNode.connect(remoteDestination)
         this.$store.dispatch('UPDATE_PEERS', new StartShare(this, true))
         this.roomNameInputErrorMessages = []
-        this.$store.dispatch('UPDATE_SHARING_STREAM', captureStream)
-        return captureStream
+        const combined = new MediaStream([...captureStream.getVideoTracks(), ...localStream.getAudioTracks()])
+        this.$store.dispatch('UPDATE_SHARING_STREAM', combined)
       } else {
 
       }
@@ -373,7 +378,7 @@ export default {
     }
   },
   mounted () {
-    this.videoTag = this.$refs.videoPlayer
+    this.videoTag = this.$refs.videoPlayerShare
     window.onunload = () => {
       if (this.sharing) {
         this.peers.socket.emit('disconnect room', { room: this.connectedRoom })

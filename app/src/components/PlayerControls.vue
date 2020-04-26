@@ -4,7 +4,12 @@
         <div class="volume-slider">
           <q-item>
             <q-item-section side>
-              <q-icon name="volume_down" />
+              <q-btn
+                outlined
+                flat
+                @click="mute()"
+                icon="volume_down"
+              />
             </q-item-section>
             <q-slider
               v-model="volume"

@@ -15,6 +15,7 @@ const servers = {
 }
 
 import io from 'socket.io-client'
+import opus from './opus'
 
 class Peer {
   constructor (peerData) {
@@ -398,7 +399,7 @@ class StartShare {
     peer.rtcConn
       .createOffer({ offerToReceiveAudio: 1 })
       .then((offer) => {
-        // opus.preferOpus(desc.sdp);
+        opus.preferOpus(offer.sdp)
         return peer.rtcConn.setLocalDescription(offer)
       })
       .then(() => {
@@ -434,11 +435,12 @@ class StartShare {
     })
 
     if (this.app.$store.getters.SHARING_STREAM.getVideoTracks().length > 0) {
-      rtcConn.addTrack(this.app.$store.getters.SHARING_STREAM.getVideoTracks()[0])
+      this.app.$store.getters.SHARING_STREAM.getTracks().forEach(track => rtcConn.addTrack(track, this.app.$store.getters.SHARING_STREAM))
+      // rtcConn.addTrack(this.app.$store.getters.SHARING_STREAM.getVideoTracks()[0])
     }
-    if (this.app.$store.getters.SHARING_STREAM.getAudioTracks().length > 0) {
-      rtcConn.addTrack(this.app.$store.getters.SHARING_STREAM.getAudioTracks()[0])
-    }
+    // if (this.app.$store.getters.SHARING_STREAM.getAudioTracks().length > 0) {
+    //   rtcConn.addTrack(this.app.$store.getters.SHARING_STREAM.getAudioTracks()[0])
+    // }
 
     peer.rtcConn = rtcConn
     this.peers.push(peer)
@@ -477,6 +479,7 @@ class StartShare {
     peer.rtcConn
       .createOffer({ offerToReceiveAudio: 1 })
       .then((offer) => {
+        opus.preferOpus(offer.sdp)
         return peer.rtcConn.setLocalDescription(offer)
       })
       .then(() => {

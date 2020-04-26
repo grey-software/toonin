@@ -169,19 +169,19 @@ export default {
           this.$store.dispatch('UPDATE_CONNECTED_STATUS', SUCCESSFUL)
           this.$store.dispatch('UPDATE_PLAYING', false)
 
-          if (incomingStream.getAudioTracks().length > 0) {
-            this.$store.dispatch('UPDATE_AUDIO_STREAM', incomingStream)
-          } else {
+          if (incomingStream.getVideoTracks().length > 0) {
             this.$store.dispatch('UPDATE_VIDEO_STREAM', incomingStream)
+          } else {
+            this.$store.dispatch('UPDATE_AUDIO_STREAM', incomingStream)
           }
         } else {
           this.$store.dispatch('UPDATE_CONNECTED_STATUS', SUCCESSFUL)
           this.$store.dispatch('UPDATE_PLAYING', true)
 
-          if (incomingStream.getAudioTracks().length > 0) {
-            this.$store.dispatch('UPDATE_AUDIO_STREAM', incomingStream)
-          } else {
+          if (incomingStream.getVideoTracks().length > 0) {
             this.$store.dispatch('UPDATE_VIDEO_STREAM', incomingStream)
+          } else {
+            this.$store.dispatch('UPDATE_AUDIO_STREAM', incomingStream)
           }
         }
       }
