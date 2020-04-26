@@ -30,7 +30,9 @@ export default function (/* { ssrContext } */) {
       connectedRoom: null,
       sharing: false,
       peers: null,
-      messages: []
+      messages: [],
+      sharingStream: null,
+      unread: 0
     },
     mutations: {
       SET_CONNECTED_STATUS: (state, payload) => {
@@ -74,6 +76,12 @@ export default function (/* { ssrContext } */) {
       },
       SET_MESSAGE: (state, payload) => {
         state.messages.push(payload)
+      },
+      SET_SHARING_STREAM: (state, payload) => {
+        state.sharingStream = payload
+      },
+      SET_UNREAD: (state, payload) => {
+        state.unread = payload
       }
     },
     actions: {
@@ -118,6 +126,12 @@ export default function (/* { ssrContext } */) {
       },
       UPDATE_MESSAGES: (context, payload) => {
         context.commit('SET_MESSAGE', payload)
+      },
+      UPDATE_SHARING_STREAM: (context, payload) => {
+        context.commit('SET_SHARING_STREAM', payload)
+      },
+      UPDATE_UNREAD: (context, payload) => {
+        context.commit('SET_UNREAD', payload)
       }
     },
     getters: {
@@ -162,6 +176,12 @@ export default function (/* { ssrContext } */) {
       },
       MESSAGES: (state) => {
         return state.messages
+      },
+      SHARING_STREAM: (state) => {
+        return state.sharingStream
+      },
+      UNREAD: (state) => {
+        return state.unread
       }
     }
   })

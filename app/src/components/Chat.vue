@@ -3,7 +3,7 @@
     <div class="toonin-title">{{ cardTitle }}</div>
     <q-card class="main-card">
       <q-card-section>
-        <div
+         <q-scroll-area
           ref="chat"
           class="logs"
         >
@@ -30,7 +30,7 @@
               :stamp="item.time"
             >{{ item.message }}</q-chat-message>
           </template>
-        </div>
+        </q-scroll-area>
       </q-card-section>
       <q-card-section class="text--primary">
         <q-input
@@ -102,9 +102,8 @@ export default {
   },
   watch: {
     messages () {
-      setTimeout(() => {
-        this.$refs.chat.$el.scrollTop = this.$refs.chat.$el.scrollHeight
-      }, 0)
+      var el = this.$refs.chat
+      el.setScrollPosition(el.getScrollTarget().scrollHeight, 1)
     }
   },
   methods: {
@@ -135,7 +134,11 @@ export default {
       }
     }
   },
-  mounted () { }
+  mounted () {
+    var el = this.$refs.chat
+    el.setScrollPosition(el.getScrollTarget().scrollHeight, 1)
+    this.$store.dispatch('UPDATE_UNREAD', 0)
+  }
 }
 </script>
 

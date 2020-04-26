@@ -5,24 +5,21 @@
   >
     <q-card-section class="toonin-title">{{ cardTitle }}</q-card-section>
     <div>
-      <q-card
-      >
         <video
           class="video-player"
           ref="videoPlayer"
-          :srcObject.prop="videoSrc"
+          :srcObject.prop="sharingStream"
           @click="requestFullScreen"
           preload="auto"
           muted
           autoplay
-          v-show="videoSrc !== null"
+          v-if="sharingStream !== null"
         ></video>
-      </q-card>
       <q-img
         contain
         src="../assets/icon.png"
         style="margin-top: 1%; padding-top: 20px;max-height:240px"
-        v-show="videoSrc == null"
+        v-else
       />
       <q-card-section class="text--primary">
         <q-input
@@ -88,7 +85,7 @@
             rounded
             color="primary"
             height="42"
-            v-show="videoSrc == null"
+            v-show="sharingStream == null"
             :disabled="!roomNameValid || tooninHappening"
           >
             <toonin-icon />Share
@@ -134,7 +131,7 @@
             outlined
             color="warning"
             rounded
-            v-show="videoSrc !== null"
+            v-show="sharingStream !== null"
             icon="mdi-stop"
           > Disconnect
           </q-btn>
@@ -176,7 +173,6 @@ export default {
     TooninIcon
   },
   data: () => ({
-    videoSrc: null,
     videoTag: null,
     roomName: '',
     roomNameInputErrorMessages: [],
@@ -220,10 +216,10 @@ export default {
         return 0
       }
     },
-    ...mapState(['connectedRoom', 'connectedStatus', 'sharing', 'peers'])
+    ...mapState(['connectedRoom', 'connectedStatus', 'sharing', 'peers', 'sharingStream'])
   },
   watch: {
-    videoSrc: function (newValue) {
+    sharingStream: function (newValue) {
       if (newValue) {
         this.shareVideo()
       } else {
@@ -276,18 +272,18 @@ export default {
       if (captureStream) {
         this.$store.dispatch('UPDATE_PEERS', new StartShare(this, true))
         this.roomNameInputErrorMessages = []
-        this.videoSrc = captureStream
+        this.$store.dispatch('UPDATE_SHARING_STREAM', captureStream)
         return captureStream
       } else {
 
       }
     },
     stopCapture () {
-      if (this.videoSrc) {
-        const tracks = this.videoSrc.getTracks()
+      if (this.sharingStream) {
+        const tracks = this.sharingStream.getTracks()
 
         tracks.forEach((track) => track.stop())
-        this.videoSrc = null
+        this.$store.dispatch('UPDATE_SHARING_STREAM', null)
       }
       this.disconnect()
     },

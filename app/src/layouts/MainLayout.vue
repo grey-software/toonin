@@ -32,7 +32,9 @@
         <q-tabs v-model="tab" class="text-teal">
           <q-tab label="Toonin" name="toonin" />
           <q-tab label="Share" name="share" />
-          <q-tab label="Chat" name="chat" />
+          <q-tab label="Chat" name="chat" >
+            <q-badge v-if="unread>0" color="red" floating>{{ unread }}</q-badge>
+          </q-tab>
         </q-tabs>
 
         <q-separator />
@@ -87,7 +89,7 @@ export default {
     Name
   },
   computed: {
-    ...mapState(['name'])
+    ...mapState(['name', 'unread'])
   },
   methods: {
     onDarkModeChange () {

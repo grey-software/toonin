@@ -227,10 +227,12 @@ class StartShare {
       this.app.$store.dispatch(
         'UPDATE_MESSAGES', { message: message.message, name: message.name, time: new Date().toLocaleTimeString('en-US') }
       )
+      this.app.$store.dispatch('UPDATE_UNREAD', this.app.$store.getters.UNREAD + 1)
     })
 
     this.socket.on('chatFromServer', (message) => {
       this.app.$store.dispatch('UPDATE_MESSAGES', { message: message, name: 'Admin', time: new Date().toLocaleTimeString('en-US') })
+      this.app.$store.dispatch('UPDATE_UNREAD', this.app.$store.getters.UNREAD + 1)
       if (message === 'room being closed.') {
         this.app.disconnect()
       }
@@ -244,6 +246,7 @@ class StartShare {
       this.app.$store.dispatch('UPDATE_CONNECTED_ROOM', newRoomID)
       this.app.$store.dispatch('UPDATE_SHARING', true)
       this.app.$store.dispatch('UPDATE_MESSAGES', { message: 'Room created successfully.', name: 'Admin', time: new Date().toLocaleTimeString('en-US') })
+      this.app.$store.dispatch('UPDATE_UNREAD', this.app.$store.getters.UNREAD + 1)
     })
 
     this.socket.on('room creation failed', (reason) => {
@@ -314,10 +317,12 @@ class StartShare {
       this.app.$store.dispatch(
         'UPDATE_MESSAGES', { message: message.message, name: message.name, time: new Date().toLocaleTimeString('en-US') }
       )
+      this.app.$store.dispatch('UPDATE_UNREAD', this.app.$store.getters.UNREAD + 1)
     })
 
     this.socket.on('chatFromServer', (message) => {
       this.app.$store.dispatch('UPDATE_MESSAGES', { message: message, name: 'Admin', time: new Date().toLocaleTimeString('en-US') })
+      this.app.$store.dispatch('UPDATE_UNREAD', this.app.$store.getters.UNREAD + 1)
     })
   }
 
@@ -428,11 +433,11 @@ class StartShare {
       ]
     })
 
-    if (this.app.videoSrc.getVideoTracks().length > 0) {
-      rtcConn.addTrack(this.app.videoSrc.getVideoTracks()[0])
+    if (this.app.$store.getters.SHARING_STREAM.getVideoTracks().length > 0) {
+      rtcConn.addTrack(this.app.$store.getters.SHARING_STREAM.getVideoTracks()[0])
     }
-    if (this.app.videoSrc.getAudioTracks().length > 0) {
-      rtcConn.addTrack(this.app.videoSrc.getAudioTracks()[0])
+    if (this.app.$store.getters.SHARING_STREAM.getAudioTracks().length > 0) {
+      rtcConn.addTrack(this.app.$store.getters.SHARING_STREAM.getAudioTracks()[0])
     }
 
     peer.rtcConn = rtcConn
