@@ -1,53 +1,40 @@
 <template>
   <q-card
-    class="mx-auto"
     max-width="400"
     max-height="500px"
   >
     <q-card-section class="headline">Connection Status</q-card-section>
     <div
-      style="float: left; margin-top: 5%; margin-right: 0%;"
       id="timeline-container"
     >
-      <q-timeline>
+      <q-timeline justify-center :layout="layout">
         <q-timeline-entry
-          :color="room != '' ? '#4CAF50' : '#F44336'"
+          :color="room != '' ? 'green' : 'red'"
           fill-dot
-        >
-          <q-card
-            style="width: 250px;"
-            class="statusCard"
-          >
-            <a class="statusCardRightText">Waiting</a>
-          </q-card>
-        </q-timeline-entry>
+          side="left"
+          title="Waiting"
+        />
 
         <q-timeline-entry
-          :color="room != '' ? '#4CAF50' : '#F44336'"
+          :color="room != '' ? 'green' : 'red'"
           fill-dot
-        >
-          <q-card class="statusCard">
-            <a class="statusCardLeftText">Room found</a>
-          </q-card>
-        </q-timeline-entry>
+          side="right"
+          title="Room found"
+        />
 
         <q-timeline-entry
-          :color="connectedStatus == 'connected' ? '#4CAF50' : '#F44336'"
+          :color="connectedStatus == 'connected' ? 'green' : 'red'"
           fill-dot
-        >
-          <q-card class="statusCard">
-            <a class="statusCardRightText">Connected</a>
-          </q-card>
-        </q-timeline-entry>
+          side="left"
+          title="Connected"
+        />
 
         <q-timeline-entry
-          :color="playing ? '#4CAF50' : '#F44336'"
+          :color="playing ? 'green' : 'red'"
           fill-dot
-        >
-          <q-card class="statusCard">
-            <a class="statusCardLeftText">Playing</a>
-          </q-card>
-        </q-timeline-entry>
+          side="right"
+          title="Playing"
+        />
       </q-timeline>
     </div>
   </q-card>
@@ -57,14 +44,10 @@
 import { mapState } from 'vuex'
 export default {
   name: 'connection',
-  props: {},
-  components: {},
-  methods: {
-    consoleClick () {
-      alert('Button clicked')
-    }
-  },
   computed: {
+    layout () {
+      return this.$q.screen.lt.sm ? 'dense' : (this.$q.screen.lt.md ? 'comfortable' : 'loose')
+    },
     ...mapState(['playing', 'connectedStatus', 'room'])
   }
 }
@@ -75,9 +58,5 @@ export default {
   font-size: 250%;
   font-weight: 300;
   margin-left: 33%;
-}
-.statusCard {
-  padding: 5%;
-  text-align: center;
 }
 </style>

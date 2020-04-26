@@ -2,15 +2,14 @@
   <div>
     <div>
       <q-layout
-        row
-        wrap
-        align-center
-        justify-center
+        class="row main-card"
+        align="center"
+        fixed-center
       >
-        <div style="padding: 5px">
+        <div style="padding: 5px" class="col-xs-12 col-md-6">
           <connect-to-room />
         </div>
-        <div style="padding: 5px">
+        <div style="padding: 5px" class="col-xs-12 col-md-6">
           <connection-status />
         </div>
       </q-layout>

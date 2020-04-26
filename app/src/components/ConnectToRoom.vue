@@ -3,7 +3,6 @@
     class="mx-auto"
     max-width="400"
     max-height="600px"
-    flat
     rounded
     :elevation="8"
   >
@@ -28,13 +27,12 @@
         :error-messages="errorMessages"
       />
     </q-card-section>
-    <q-card-actions>
+    <q-card-actions align="center">
       <q-btn
         @click="handleTooninButtonClick"
         class="btn-share pr-4"
         height="42"
         outlined
-        color="primary"
         rounded
         :disabled="sharing"
       >
