@@ -107,7 +107,7 @@ export default {
 .my-card
   width: 100%
   max-width: 1366px
-  max-height: 1200px
+  max-height: 1366px
 .main-card
   width: 90%
   max-width: 900px

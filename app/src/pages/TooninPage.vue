@@ -12,13 +12,13 @@
         <div style="padding: 5px" class="col-xs-12 col-md-6">
           <connection-status />
         </div>
+        <div v-show="connectedStatus === 'connected'" style="padding: 30px" class="col-xs-12">
+          <video-player></video-player>
+        <br />
+          <player-controls @volume-change="volumeHandler" />
+        <Title />
+      </div>
       </q-layout>
-    </div>
-    <div v-show="connectedStatus === 'connected'">
-      <video-player></video-player>
-      <br />
-      <player-controls @volume-change="volumeHandler" />
-      <Title />
     </div>
   </div>
 </template>

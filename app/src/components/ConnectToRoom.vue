@@ -1,6 +1,5 @@
 <template>
   <q-card
-    class="mx-auto"
     max-width="400"
     max-height="600px"
     rounded
@@ -24,22 +23,27 @@
         placeholder="Room Key"
         outlined
         rounded
-        :error-messages="errorMessages"
-      />
+        :error="errorMessages.length > 0"
+      >
+        <template v-slot:error>
+          {{ errorMessages[0] }}
+        </template>
+      </q-input>
     </q-card-section>
     <q-card-actions align="center">
       <q-btn
         @click="handleTooninButtonClick"
         class="btn-share pr-4"
+        :color='connectedStatus === "connected" ? "warning": primary'
         height="42"
-        outlined
         rounded
         :disabled="sharing"
       >
         <q-icon
           v-if="connectedStatus === 'connected'"
+          name="mdi-stop"
           left
-        >mdi-stop</q-icon>
+        />
         <toonin-icon
           v-else
           left

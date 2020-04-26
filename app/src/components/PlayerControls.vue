@@ -1,15 +1,20 @@
 <template>
-  <q-card class="controls-container mx-auto">
-    <div class="row controls-row px-4">
-      <div class="col mt-5">
-        <q-slider
-          v-model="volume"
-          prepend-icon="volume_up"
-          @change="volChange"
-          @click:prepend="mute"
-        ></q-slider>
-      </div>
-      <div class="col-3">
+  <q-card class="controls-container">
+      <q-card-actions style="padding: 20px" align="around">
+        <div class="volume-slider">
+          <q-item>
+            <q-item-section side>
+              <q-icon name="volume_down" />
+            </q-item-section>
+            <q-slider
+              v-model="volume"
+              :min="0"
+              :max="100"
+              :step="1"
+              label
+            ></q-slider>
+          </q-item>
+        </div>
         <q-btn
           v-show="playing == false"
           :disabled="audioStream || videoStream ? false : true"
@@ -18,7 +23,7 @@
           color="light-blue"
           @click="playTrack()"
         >
-          <q-icon large>play_arrow</q-icon>
+          <q-icon large name="play_arrow"></q-icon>
         </q-btn>
         <q-btn
           v-show="connectedStatus == 'connected' && playing == true"
@@ -27,20 +32,18 @@
           color="light-blue"
           @click="pauseTrack()"
         >
-          <q-icon large>pause</q-icon>
+          <q-icon large name="pause"></q-icon>
         </q-btn>
-      </div>
-      <audio
+      </q-card-actions>
+    <audio
         :srcObject.prop="playing ? audioStream : null"
         style="display: none;"
         preload="auto"
         autoplay
         ref="audio"
       />
-    </div>
   </q-card>
 </template>
-
 <script>
 import { mapState } from 'vuex'
 
@@ -58,9 +61,6 @@ export default {
       this.$store.dispatch('UPDATE_PLAYING', true)
       this.audio.play()
     },
-    volChange (value) {
-      this.audio.volume = value / 100
-    },
     mute () {
       this.audio.volume = 0
       this.$store.dispatch('UPDATE_VOLUME', 0)
@@ -72,13 +72,12 @@ export default {
       'connectedStatus',
       'audioStream',
       'videoStream',
-      'playing'
+      'playing',
+      'volume'
     ]),
     volume: {
-      get: function () {
-        return this.$store.getters.VOLUME
-      },
       set: function (value) {
+        this.audio.volume = value / 100
         this.$store.dispatch('UPDATE_VOLUME', value)
       }
     }
@@ -89,18 +88,15 @@ export default {
 }
 </script>
 
-<style scoped>
-.controls-container {
+<style lang="sass" scoped>
+.controls-container
   max-width: 400px;
   border-radius: 16px !important;
-  align-items: center;
-  justify-content: center;
-  display: flex;
-}
 
-.controls-row {
+.controls-row
   display: flex;
   align-items: center;
-  justify-content: center;
-}
+
+.volume-slider
+  width: 80%
 </style>
