@@ -49,92 +49,95 @@
         </template>
         </q-input>
       </q-card-section>
-      <q-card-actions>
-        <span v-show="connectedRoom">
-          <q-icon
-            large
+      <q-card-actions style="padding: 20px" align="center">
+          <span v-show="connectedRoom">
+            <q-icon
+              large
+              color="primary"
+              name="mdi-account"
+            ></q-icon>
+            <span class="label-room-name ml-3" style="padding-right: 10px">{{ this.peerCounter }} peers</span>
+          </span>
+          <q-btn
+            @click="copyIdToClipboard"
+            outlined
+            rounded
+            v-show="connectedRoom"
+          >
+            <q-icon
+              color="primary"
+              name="mdi-content-copy"
+            />
+          </q-btn>
+          <q-btn
+            @click="copyLinkToClipboard"
+            outlined
+            rounded
+            v-show="connectedRoom"
+          >
+            <q-icon
+              color="primary"
+              name="mdi-earth"
+            />
+          </q-btn>
+          <q-space />
+          <q-btn
+            @click="startCapture"
+            class="btn-share pr-4"
+            outline
+            rounded
             color="primary"
-          >mdi-account</q-icon>
-          <span class="label-room-name ml-3">{{ this.peerCounter }} peers</span>
-        </span>
-        <q-btn
-          @click="copyIdToClipboard"
-          icon
-          color="primary"
-          class="ml-3"
-          v-show="connectedRoom"
-        >
-          <q-icon color="primary">mdi-content-copy</q-icon>
-        </q-btn>
-        <q-btn
-          class="mx-2"
-          @click="copyLinkToClipboard"
-          icon
-          v-show="connectedRoom"
-        >
-          <q-icon
-            left
-            color="primary"
-          >mdi-earth</q-icon>
-        </q-btn>
-      </q-card-actions>
-      <q-card-actions align="right" style="padding: 20px">
-        <q-btn
-          @click="startCapture"
-          class="btn-share pr-4"
-          outline
-          rounded
-          color="primary"
-          height="42"
-          v-show="videoSrc == null"
-          :disabled="!roomNameValid || tooninHappening"
-        >
-          <toonin-icon />Share
-        </q-btn>
-        <q-btn
-          @click="getUserVideo"
-          disabled
-          outlined
-          rounded
-        >
-          <q-icon
-            v-if="userVideo"
+            height="42"
+            v-show="videoSrc == null"
+            :disabled="!roomNameValid || tooninHappening"
+          >
+            <toonin-icon />Share
+          </q-btn>
+          <q-btn
+            @click="getUserVideo"
+            disabled
+            outlined
+            rounded
+          >
+            <q-icon
+              v-if="userVideo"
+              color="warning"
+              name="mdi-video"
+            />
+            <q-icon
+              v-else
+              color="primary"
+              name="mdi-video"
+            />
+          </q-btn>
+          <q-btn
+            @click="getUserAudio"
+            disabled
+            outlined
+            rounded
+          >
+            <q-icon
+              v-if="userAudio"
+              color="warning"
+              name="mdi-microphone"
+            ></q-icon>
+            <q-icon
+              v-else
+              color="primary"
+              name="mdi-microphone"
+            ></q-icon>
+          </q-btn>
+          <q-btn
+            @click="stopCapture"
+            class="btn-share pr-4"
+            height="42"
+            outlined
             color="warning"
-          >mdi-video</q-icon>
-          <q-icon
-            v-else
-            color="primary"
-            name="mdi-video"
-          />
-        </q-btn>
-        <q-btn
-          @click="getUserAudio"
-          disabled
-          outlined
-          rounded
-        >
-          <q-icon
-            v-if="userAudio"
-            color="warning"
-            name="mdi-microphone"
-          ></q-icon>
-          <q-icon
-            v-else
-            color="primary"
-            name="mdi-microphone"
-          ></q-icon>
-        </q-btn>
-        <q-btn
-          @click="stopCapture"
-          class="btn-share pr-4"
-          height="42"
-          outlined
-          color="warning"
-          rounded
-          v-show="videoSrc !== null"
-          icon="mdi-stop"
-        > Disconnect
-        </q-btn>
+            rounded
+            v-show="videoSrc !== null"
+            icon="mdi-stop"
+          > Disconnect
+          </q-btn>
       </q-card-actions>
     </div>
   </q-card>

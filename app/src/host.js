@@ -82,7 +82,7 @@ class StartShare {
 
   async initSocket () {
     // console.log(window);
-    this.socket = await io(window.location.hostname)
+    this.socket = await io(window.location.hostname + ':8443')
     if (this.socket && this.sharing) {
       this.setSocketListeners()
     }
@@ -224,15 +224,13 @@ class StartShare {
 
     this.socket.on('chatIncoming', (message) => {
       // eslint-disable-next-line no-console
-      console.log('message came')
       this.app.$store.dispatch(
-        'UPDATE_MESSAGES',
-        message.name + ': ' + message.message
+        'UPDATE_MESSAGES', { message: message.message, name: message.name, time: new Date().toLocaleTimeString('en-US') }
       )
     })
 
     this.socket.on('chatFromServer', (message) => {
-      this.app.$store.dispatch('UPDATE_MESSAGES', 'Admin : ' + message)
+      this.app.$store.dispatch('UPDATE_MESSAGES', { message: message, name: 'Admin', time: new Date().toLocaleTimeString('en-US') })
       if (message === 'room being closed.') {
         this.app.disconnect()
       }
@@ -245,7 +243,7 @@ class StartShare {
       console.log('New room created with ID: ' + newRoomID)
       this.app.$store.dispatch('UPDATE_CONNECTED_ROOM', newRoomID)
       this.app.$store.dispatch('UPDATE_SHARING', true)
-      this.app.$store.dispatch('UPDATE_MESSAGES', 'Room created successfully.')
+      this.app.$store.dispatch('UPDATE_MESSAGES', { message: 'Room created successfully.', name: 'Admin', time: new Date().toLocaleTimeString('en-US') })
     })
 
     this.socket.on('room creation failed', (reason) => {
@@ -314,13 +312,12 @@ class StartShare {
     this.socket.on('chatIncoming', (message) => {
       // eslint-disable-next-line no-console
       this.app.$store.dispatch(
-        'UPDATE_MESSAGES',
-        message.name + ': ' + message.message
+        'UPDATE_MESSAGES', { message: message.message, name: message.name, time: new Date().toLocaleTimeString('en-US') }
       )
     })
 
     this.socket.on('chatFromServer', (message) => {
-      this.app.$store.dispatch('UPDATE_MESSAGES', 'Admin : ' + message)
+      this.app.$store.dispatch('UPDATE_MESSAGES', { message: message, name: 'Admin', time: new Date().toLocaleTimeString('en-US') })
     })
   }
 

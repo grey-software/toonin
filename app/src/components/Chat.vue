@@ -1,41 +1,63 @@
 <template>
-  <q-card
-    class="mx-auto"
-    max-width="900px"
-    :elevation="40"
-  >
-    <q-card-section class="toonin-title">{{ cardTitle }}</q-card-section>
-    <q-card>
+  <div>
+    <div class="toonin-title">{{ cardTitle }}</div>
+    <q-card class="main-card">
       <q-card-section>
-        <q-list
+        <div
           ref="chat"
-          id="logs"
+          class="logs"
         >
           <template v-for="(item, index) in messages">
-            <div
-              v-if="item"
+             <div
+              v-if="item.name === 'Admin'"
               :key="index"
               class="text-body1"
-            >{{ item }}</div>
+            >{{ item.message }}</div>
+            <q-chat-message
+              v-else-if="item.name === 'me'"
+              sent
+              :key="index"
+              :name="item.name"
+              :stamp="item.time"
+              text-color="white"
+              bg-color="primary"
+            >{{ item.message }}</q-chat-message>
+            <q-chat-message
+              v-else
+              :key="index"
+              :name="item.name"
+              bg-color="amber"
+              :stamp="item.time"
+            >{{ item.message }}</q-chat-message>
           </template>
-        </q-list>
+        </div>
+      </q-card-section>
+      <q-card-section class="text--primary">
+        <q-input
+          v-model="message"
+          style="color: white;"
+          label="Messages"
+          outlined
+          rounded
+          autofocus
+          @keydown.enter="sendMessage"
+          :error="errorMessages.length > 0"
+        >
+        <template v-slot:append>
+            <q-btn
+              icon="mdi-send-circle"
+              round
+              flat
+              @click="sendMessage"
+            />
+          </template>
+          <template v-slot:error>
+            {{ errorMessages[0] }}
+          </template>
+          </q-input>
       </q-card-section>
     </q-card>
-    <q-card-actions>
-      <q-input
-        v-model="message"
-        style="color: white;"
-        label="Messages"
-        outlined
-        rounded
-        autofocus
-        append-icon="mdi-send-circle"
-        @click:append="sendMessage"
-        @keydown.enter="sendMessage"
-        :error-messages="errorMessages"
-      />
-    </q-card-actions>
-  </q-card>
+  </div>
 </template>
 
 <script>
@@ -107,7 +129,7 @@ export default {
             message: this.message,
             name: this.name
           })
-          this.$store.dispatch('UPDATE_MESSAGES', 'You: ' + this.message)
+          this.$store.dispatch('UPDATE_MESSAGES', { message: this.message, name: 'me', time: new Date().toLocaleTimeString('en-US') })
           this.message = ''
         }
       }
@@ -117,9 +139,11 @@ export default {
 }
 </script>
 
-<style>
-#logs {
-  height: 300px;
-  overflow: auto;
-}
+<style lang="sass">
+.logs
+  height: 300px
+  max-width: 100%
+  overflow-y: auto
+  overflow-x: hidden
+  font-size: 12px !important
 </style>

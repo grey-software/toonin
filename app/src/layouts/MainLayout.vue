@@ -24,7 +24,7 @@
         </div>
       </q-toolbar>
     </q-header>
-    <div style="padding-top: 100px" align="center" >
+    <div style="padding: 100px" align="center" >
       <q-card class=" toonin-title my-card q-pa-md" v-if="name">
         <q-card-section>
         <div class="text-h4">Welcome, {{ name }}</div>
