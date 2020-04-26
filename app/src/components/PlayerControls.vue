@@ -72,10 +72,12 @@ export default {
       'connectedStatus',
       'audioStream',
       'videoStream',
-      'playing',
-      'volume'
+      'playing'
     ]),
     volume: {
+      get: function () {
+        return this.$store.getters.VOLUME
+      },
       set: function (value) {
         this.audio.volume = value / 100
         this.$store.dispatch('UPDATE_VOLUME', value)

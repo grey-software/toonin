@@ -83,7 +83,7 @@
             class="btn-share pr-4"
             outline
             rounded
-            color="primary"
+            :color='"primary"'
             height="42"
             v-show="sharingStream == null"
             :disabled="!roomNameValid || tooninHappening"
