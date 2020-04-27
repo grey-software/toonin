@@ -41,6 +41,7 @@
         </q-btn>
       </q-card-actions>
     <audio
+        v-if="!videoStream"
         :srcObject.prop="playing ? audioStream : null"
         style="display: none;"
         preload="auto"

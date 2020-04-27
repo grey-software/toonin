@@ -9,7 +9,7 @@
       class="video-player"
       ref="videoPlayer"
       v-show="videoStream !== null"
-      :srcObject.prop="playing ? videoStream : null"
+      :srcObject.prop="playing ? combined : null"
       @click="requestFullScreen"
       autoplay
     ></video>
@@ -25,7 +25,19 @@ export default {
     return { videoTag: null }
   },
   computed: {
-    ...mapState(['videoStream', 'playing'])
+    ...mapState(['videoStream', 'playing', 'audioStream', 'volume']),
+    combined () {
+      if (this.audioStream && this.videoStream) {
+        return new MediaStream([...this.videoStream.getVideoTracks(), ...this.audioStream.getAudioTracks()])
+      } else {
+        return new MediaStream([...this.videoStream.getVideoTracks()])
+      }
+    }
+  },
+  watch: {
+    volume () {
+      this.videoTag.volume = this.volume / 100
+    }
   },
   methods: {
     requestFullScreen () {
