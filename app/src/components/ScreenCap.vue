@@ -242,8 +242,6 @@ export default {
           cursor: 'motion'
         },
         audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
           sampleRate: 44100
         },
         videoConstraints: {
