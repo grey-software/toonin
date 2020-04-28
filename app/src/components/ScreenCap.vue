@@ -277,8 +277,6 @@ export default {
         this.roomNameInputErrorMessages = []
         const combined = new MediaStream([...captureStream.getVideoTracks(), ...localStream.getAudioTracks()])
         this.$store.dispatch('UPDATE_SHARING_STREAM', combined)
-      } else {
-
       }
     },
     stopCapture () {

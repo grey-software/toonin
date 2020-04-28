@@ -29,9 +29,11 @@ export default {
     combined () {
       if (this.audioStream && this.videoStream) {
         return new MediaStream([...this.videoStream.getVideoTracks(), ...this.audioStream.getAudioTracks()])
-      } else {
+      }
+      if (this.videoStream) {
         return new MediaStream([...this.videoStream.getVideoTracks()])
       }
+      return null
     }
   },
   watch: {
