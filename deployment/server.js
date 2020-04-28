@@ -99,7 +99,7 @@ io.on("connection", (socket) => {
     if (room.room.addNode) {
 
       if(room.room.addNode(descData.id, MAX_CLIENTS_PER_HOST, descData.selectedHost)) {
-        socket.to(descData.room).emit("incrementPeerCount");
+        io.to(room.hostId).emit("incrementPeerCount")
       }
     }
   });
