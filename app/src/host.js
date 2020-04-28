@@ -76,6 +76,7 @@ class StartShare {
   constructor (app, share) {
     this.app = app
     this.peers = []
+    this.peerCount = 0;
     this.socket = null
     this.sharing = share
     this.initSocket()
@@ -248,7 +249,7 @@ class StartShare {
       this.app.$store.dispatch('UPDATE_SHARING', true)
       this.app.$store.dispatch('UPDATE_MESSAGES', { message: 'Room created successfully.', name: 'Admin', time: new Date().toLocaleTimeString('en-US') })
       this.app.$store.dispatch('UPDATE_UNREAD', this.app.$store.getters.UNREAD + 1)
-    })
+    });
 
     this.socket.on('room creation failed', (reason) => {
       // eslint-disable-next-line no-console
@@ -259,7 +260,7 @@ class StartShare {
       this.app.$store.dispatch('UPDATE_CONNECTED_ROOM', null)
       this.app.$store.dispatch('UPDATE_SHARING', false)
       this.app.stopCapture()
-    })
+    });
 
     // new peer connection
     this.socket.on('peer joined', (peerData) => {
@@ -271,7 +272,7 @@ class StartShare {
         console.log('New peer has joined the room')
         this.initPeerSharing(peerData)
       }
-    })
+    });
 
     this.socket.on('peer ice', (iceData) => {
       // eslint-disable-next-line no-console
@@ -290,7 +291,7 @@ class StartShare {
         console.log('Ice Candidate not for me')
       }
       this.addPeerIceCandidate(iceData)
-    })
+    });
 
     this.socket.on('peer desc', (descData) => {
       // eslint-disable-next-line no-console
@@ -307,11 +308,11 @@ class StartShare {
         console.log('Answer Description not for me')
       }
       this.addPeerDesc(descData)
-    })
+    });
 
     this.socket.on('disconnect', () => {
       console.log('user disconnected from server.')
-    })
+    });
 
     this.socket.on('chatIncoming', (message) => {
       // eslint-disable-next-line no-console
@@ -319,12 +320,22 @@ class StartShare {
         'UPDATE_MESSAGES', { message: message.message, name: message.name, time: new Date().toLocaleTimeString('en-US') }
       )
       this.app.$store.dispatch('UPDATE_UNREAD', this.app.$store.getters.UNREAD + 1)
-    })
+    });
 
     this.socket.on('chatFromServer', (message) => {
       this.app.$store.dispatch('UPDATE_MESSAGES', { message: message, name: 'Admin', time: new Date().toLocaleTimeString('en-US') })
       this.app.$store.dispatch('UPDATE_UNREAD', this.app.$store.getters.UNREAD + 1)
-    })
+    });
+
+    /* Listeners to manage peer count */
+
+    this.socket.on("incrementPeerCount", () => {
+      this.peerCount++;
+    });
+
+    this.socket.on("decrementPeerCount", () => {
+      this.peerCount--;
+    });
   }
 
   /**
@@ -557,7 +568,7 @@ class StartShare {
   }
 
   getPeerCount () {
-    return this.peers.length
+    return this.peerCount;
   }
 
   getSocket () {
