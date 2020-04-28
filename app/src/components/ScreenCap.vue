@@ -268,15 +268,19 @@ export default {
         )
       }
       if (captureStream) {
-        var localStream = new MediaStream(captureStream.getAudioTracks())
-        var audioContext = new AudioContext()
-        var audioSourceNode = audioContext.createMediaStreamSource(localStream)
-        var remoteDestination = audioContext.createMediaStreamDestination()
-        audioSourceNode.connect(remoteDestination)
         this.$store.dispatch('UPDATE_PEERS', new StartShare(this, true))
         this.roomNameInputErrorMessages = []
-        const combined = new MediaStream([...captureStream.getVideoTracks(), ...localStream.getAudioTracks()])
-        this.$store.dispatch('UPDATE_SHARING_STREAM', combined)
+        if (captureStream.getAudioTracks() > 0) {
+          var localStream = new MediaStream(captureStream.getAudioTracks())
+          var audioContext = new AudioContext()
+          var audioSourceNode = audioContext.createMediaStreamSource(localStream)
+          var remoteDestination = audioContext.createMediaStreamDestination()
+          audioSourceNode.connect(remoteDestination)
+          const combined = new MediaStream([...captureStream.getVideoTracks(), ...localStream.getAudioTracks()])
+          this.$store.dispatch('UPDATE_SHARING_STREAM', combined)
+        } else {
+          this.$store.dispatch('UPDATE_SHARING_STREAM', captureStream)
+        }
       }
     },
     stopCapture () {
