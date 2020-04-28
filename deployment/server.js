@@ -114,7 +114,7 @@ io.on("connection", (socket) => {
     if (room) {
       if (room.room.removeNode) {
         room.room.removeNode(socket, req.socketID, req.room, room.room);
-        socket.to(req.room).emit("decrementPeerCount");
+        io.to(room.hostID).emit("decrementPeerCount");
       }
       if (socket.id === req.socketID) {
         socket.leave(req.room);
