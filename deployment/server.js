@@ -97,11 +97,10 @@ io.on("connection", (socket) => {
 
     const room = roomManager.getRoom(descData.room);
     if (room.room.addNode) {
-      room.room.addNode(
-        descData.id,
-        MAX_CLIENTS_PER_HOST,
-        descData.selectedHost
-      );
+
+      if(room.room.addNode(descData.id, MAX_CLIENTS_PER_HOST, descData.selectedHost)) {
+        io.to(room.hostId).emit("incrementPeerCount")
+      }
     }
   });
 
@@ -115,6 +114,7 @@ io.on("connection", (socket) => {
     if (room) {
       if (room.room.removeNode) {
         room.room.removeNode(socket, req.socketID, req.room, room.room);
+        io.to(room.hostID).emit("decrementPeerCount");
       }
       if (socket.id === req.socketID) {
         socket.leave(req.room);
