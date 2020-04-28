@@ -76,6 +76,7 @@ class StartShare {
   constructor (app, share) {
     this.app = app
     this.peers = []
+    this.peerCount = 0
     this.socket = null
     this.sharing = share
     this.initSocket()
@@ -325,6 +326,16 @@ class StartShare {
       this.app.$store.dispatch('UPDATE_MESSAGES', { message: message, name: 'Admin', time: new Date().toLocaleTimeString('en-US') })
       this.app.$store.dispatch('UPDATE_UNREAD', this.app.$store.getters.UNREAD + 1)
     })
+
+    /* Listeners to manage peer count */
+
+    this.socket.on('incrementPeerCount', () => {
+      this.peerCount++
+    })
+
+    this.socket.on('decrementPeerCount', () => {
+      this.peerCount--
+    })
   }
 
   /**
@@ -557,7 +568,7 @@ class StartShare {
   }
 
   getPeerCount () {
-    return this.peers.length
+    return this.peerCount
   }
 
   getSocket () {
