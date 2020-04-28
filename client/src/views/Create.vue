@@ -5,11 +5,17 @@
         <Name></Name>
       </v-container>
       <v-container v-else>
-        <v-card class="mx-auto" max-width="900px" :elevation="20">
-          <v-card-title class="toonin-title justify-center"
-            >Welcome {{ name }}</v-card-title
+        <v-card
+          class="mx-auto"
+          max-width="900px"
+          :elevation="20"
+        >
+          <v-card-title class="toonin-title justify-center">Welcome {{ name }}</v-card-title>
+          <v-tabs
+            centered
+            slider-color="yellow"
+            v-model="tab"
           >
-          <v-tabs centered slider-color="yellow" v-model="tab">
             <v-tab>Connect</v-tab>
             <v-tab>Share Screen</v-tab>
             <v-tab>Chat</v-tab>
@@ -47,7 +53,7 @@ import Home from '@/views/Home.vue';
 import { mapState } from 'vuex';
 export default {
   name: 'Create',
-  data() {
+  data () {
     return {
       tab: null,
     };

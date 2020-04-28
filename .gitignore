@@ -3,6 +3,8 @@ extension/build/
 /node_modules
 **/node_modules
 
+.history
+
 # testing
 /coverage
 
