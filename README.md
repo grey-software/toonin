@@ -6,7 +6,7 @@
 
 # Toonin
 
-[![CircleCI](https://circleci.com/gh/grey-software/toonin/tree/master.svg?style=svg)](https://circleci.com/gh/grey-software/toonin/tree/master) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/d7e992618c424b9a8f1604bf7bb00403)](https://www.codacy.com/gh/grey-software/toonin?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=grey-software/toonin&amp;utm_campaign=Badge_Grade) [![Netlify Status](https://api.netlify.com/api/v1/badges/fc6849cb-e7ae-4de9-be09-660d51342bf6/deploy-status)](https://app.netlify.com/sites/wonderful-hawking-9f1b38/deploys)
+[![CircleCI](https://circleci.com/gh/grey-software/toonin/tree/master.svg?style=svg)](https://circleci.com/gh/grey-software/toonin/tree/master) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/d7e992618c424b9a8f1604bf7bb00403)](https://www.codacy.com/gh/grey-software/toonin?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=grey-software/toonin&amp;utm_campaign=Badge_Grade) [![Netlify Status](https://api.netlify.com/api/v1/badges/fc6849cb-e7ae-4de9-be09-660d51342bf6/deploy-status)](https://app.netlify.com/sites/toonin/deploys)
 
 Toonin is a Chrome Extension coupled with a web app that allows your friends to Tune In to what you're listening to. 
 
