@@ -83,7 +83,8 @@ class StartShare {
   }
 
   async initSocket () {
-    this.socket = await io(window.location.hostname + ':8443')
+    // console.log(window);
+    this.socket = await io('https://www.toonin.ml')
     if (this.socket && this.sharing) {
       this.setSocketListeners()
     }
@@ -124,7 +125,7 @@ class StartShare {
       console.log('src ice message came')
       if (
         iceData.room !== this.app.$store.getters.ROOM ||
-        iceData.id !== this.app.$store.getters.PEERID
+                iceData.id !== this.app.$store.getters.PEERID
       ) {
         return
       }
@@ -137,7 +138,7 @@ class StartShare {
       console.log('src desc message came')
       if (
         descData.room !== this.app.$store.getters.ROOM ||
-        descData.id !== this.app.$store.getters.PEERID
+                descData.id !== this.app.$store.getters.PEERID
       ) {
         return
       }
@@ -162,7 +163,7 @@ class StartShare {
           })
           console.log(
             'sending answer now' +
-            this.app.$store.getters.RTCCONN.localDescription
+                        this.app.$store.getters.RTCCONN.localDescription
           )
         })
     })
@@ -191,7 +192,7 @@ class StartShare {
       // check if this ice data is for us or someone else in the room
       if (
         this.app.$store.getters.ROOM !== iceData.room ||
-        iceData.hostID !== this.socket.id
+                iceData.hostID !== this.socket.id
       ) {
         console.log('Ice Candidate not for me')
       }
@@ -201,9 +202,9 @@ class StartShare {
     this.socket.on('peer desc', (descData) => {
       console.log(
         'Answer description from peer: ' +
-        descData.id +
-        ' in room: ' +
-        descData.room
+                descData.id +
+                ' in room: ' +
+                descData.room
       )
       console.log('Answer description: ' + descData.desc)
       if (this.app.$store.getters.ROOM !== descData.room) {
@@ -275,12 +276,16 @@ class StartShare {
 
     this.socket.on('peer ice', (iceData) => {
       // eslint-disable-next-line no-console
+      // console.log(
+      //   "Ice Candidate from peer: " + iceData.id + " in room: " + iceData.room
+      // );
+      // eslint-disable-next-line no-console
       console.log('Ice Candidate: ' + iceData.candidate)
 
       // check if this ice data is for us
       if (
         this.app.$store.getters.CONNECTED_ROOM !== iceData.room ||
-        iceData.hostID !== this.socket.id
+                iceData.hostID !== this.socket.id
       ) {
         // eslint-disable-next-line no-console
         console.log('Ice Candidate not for me')
@@ -289,6 +294,13 @@ class StartShare {
     })
 
     this.socket.on('peer desc', (descData) => {
+      // eslint-disable-next-line no-console
+      // console.log(
+      //   "Answer description from peer: " +
+      //     descData.id +
+      //     " in room: " +
+      //     descData.room
+      // );
       // eslint-disable-next-line no-console
       console.log('Answer description: ' + descData.desc)
       if (this.app.$store.getters.CONNECTED_ROOM !== descData.room) {
@@ -370,7 +382,7 @@ class StartShare {
       }
       if (
         peer.rtcConn.connectionState === 'failed' ||
-        peer.rtcConn.connectionState === 'disconnected'
+                peer.rtcConn.connectionState === 'disconnected'
       ) {
         this.socket.emit('logoff', {
           room: this.app.$store.getters.ROOM,
@@ -458,7 +470,7 @@ class StartShare {
       }
       if (
         peer.rtcConn.connectionState === 'failed' ||
-        peer.rtcConn.connectionState === 'disconnected'
+                peer.rtcConn.connectionState === 'disconnected'
       ) {
         console.log('deleting peer ' + peer.id)
         this.peers = this.peers.filter((pr) => pr.id !== peer.id)
@@ -566,4 +578,5 @@ class StartShare {
   }
 }
 
-export { StartShare }
+const _StartShare = StartShare
+export { _StartShare as StartShare }
