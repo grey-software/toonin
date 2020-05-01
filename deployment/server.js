@@ -162,7 +162,7 @@ app.use(
 app.use(staticFileMiddleware);
 
 app.get("/", function(req, res) {
-  res.render("../client/dist/index.html");
+  res.render("../app/dist/spa/index.html");
 });
 
 http.listen(port, () => {
