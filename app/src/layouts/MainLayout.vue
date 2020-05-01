@@ -31,7 +31,7 @@
       </q-card-section>
         <q-tabs v-model="tab" class="text-teal">
           <q-tab label="Toonin" name="toonin" />
-          <q-tab label="Share" name="share" />
+          <q-tab label="Share" v-if="!$q.platform.is.mobile" name="share" />
           <q-tab label="Chat" name="chat" >
             <q-badge v-if="unread>0" color="red" floating>{{ unread }}</q-badge>
           </q-tab>
@@ -43,7 +43,7 @@
           <q-tab-panel name="toonin">
             <TooninPage />
           </q-tab-panel>
-          <q-tab-panel name="share">
+          <q-tab-panel v-if="!$q.platform.is.mobile" name="share">
             <SharePage />
           </q-tab-panel>
           <q-tab-panel name="chat">
