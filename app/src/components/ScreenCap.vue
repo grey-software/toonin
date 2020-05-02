@@ -79,18 +79,6 @@
           </q-btn>
           <q-space />
           <q-btn
-            @click="startCapture"
-            class="btn-share pr-4"
-            outline
-            rounded
-            :color='"primary"'
-            height="42"
-            v-show="sharingStream == null"
-            :disabled="!roomNameValid || tooninHappening"
-          >
-            <toonin-icon />Share
-          </q-btn>
-          <q-btn
             @click="getUserVideo"
             disabled
             outlined
@@ -125,16 +113,65 @@
             ></q-icon>
           </q-btn>
           <q-btn
+            @click="createRoom"
+            class="btn-share pr-4"
+            outline
+            rounded
+            :color='"primary"'
+            height="42"
+            v-show="!connectedRoom"
+            :disabled="!roomNameValid || tooninHappening"
+          >
+            <toonin-icon />Create Room
+          </q-btn>
+          <q-btn
+            @click="disconnect"
+            class="btn-share pr-4"
+            height="42"
+            outlined
+            color="warning"
+            rounded
+            v-show="connectedRoom"
+            icon="mdi-stop"
+          > Disconnect
+          </q-btn>
+      </q-card-actions>
+      <q-card-actions align="right" class="checkboxes" style="padding: 20px">
+        <q-btn
+            @click="startCapture"
+            class="btn-share pr-4"
+            outline
+            rounded
+            :color='"primary"'
+            height="42"
+            v-show="!sharingStream"
+            :disabled="!connectedRoom || tooninHappening"
+          >
+            <toonin-icon />Capture
+        </q-btn>
+        <q-btn
             @click="stopCapture"
             class="btn-share pr-4"
             height="42"
             outlined
             color="warning"
             rounded
-            v-show="sharingStream !== null"
+            v-show="sharingStream"
             icon="mdi-stop"
-          > Disconnect
+          >Stop Sharing
           </q-btn>
+        <q-checkbox
+            v-model="sendAudio"
+            color="secondary"
+            label="Share Audio"
+            v-show="sharingStream"
+          />
+          <q-checkbox
+            v-model="sendVideo"
+            color="secondary"
+            label="Share Video"
+            v-show="sharingStream"
+          />
       </q-card-actions>
     </div>
   </q-card>
@@ -216,87 +253,104 @@ export default {
         return 0
       }
     },
-    ...mapState(['connectedRoom', 'connectedStatus', 'sharing', 'peers', 'sharingStream'])
+    sendAudio: {
+      get () {
+        return this.shareAudio
+      },
+      set (value) {
+        this.$store.dispatch('UPDATE_SHARE_AUDIO', value)
+      }
+    },
+    sendVideo: {
+      get () {
+        return this.shareVideo
+      },
+      set (value) {
+        this.$store.dispatch('UPDATE_SHARE_VIDEO', value)
+      }
+    },
+    ...mapState(['connectedRoom', 'connectedStatus', 'sharing', 'peers', 'sharingStream', 'shareAudio', 'shareVideo'])
   },
   watch: {
-    sharingStream: function (newValue) {
-      if (newValue) {
-        this.shareVideo()
-      } else {
-        this.stopCapture()
-      }
-    }
+    // sharingStream: function (newValue) {
+    //   if (newValue) {
+    //     this.startShare()
+    //   } else {
+    //     this.stopCapture()
+    //   }
+    // }
+    // shareVideo: (newValue) => {
+    //   if (newValue) {
+    //     this.peers.updatePeers(newValue)
+    //   }
+    // }
   },
   methods: {
-    shareVideo () {
-      // eslint-disable-next-line no-console
-      console.log('called shareVideo.')
-      this.peers.getSocket().emit('create room', {
-        room: this.roomName,
-        isDistributed: true
-      })
+    createRoom () {
+      this.roomNameInputErrorMessages = []
+      this.$store.dispatch('UPDATE_PEERS', new StartShare(this, true))
     },
     async startCapture () {
-      var displayMediaOptions = {
-        video: {
-          cursor: 'motion'
-        },
-        audio: {
-          sampleRate: 44100
-        },
-        videoConstraints: {
-          mandatory: {
-            minFrameRate: 60
+      if (this.connectedRoom) {
+        var displayMediaOptions = {
+          video: {
+            cursor: 'motion'
+          },
+          audio: {
+            sampleRate: 44100
+          },
+          videoConstraints: {
+            mandatory: {
+              minFrameRate: 60
+            }
           }
         }
-      }
-      let captureStream = null
-      try {
-        captureStream = await navigator.mediaDevices.getDisplayMedia(
-          displayMediaOptions
-        )
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.log(err)
-        if (typeof window.orientation !== 'undefined') {
+        let captureStream = null
+        try {
+          captureStream = await navigator.mediaDevices.getDisplayMedia(
+            displayMediaOptions
+          )
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.log(err)
+          if (typeof window.orientation !== 'undefined') {
+            this.roomNameInputErrorMessages.push(
+              'Error: screen capture not available on mobile devices.'
+            )
+          }
           this.roomNameInputErrorMessages.push(
-            'Error: screen capture not available on mobile devices.'
+            'Error: screen capture not available. ' + err.message
           )
         }
-        this.roomNameInputErrorMessages.push(
-          'Error: screen capture not available. ' + err.message
-        )
-      }
-      if (captureStream) {
-        this.$store.dispatch('UPDATE_PEERS', new StartShare(this, true))
-        this.roomNameInputErrorMessages = []
-        if (captureStream.getAudioTracks() > 0) {
-          var localStream = new MediaStream(captureStream.getAudioTracks())
-          var audioContext = new AudioContext()
-          var audioSourceNode = audioContext.createMediaStreamSource(localStream)
-          var remoteDestination = audioContext.createMediaStreamDestination()
-          audioSourceNode.connect(remoteDestination)
-          const combined = new MediaStream([...captureStream.getVideoTracks(), ...localStream.getAudioTracks()])
-          this.$store.dispatch('UPDATE_SHARING_STREAM', combined)
-        } else {
-          this.$store.dispatch('UPDATE_SHARING_STREAM', captureStream)
+        if (captureStream) {
+          this.roomNameInputErrorMessages = []
+          this.$store.dispatch('UPDATE_SHARING', true)
+          if (captureStream.getAudioTracks() > 0) {
+            var localStream = new MediaStream(captureStream.getAudioTracks())
+            var audioContext = new AudioContext()
+            var audioSourceNode = audioContext.createMediaStreamSource(localStream)
+            var remoteDestination = audioContext.createMediaStreamDestination()
+            audioSourceNode.connect(remoteDestination)
+            const combined = new MediaStream([...captureStream.getVideoTracks(), ...localStream.getAudioTracks()])
+            this.$store.dispatch('UPDATE_SHARING_STREAM', combined)
+          } else {
+            this.$store.dispatch('UPDATE_SHARING_STREAM', captureStream)
+          }
         }
       }
     },
     stopCapture () {
       if (this.sharingStream) {
         const tracks = this.sharingStream.getTracks()
-
         tracks.forEach((track) => track.stop())
         this.$store.dispatch('UPDATE_SHARING_STREAM', null)
+        this.$store.dispatch('UPDATE_SHARING', false)
       }
-      this.disconnect()
     },
     async disconnect () {
-      if (this.sharing) {
+      if (this.connectedRoom) {
         await this.peers.removeAllPeersAndClose()
         this.$store.dispatch('UPDATE_CONNECTED_ROOM', null)
-        this.$store.dispatch('UPDATE_SHARING', false)
         this.$store.dispatch('UPDATE_PEERS', null)
         this.roomName = ''
       }
@@ -393,4 +447,8 @@ export default {
   border: 3px solid #999;
   width: 95%;
   height: 480px;
+
+.checkboxes
+  text-align right
+  font-size: 12px
 </style>

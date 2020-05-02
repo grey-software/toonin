@@ -75,14 +75,14 @@ export default {
     errorMessages () {
       if (this.errors > 0) {
         return this.errors
-      } else if (!this.sharing && this.connectedStatus !== 'connected') {
+      } else if (!this.connectedRoom && this.connectedStatus !== 'connected') {
         return ['Not Connected to a room.']
       } else {
         return this.errors
       }
     },
     roomname () {
-      if (this.sharing) {
+      if (this.connectedRoom) {
         return this.connectedRoom
       }
       if (this.room.length > 0) {
@@ -91,7 +91,6 @@ export default {
       return ''
     },
     ...mapState([
-      'sharing',
       'name',
       'connectedStatus',
       'room',

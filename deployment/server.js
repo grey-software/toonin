@@ -94,12 +94,13 @@ io.on("connection", (socket) => {
       `Received answer description from peer: ${descData.id} in room: ${descData.room}`
     );
     socket.to(descData.room).emit("peer desc", descData);
+    if (descData.renegotiation) {
+      const room = roomManager.getRoom(descData.room);
+      if (room.room.addNode) {
 
-    const room = roomManager.getRoom(descData.room);
-    if (room.room.addNode) {
-
-      if(room.room.addNode(descData.id, MAX_CLIENTS_PER_HOST, descData.selectedHost)) {
-        io.to(room.hostId).emit("incrementPeerCount")
+        if(room.room.addNode(descData.id, MAX_CLIENTS_PER_HOST, descData.selectedHost)) {
+          io.to(room.hostId).emit("incrementPeerCount")
+        }
       }
     }
   });
@@ -110,16 +111,19 @@ io.on("connection", (socket) => {
   });
 
   socket.on("logoff", (req) => {
+    console.log("lofoff came in " + req.room) 
     const room = roomManager.getRoom(req.room);
     if (room) {
       if (room.room.removeNode) {
+        var roomid = room.hostId;
         room.room.removeNode(socket, req.socketID, req.room, room.room);
-        io.to(room.hostID).emit("decrementPeerCount");
+        io.to(room.hostId).emit("decrementPeerCount");
+        console.log("done sending to room " + roomid);
       }
       if (socket.id === req.socketID) {
         socket.leave(req.room);
       }
-      socket.to(room).emit("chatFromServer", req.name + " has left.");
+      socket.to(req.room).emit("chatFromServer", req.name + " has left.");
     }
   });
 
