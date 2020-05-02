@@ -150,7 +150,7 @@ app.get("/status", (req, res) => {
   res.send("Server is alive");
 });
 
-const staticFileMiddleware = express.static("../client/dist");
+const staticFileMiddleware = express.static("../app/dist/spa");
 
 app.use(staticFileMiddleware);
 app.use(

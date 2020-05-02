@@ -1,5 +1,5 @@
 # Define the docker hub image: https://hub.docker.com/_/node/
-FROM node:alpine
+FROM node:13.7-alpine
 
 # Create app directory
 RUN mkdir -p /usr/toonin/app
@@ -12,7 +12,7 @@ COPY ./app/package.json /usr/toonin/app
 
 # Bundle app source
 COPY . /usr/toonin
-RUN (cd deployment && npm install) & (cd app && npm install && npm run build)
+RUN (cd deployment && npm install) & (cd app && npm rebuild node-sass && npm install && npm run build)
 
 
 CMD [ "npm", "start" ]
