@@ -5,6 +5,7 @@
   >
     <q-card-section class="toonin-title">{{ cardTitle }}</q-card-section>
     <div>
+      <vue-plyr style="padding: 0%;" v-if="sharingStream !== null" muted>
         <video
           class="video-player"
           ref="videoPlayerShare"
@@ -13,8 +14,9 @@
           preload="auto"
           muted
           autoplay
-          v-if="sharingStream !== null"
+          controls
         ></video>
+      </vue-plyr>
       <q-img
         contain
         src="../assets/icon.png"
@@ -390,7 +392,7 @@ export default {
 
 <style lang="sass" scoped>
 .video-player
-  border: 3px solid #999;
-  width: 95%;
+  border: 1.5px solid #999;
+  width: 100%;
   height: 480px;
 </style>
