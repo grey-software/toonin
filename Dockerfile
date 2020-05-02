@@ -1,17 +1,18 @@
 # Define the docker hub image: https://hub.docker.com/_/node/
-FROM node:alpine
+FROM node:13.7-alpine
 
 # Create app directory
-RUN mkdir -p /usr/src/app/client
-RUN mkdir -p /usr/src/app/deployment
-WORKDIR /usr/src/app
+RUN mkdir -p /usr/toonin/app
+RUN mkdir -p /usr/toonin/deployment
+WORKDIR /usr/toonin
 
 # Install app dependencies
-COPY ./deployment/package.json /usr/src/app/deployment
-COPY ./client/package.json /usr/src/app/client
+COPY ./deployment/package.json /usr/toonin/deployment
+COPY ./app/package.json /usr/toonin/app
+
 # Bundle app source
-COPY . /usr/src/app
-RUN (cd deployment && npm install) & (cd client && npm install && npm run build)
+COPY . /usr/toonin
+RUN (cd deployment && npm install) & (cd app && npm rebuild node-sass && npm install && npm run build)
 
 
 CMD [ "npm", "start" ]
