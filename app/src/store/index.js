@@ -1,9 +1,11 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import VuePlyr from 'vue-plyr'
 
 // import example from './module-example'
 
 Vue.use(Vuex)
+Vue.use(VuePlyr)
 
 /*
  * If not building with SSR mode, you can

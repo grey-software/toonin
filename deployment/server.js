@@ -154,7 +154,7 @@ app.get("/status", (req, res) => {
   res.send("Server is alive");
 });
 
-const staticFileMiddleware = express.static("../client/dist");
+const staticFileMiddleware = express.static("../app/dist/spa");
 
 app.use(staticFileMiddleware);
 app.use(
@@ -166,7 +166,7 @@ app.use(
 app.use(staticFileMiddleware);
 
 app.get("/", function(req, res) {
-  res.render("../client/dist/index.html");
+  res.render("../app/dist/spa/index.html");
 });
 
 http.listen(port, () => {
