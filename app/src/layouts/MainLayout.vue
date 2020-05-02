@@ -79,7 +79,7 @@ import { mapState } from 'vuex'
 export default {
   data () {
     return {
-      tab: 'share'
+      tab: this.$q.platform.is.mobile ? 'toonin' : 'share'
     }
   },
   components: {
