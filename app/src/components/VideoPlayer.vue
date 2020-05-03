@@ -1,11 +1,8 @@
 <template>
-  <q-card
-    :hidden="playing ? false : true"
-    :elevation="20"
-    v-show="videoStream !== null"
-    class="main-card"
-  >
+  <vue-plyr style="padding: 0%;">
     <video
+      controls
+      crossorigin
       class="video-player"
       ref="videoPlayer"
       v-show="videoStream !== null"
@@ -13,7 +10,7 @@
       @click="requestFullScreen"
       autoplay
     ></video>
-  </q-card>
+  </vue-plyr>
 </template>
 
 <script>
@@ -65,7 +62,7 @@ export default {
 
 <style lang="sass" scoped>
 .video-player
-  border: 3px solid #999;
-  width: 95%;
+  border: 1.5px solid #999;
+  width: 100%;
   height: 480px;
 </style>
