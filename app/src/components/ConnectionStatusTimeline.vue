@@ -67,34 +67,25 @@ export default {
   },
   methods: {
     handleClick (e) {
-      console.log(e.target)
       this.timelineComponents['timelineEvents'].forEach(element => {
         element.classList.remove('selected')
       })
       e.target.classList.add('selected');
       this.updateOlderEvents(e.target);
       this.updateFilling(e.target, this.timelineComponents['fillingLine'], this.timelineWidth);
-      // updateVisibleContent($(this), timelineComponents['eventsContent']);
     },
     initTimeline () {
 
       this.timelineComponents['eventsWrapper'] = this.$refs.eventsWrapper
       this.timelineComponents['fillingLine'] = this.$refs.fillingLine
       this.timelineComponents['timelineEvents'] = Array.prototype.slice.call(this.$refs.eventsWrapper.getElementsByTagName("li")).map(element => element.getElementsByTagName("a")[0]);
-      console.log(this.timelineComponents['timelineEvents'])
       this.timelineComponents['timelineDates'] = this.timelineComponents['timelineEvents'].map(element => this.parseDate(element));
-      console.log(this.timelineComponents['timelineDates'])
       this.timelineComponents['eventsMinLapse'] = this.minLapse(this.timelineComponents['timelineDates']);
       this.timelineWidth = this.setTimelineWidth(this.timelineComponents, this.eventsMinDistance);
-
-      //assign a left postion to the single events along the timeline
       this.setDatePosition(this.timelineComponents, this.eventsMinDistance, this.timelineWidth);
-      //assign a width to the timeline
-      //the timeline has been initialize - show it
       this.loaded = true;
     },
     parseDate (event) {
-      console.log(event)
       const dateComp = event.getAttribute('data-date').split('/');
       return new Date(dateComp[2], dateComp[1] - 1, dateComp[0]);
     },
@@ -105,24 +96,17 @@ export default {
       for (let i = 0; i < timelineComponents['timelineDates'].length; i++) {
         var timelineEventWidth = window.getComputedStyle(this.timelineComponents['timelineEvents'][i]).getPropertyValue('width');
         timelineEventWidth = Number(timelineEventWidth.replace('px', ''))
-        console.log(timelineEventWidth)
         const offset = ((i / TIMELINE_ITEM_COUNT) * totalWidth) + 24
-        console.log(offset)
         timelineComponents['timelineEvents'][i].style['left'] = offset + 'px';
-        // const distance = this.daydiff(timelineComponents['timelineDates'][0], timelineComponents['timelineDates'][i])
-        // console.log(distance)
-        // const distanceNorm = Math.round(distance / timelineComponents['eventsMinLapse']);
       }
     },
     setTimelineWidth (timelineComponents, width) {
-      console.log(width)
       const timeSpan = this.daydiff(timelineComponents['timelineDates'][0], timelineComponents['timelineDates'][timelineComponents['timelineDates'].length - 1])
       const timeSpanNorm = Math.round(timeSpan / timelineComponents['eventsMinLapse']) + 1
       // const totalWidth = timeSpanNorm * width;
       const totalWidth = timeSpanNorm * width;
       timelineComponents['eventsWrapper'].style['width'] = totalWidth + 'px';
       this.updateFilling(timelineComponents['timelineEvents'][0], timelineComponents['fillingLine'], totalWidth);
-      console.log(totalWidth)
       return totalWidth;
     },
     updateFilling (selectedEvent, filling, totalWidth) {
@@ -143,29 +127,6 @@ export default {
         if (i >= eventIndex) this.timelineComponents['timelineEvents'][i].classList.remove('older-event')
       }
     },
-    // updateVisibleContent (event, eventsContent) {
-    //   var eventDate = event.data('date'),
-    //     visibleContent = eventsContent.find('.selected'),
-    //     selectedContent = eventsContent.find('[data-date="' + eventDate + '"]'),
-    //     selectedContentHeight = selectedContent.height();
-
-    //   if (selectedContent.index() > visibleContent.index()) {
-    //     var classEnetering = 'selected enter-right',
-    //       classLeaving = 'leave-left';
-    //   } else {
-    //     var classEnetering = 'selected enter-left',
-    //       classLeaving = 'leave-right';
-    //   }
-
-    //   selectedContent.attr('class', classEnetering);
-    //   visibleContent.attr('class', classLeaving).one('webkitAnimationEnd oanimationend msAnimationEnd animationend', function () {
-    //     visibleContent.classList.remove('leave-right¬');
-    //     visibleContent.classList.remove('leave-left');
-    //     selectedContent.classList.remove('enter-left');
-    //     selectedContent.classList.remove('enter-right');
-    //   });
-    //   eventsContent.style['height'] = selectedContentHeight + 'px';
-    // },
     setTransformValue (element, property, value) {
       element.style["-webkit-transform"] = property + "(" + value + ")";
       element.style["-moz-transform"] = property + "(" + value + ")";
