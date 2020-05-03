@@ -4,7 +4,7 @@
     <div
       class="timeline"
       :class="{ loaded: loaded }"
-      style="max-width: 556px;"
+      style="max-width: 100%;"
     >
 
       <div class="events-wrapper">

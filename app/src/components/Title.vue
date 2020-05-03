@@ -30,7 +30,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .title-text {
   animation: title-text 12s linear infinite;
 }

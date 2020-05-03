@@ -17,7 +17,34 @@
       >
       </q-btn>
     </div>
-    <ConnectionStatusTimeline />
+    <q-tabs
+      v-model="tab"
+      class="text-teal"
+    >
+      <q-tab
+        label="Toonin"
+        name="toonin"
+      />
+      <q-tab
+        label="Share"
+        v-if="!$q.platform.is.mobile"
+        name="share"
+      />
+    </q-tabs>
+    <q-tab-panels
+      v-model="tab"
+      animated
+    >
+      <q-tab-panel name="toonin">
+        <TooninPage2 />
+      </q-tab-panel>
+      <q-tab-panel
+        v-if="!$q.platform.is.mobile"
+        name="share"
+      >
+        <SharePage />
+      </q-tab-panel>
+    </q-tab-panels>
 
     <q-page-container>
       <router-view />
@@ -28,9 +55,19 @@
 
 <script>
 import ConnectionStatusTimeline from "../components/ConnectionStatusTimeline"
+import SharePage from '../pages/SharePage'
+import TooninPage2 from '../pages/TooninPage2'
+
 export default {
   components: {
     ConnectionStatusTimeline,
+    SharePage,
+    TooninPage2
+  },
+  data () {
+    return {
+      tab: this.$q.platform.is.mobile ? 'toonin' : 'share'
+    }
   },
   methods: {
     onDarkModeChange () {

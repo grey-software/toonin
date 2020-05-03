@@ -88,30 +88,30 @@
       class="bg-grey-8 text-white"
     >
       <q-toolbar>
-         <q-tabs
-      v-model="tab"
-      class="text-teal"
-    >
-      <q-tab
-        label="Toonin"
-        name="toonin"
-      />
-      <q-tab
-        label="Share"
-        v-if="!$q.platform.is.mobile"
-        name="share"
-      />
-      <q-tab
-        label="Chat"
-        name="chat"
-      >
-        <q-badge
-          v-if="unread>0"
-          color="red"
-          floating
-        >{{ unread }}</q-badge>
-      </q-tab>
-    </q-tabs>
+        <q-tabs
+          v-model="tab"
+          class="text-teal"
+        >
+          <q-tab
+            label="Toonin"
+            name="toonin"
+          />
+          <q-tab
+            label="Share"
+            v-if="!$q.platform.is.mobile"
+            name="share"
+          />
+          <q-tab
+            label="Chat"
+            name="chat"
+          >
+            <q-badge
+              v-if="unread>0"
+              color="red"
+              floating
+            >{{ unread }}</q-badge>
+          </q-tab>
+        </q-tabs>
         <q-toolbar-title align="right">
           <span>
             &copy;

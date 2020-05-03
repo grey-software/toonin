@@ -5,7 +5,7 @@ const routes = [
     children: [
       {
         path: 'toonin',
-        component: () => import('pages/TooninPage.vue')
+        component: () => import('pages/TooninPage2.vue')
       },
       {
         path: 'share',
