@@ -69,10 +69,11 @@ class Peer {
       senders.forEach(sender => {
         if (sender.track && sender.track.kind === 'audio') {
           if (value) {
+            sender.track.enabled = value
             sender.replaceTrack(track)
             sent = true
           } else {
-            this.rtcConn.removeTrack(sender)
+            sender.track.enabled = value
           }
         }
       })
@@ -96,13 +97,12 @@ class Peer {
       senders.forEach(sender => {
         if (sender.track && sender.track.kind === 'video') {
           if (value) {
+            sender.track.enabled = value
             sender.replaceTrack(track)
             sent = true
           } else {
             console.log('track enabled ' + value)
-            sender.track.stop()
             sender.track.enabled = value
-            // this.rtcConn.removeTrack(sender)
           }
         }
       })
@@ -538,18 +538,17 @@ class StartShare {
 
     peer.rtcConn = rtcConn
     this.peers.push(peer)
-    if (this.app.$store.getters.SHARING_STREAM && this.app.$store.getters.SHARING_STREAM.getVideoTracks().length > 0) {
+    if (this.app.$store.getters.SHARING_STREAM) {
       var stream = this.app.$store.getters.SHARING_STREAM
       console.log('about to send track')
       // rtcConn.addTrack(this.app.$store.getters.SHARING_STREAM.getVideoTracks()[0])
       stream.getTracks().forEach(track => {
-        console.log('about to send track inside for each')
         if (track.kind === 'video' && this.app.$store.getters.SHARE_VIDEO) {
           console.log('about to send track inside for each in video')
-          peer.updateOutgoingVideoTrack(track)
+          peer.updateOutgoingVideoTrack(track, this.app.$store.getters.SHARE_VIDEO)
         }
         if (track.kind === 'audio' && this.app.$store.getters.SHARE_AUDIO) {
-          peer.updateTracks(track)
+          peer.updateOutgoingAudioTrack(track, this.app.$store.getters.SHARE_AUDIO)
         }
       })
     }
@@ -712,8 +711,8 @@ class StartShare {
    * @param {Object} params type property either 'video' or 'audio' and whether true or false.
    */
   updatePeers (params) {
-    if (this.app.$store.getters.SHARING_STREAM && this.app.$store.getters.SHARING_STREAM.getVideoTracks().length > 0) {
-      var stream = this.app.$store.getters.SHARING_STREAM
+    var stream = this.app.$store.getters.SHARING_STREAM
+    if (stream) {
       this.peers.forEach(peer => {
         stream.getTracks().forEach(track => {
           if (track.kind === 'video' && params.type === 'video') {

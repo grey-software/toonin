@@ -89,6 +89,7 @@ export default function (/* { ssrContext } */) {
       },
       SET_SHARE_AUDIO: (state, payload) => {
         state.shareAudio = payload
+        state.peers.updatePeers({ type: 'audio', value: payload })
       },
       SET_SHARE_VIDEO: (state, payload) => {
         state.shareVideo = payload
