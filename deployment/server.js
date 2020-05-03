@@ -111,14 +111,11 @@ io.on("connection", (socket) => {
   });
 
   socket.on("logoff", (req) => {
-    console.log("lofoff came in " + req.room) 
     const room = roomManager.getRoom(req.room);
     if (room) {
       if (room.room.removeNode) {
-        var roomid = room.hostId;
         room.room.removeNode(socket, req.socketID, req.room, room.room);
         io.to(room.hostId).emit("decrementPeerCount");
-        console.log("done sending to room " + roomid);
       }
       if (socket.id === req.socketID) {
         socket.leave(req.room);
