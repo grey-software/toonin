@@ -273,20 +273,6 @@ export default {
     },
     ...mapState(['connectedRoom', 'connectedStatus', 'sharing', 'peers', 'sharingStream', 'shareAudio', 'shareVideo'])
   },
-  watch: {
-    // sharingStream: function (newValue) {
-    //   if (newValue) {
-    //     this.startShare()
-    //   } else {
-    //     this.stopCapture()
-    //   }
-    // }
-    // shareVideo: (newValue) => {
-    //   if (newValue) {
-    //     this.peers.updatePeers(newValue)
-    //   }
-    // }
-  },
   methods: {
     createRoom () {
       this.roomNameInputErrorMessages = []
@@ -355,6 +341,7 @@ export default {
         this.$store.dispatch('UPDATE_CONNECTED_ROOM', null)
         this.$store.dispatch('UPDATE_PEERS', null)
         this.roomName = ''
+        this.stopCapture()
       }
     },
     requestFullScreen () {
