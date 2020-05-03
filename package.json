@@ -5,7 +5,8 @@
   "private": true,
   "image": "heroku/nodejs",
   "scripts": {
-    "start": "cd deployment && npm start"
+    "start": "cd deployment && npm start",
+    "setup": "npm install --prefix app;npm install --prefix deployment"
   },
   "dependencies": {
     "core-js": "^2.6.5",
