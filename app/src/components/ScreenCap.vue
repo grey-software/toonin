@@ -379,8 +379,6 @@ export default {
           })
           /* use the stream */
         } catch (err) {
-          // video: { facingMode: "user" }
-          /* handle the error */
           // eslint-disable-next-line no-console
           console.log(err)
         }
@@ -404,8 +402,6 @@ export default {
           })
           /* use the stream */
         } catch (err) {
-          // video: { facingMode: "user" }
-          /* handle the error */
           // eslint-disable-next-line no-console
           console.log(err)
         }

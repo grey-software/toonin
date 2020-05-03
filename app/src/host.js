@@ -79,7 +79,6 @@ class Peer {
       })
     }
     if (!sent && value) {
-      console.log('adding as new track')
       this.rtcConn.addTrack(track)
     }
   }
@@ -108,7 +107,6 @@ class Peer {
       })
     }
     if (!sent && value) {
-      console.log('adding as new track')
       this.rtcConn.addTrack(track)
     }
   }
@@ -119,13 +117,10 @@ class Peer {
    * @param {Boolean} value if the track type should be enabled/disabled.
    */
   updateTracks (track, value) {
-    console.log('updating track')
     if (track.kind === 'audio') {
-      console.log('updating audio track.')
       this.updateOutgoingAudioTrack(track, value)
     }
     if (track.kind === 'video') {
-      console.log('updating video track.')
       this.updateOutgoingVideoTrack(track, value)
     }
   }
@@ -359,10 +354,6 @@ class StartShare {
 
     this.socket.on('peer ice', (iceData) => {
       // eslint-disable-next-line no-console
-      // console.log(
-      //   "Ice Candidate from peer: " + iceData.id + " in room: " + iceData.room
-      // );
-      // eslint-disable-next-line no-console
       console.log('Ice Candidate: ' + iceData.candidate)
 
       // check if this ice data is for us
@@ -377,13 +368,6 @@ class StartShare {
     })
 
     this.socket.on('peer desc', (descData) => {
-      // eslint-disable-next-line no-console
-      // console.log(
-      //   "Answer description from peer: " +
-      //     descData.id +
-      //     " in room: " +
-      //     descData.room
-      // );
       // eslint-disable-next-line no-console
       console.log('Answer description: ' + descData.desc)
       if (this.app.$store.getters.CONNECTED_ROOM !== descData.room) {
@@ -540,11 +524,9 @@ class StartShare {
     this.peers.push(peer)
     if (this.app.$store.getters.SHARING_STREAM) {
       var stream = this.app.$store.getters.SHARING_STREAM
-      console.log('about to send track')
       // rtcConn.addTrack(this.app.$store.getters.SHARING_STREAM.getVideoTracks()[0])
       stream.getTracks().forEach(track => {
         if (track.kind === 'video' && this.app.$store.getters.SHARE_VIDEO) {
-          console.log('about to send track inside for each in video')
           peer.updateOutgoingVideoTrack(track, this.app.$store.getters.SHARE_VIDEO)
         }
         if (track.kind === 'audio' && this.app.$store.getters.SHARE_AUDIO) {

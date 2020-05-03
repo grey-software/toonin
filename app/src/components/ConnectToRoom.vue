@@ -158,7 +158,6 @@ export default {
       }
 
       this.rtcConn.ontrack = event => {
-        // console.log(event)
         var incomingStream = new MediaStream([event.track])
         this.peers.updateOutgoingTracks(event.track)
 
@@ -289,15 +288,6 @@ export default {
       }
       return null
     }
-    // window.onunload = () => {
-    //   if (this.room) {
-    //     this.peers.socket.emit('logoff', {
-    //       room: this.$store.getters.ROOM,
-    //       socketID: this.peers.getSocket().id,
-    //       name: this.$store.getters.NAME
-    //     })
-    //   }
-    // }
   }
 }
 </script>
