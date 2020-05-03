@@ -1,6 +1,6 @@
 <template>
   <q-layout view="hHh lpR fFf">
-    <div class="row items-center justify-center q-mt-lg">
+    <div class="row justify-center items-center q-mt-lg" style="max-width:599px;">
       <div class="row items-baseline ">
         <img
           class="title-icon q-mr-sm"

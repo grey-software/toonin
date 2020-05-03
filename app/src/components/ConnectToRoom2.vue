@@ -1,5 +1,5 @@
 <template>
-  <div class="column justify-center" style="max-width: 556px;">
+  <div style="max-width: 556px;">
     <ConnectionStatusTimeline />
 
     <div class="row">
@@ -43,7 +43,6 @@
       </q-btn>
 
     </div>
-
 
   </div>
 </template>
