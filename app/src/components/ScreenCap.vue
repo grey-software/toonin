@@ -124,6 +124,9 @@
             v-show="!connectedRoomName"
             :disabled="!roomNameValid || tooninHappening"
           >
+            <q-tooltip>
+              Select 'Share audio' if required. (Only when tab sharing)
+            </q-tooltip>
             <toonin-icon />Share
           </q-btn>
           <q-btn
@@ -148,6 +151,9 @@
             height="42"
             v-show="connectedRoomName && !sharingStream"
           >
+            <q-tooltip>
+              Select 'Share audio' if required. (Only when tab sharing)
+            </q-tooltip>
             <toonin-icon />Capture
         </q-btn>
         <q-btn
@@ -166,7 +172,12 @@
             color="secondary"
             label="Share Audio"
             v-show="sharingStream"
-          />
+            :disabled="sharingStream ? sharingStream.getAudioTracks().length === 0 : true"
+          >
+            <q-tooltip :target="showTip" anchor="top middle" self="top middle">
+              'Share audio' not selected while capturing.
+            </q-tooltip>
+          </q-checkbox>
           <q-checkbox
             v-model="sendVideo"
             color="secondary"
@@ -269,6 +280,12 @@ export default {
       set (value) {
         this.$store.dispatch('UPDATE_SHARE_VIDEO', value)
       }
+    },
+    showTip () {
+      if (this.sharingStream) {
+        return this.sharingStream.getAudioTracks().length === 0
+      }
+      return true
     },
     ...mapState(['connectedRoomName', 'connectedStatus', 'sharing', 'peers', 'sharingStream', 'shareAudio', 'shareVideo'])
   },
