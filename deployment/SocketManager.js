@@ -19,7 +19,7 @@ class SocketManager {
     /**
      * Return room name for a socket connection
      * @param {String} id Socket id
-     * @return {String} Room name the socket belongs too or null
+     * @return {String} Room name the socket belongs to or null
      */
     getSocket(id) {
         if (this.sockets[id]) {
@@ -42,7 +42,7 @@ class SocketManager {
      * @return {Number} The number of sockets in a given room.
      */
     getSocketCountInRoom(room) {
-        // -1 lenght to not count hosting socket. 
+        // -1 length to not count hosting socket. 
         return Object.values(this.sockets).filter(socket => socket.room === room).length - 1
     }
 

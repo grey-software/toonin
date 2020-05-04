@@ -114,17 +114,17 @@ io.on("connection", (socket) => {
 
   socket.on("logoff", (req) => {
     console.log('Log off request from ' + req.name)
-    SocketDisconnect(req, socket) 
+    disconnectSocket(req, socket) 
   });
 
   socket.on("disconnect room", (req) => {
-    SocketDisconnect(req, socket) 
+    disconnectSocket(req, socket) 
   });
 
   socket.on("disconnect", () => {
     console.log("user disconnected " + socket.id);
     const socketInfo = socketManager.getSocket(socket.id)
-    var result = SocketDisconnect(socketInfo, socket)
+    var result = disconnectSocket(socketInfo, socket)
     console.log("user disconnected " + result);
   });
 
@@ -139,7 +139,7 @@ io.on("connection", (socket) => {
  * @param {SocketIOClient.Socket} socket socket object.
  * @return {Boolean} Indicated if socket was deleted
  */
-function SocketDisconnect(req, socket) {
+function disconnectSocket(req, socket) {
   if (roomManager.deleteRoom(socket.id)) {
     console.log("closing room " + req.room);
     socket.to(req.room).emit("chatFromServer", "room being closed.");
