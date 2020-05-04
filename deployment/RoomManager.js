@@ -42,6 +42,7 @@ class RoomManager {
     if (hasCustomRoomName) {
       if (this.getRoom(roomName)) {
         socket.emit("room creation failed", "name already exists");
+        return false
       } else {
         newRoomID = roomName;
         if (isDistributed) {
@@ -59,6 +60,7 @@ class RoomManager {
         socket.join(newRoomID, () => {
           socket.emit("room created", newRoomID);
         });
+        return true
       }
 
       // if no custom room name, generate a random id
@@ -78,6 +80,7 @@ class RoomManager {
       socket.join(newRoomID, () => {
         socket.emit("room created", newRoomID);
       });
+      return true
     }
   }
 
@@ -89,6 +92,10 @@ class RoomManager {
     return null;
   }
 
+  /**
+     * Delete a Room from Room Manager
+     * @param {String} id Socket id
+     */
   deleteRoom(id) {
     var size = this.rooms.length;
     this.rooms = this.rooms.filter((room) => room.hostId !== id);
