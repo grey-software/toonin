@@ -1,6 +1,12 @@
 <template>
-  <q-layout view="hHh lpR fFf">
-    <div class="row justify-center items-center q-mt-lg" style="max-width:599px;">
+  <q-layout
+    view="hHh lpR fFf"
+    class="column items-center"
+  >
+    <div
+      class="row justify-center items-center q-mt-lg"
+      style="width:599px;"
+    >
       <div class="row items-baseline ">
         <img
           class="title-icon q-mr-sm"
@@ -20,6 +26,7 @@
     <q-tabs
       v-model="tab"
       class="text-teal"
+      style="width:599px;"
     >
       <q-tab
         label="Toonin"
@@ -47,7 +54,12 @@
     </q-tab-panels>
 
     <q-page-container>
-      <router-view />
+      <transition
+        name="fade"
+        mode="out-in"
+      >
+        <router-view />
+      </transition>
     </q-page-container>
 
   </q-layout>

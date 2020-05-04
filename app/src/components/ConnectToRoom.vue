@@ -35,7 +35,6 @@
         @click="handleTooninButtonClick"
         class="btn-share pr-4"
         :color='connectedStatus === "connected" ? "warning": "primary"'
-        height="42"
         outline
         rounded
         :disabled="sharing"

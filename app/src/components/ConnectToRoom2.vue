@@ -1,21 +1,17 @@
 <template>
-  <div style="max-width: 556px;">
-    <ConnectionStatusTimeline />
+  <div style="width: 556px;">
 
-    <div class="row">
-
+    <div class="row justify-space-between q-mt-lg">
       <q-input
-        v-show="
-          connectedStatus === 'disconnected' || connectedStatus === 'failed'
-        "
+        v-show="showInput"
         v-model="roomName"
-        style="color: white;"
         autofocus
         @keydown.enter="toonin"
         placeholder="Room Key"
         outlined
         rounded
         :error="errorMessages.length > 0"
+        class="col-8 col-auto q-mr-lg input-room"
       >
         <template v-slot:error>
           {{ errorMessages[0] }}
@@ -23,9 +19,8 @@
       </q-input>
       <q-btn
         @click="handleTooninButtonClick"
-        class="btn-share pr-4"
+        class="btn-share col-3"
         :color='connectedStatus === "connected" ? "warning": "primary"'
-        height="42"
         outline
         rounded
         :disabled="sharing"
@@ -34,15 +29,18 @@
           v-if="connectedStatus === 'connected'"
           name="mdi-stop"
           left
+          class="q-mr-xs"
         />
         <toonin-icon
           v-else
           left
+          class="q-mr-xs"
         ></toonin-icon>
         {{ buttonStatus }}
       </q-btn>
-
     </div>
+
+    <ConnectionStatusTimeline />
 
   </div>
 </template>
@@ -232,6 +230,9 @@ export default {
     }
   },
   computed: {
+    showInput () {
+      return this.connectedStatus === 'disconnected' || this.connectedStatus === 'failed'
+    },
     buttonStatus () {
       if (this.connectedStatus === 'connected') {
         return 'Disconnect'
@@ -286,7 +287,9 @@ export default {
 
 
 <style scoped>
-.q-input {
-  width: 100%;
+.btn-share {
+  height: 56px;
+  font-size: 18px;
+  text-transform: capitalize;
 }
 </style>
