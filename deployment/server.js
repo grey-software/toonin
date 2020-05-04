@@ -94,12 +94,13 @@ io.on("connection", (socket) => {
       `Received answer description from peer: ${descData.id} in room: ${descData.room}`
     );
     socket.to(descData.room).emit("peer desc", descData);
+    if (descData.renegotiation) {
+      const room = roomManager.getRoom(descData.room);
+      if (room.room.addNode) {
 
-    const room = roomManager.getRoom(descData.room);
-    if (room.room.addNode) {
-
-      if(room.room.addNode(descData.id, MAX_CLIENTS_PER_HOST, descData.selectedHost)) {
-        io.to(room.hostId).emit("incrementPeerCount")
+        if(room.room.addNode(descData.id, MAX_CLIENTS_PER_HOST, descData.selectedHost)) {
+          io.to(room.hostId).emit("incrementPeerCount")
+        }
       }
     }
   });
@@ -114,12 +115,12 @@ io.on("connection", (socket) => {
     if (room) {
       if (room.room.removeNode) {
         room.room.removeNode(socket, req.socketID, req.room, room.room);
-        io.to(room.hostID).emit("decrementPeerCount");
+        io.to(room.hostId).emit("decrementPeerCount");
       }
       if (socket.id === req.socketID) {
         socket.leave(req.room);
       }
-      socket.to(room).emit("chatFromServer", req.name + " has left.");
+      socket.to(req.room).emit("chatFromServer", req.name + " has left.");
     }
   });
 

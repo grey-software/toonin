@@ -216,7 +216,7 @@ export default {
       this.connectToRoom(true)
     },
     async disconnect () {
-      this.peers.getSocket().emit('logoff', {
+      this.peers.socket.emit('logoff', {
         room: this.$store.getters.ROOM,
         socketID: this.peers.getSocket().id,
         name: this.$store.getters.NAME
@@ -276,7 +276,7 @@ export default {
       this.roomName = this.$route.params.room
       setTimeout(() => this.toonin(), 500)
     }
-    window.onunload = () => {
+    window.onbeforeunload = function () {
       if (this.room) {
         this.peers.socket.emit('logoff', {
           room: this.$store.getters.ROOM,
@@ -284,6 +284,7 @@ export default {
           name: this.$store.getters.NAME
         })
       }
+      return null
     }
   }
 }
