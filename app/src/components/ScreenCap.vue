@@ -124,7 +124,7 @@
             v-show="!connectedRoomName"
             :disabled="!roomNameValid || tooninHappening"
           >
-            <toonin-icon />Create Room
+            <toonin-icon />Share
           </q-btn>
           <q-btn
             @click="disconnect"
@@ -146,8 +146,7 @@
             rounded
             :color='"primary"'
             height="42"
-            v-show="!sharingStream"
-            :disabled="!connectedRoomName || tooninHappening"
+            v-show="connectedRoomName && !sharingStream"
           >
             <toonin-icon />Capture
         </q-btn>
@@ -272,6 +271,13 @@ export default {
       }
     },
     ...mapState(['connectedRoomName', 'connectedStatus', 'sharing', 'peers', 'sharingStream', 'shareAudio', 'shareVideo'])
+  },
+  watch: {
+    connectedRoomName: function (newValue) {
+      if (newValue) {
+        this.startCapture()
+      }
+    }
   },
   methods: {
     createRoom () {

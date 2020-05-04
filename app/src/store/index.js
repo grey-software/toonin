@@ -70,7 +70,6 @@ export default function (/* { ssrContext } */) {
         state.name = payload
       },
       SET_CONNECTED_ROOM: (state, payload) => {
-        console.log(payload)
         state.connectedRoomName = payload
       },
       SET_SHARING: (state, payload) => {
