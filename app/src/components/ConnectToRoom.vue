@@ -153,7 +153,6 @@ export default {
           this.$store.dispatch('UPDATE_PLAYING', false)
 
           if (incomingStream.getVideoTracks().length > 0) {
-            console.log('adding stream')
             this.$store.dispatch('UPDATE_VIDEO_STREAM', incomingStream)
           } else {
             this.$store.dispatch('UPDATE_AUDIO_STREAM', incomingStream)
@@ -163,7 +162,6 @@ export default {
           this.$store.dispatch('UPDATE_PLAYING', true)
 
           if (incomingStream.getVideoTracks().length > 0) {
-            console.log('adding stream')
             this.$store.dispatch('UPDATE_VIDEO_STREAM', incomingStream)
           } else {
             this.$store.dispatch('UPDATE_AUDIO_STREAM', incomingStream)

@@ -29,7 +29,7 @@ export default function (/* { ssrContext } */) {
       audioStream: null,
       videoStream: null,
       name: '',
-      connectedRoom: null,
+      connectedRoomName: null,
       sharing: false,
       peers: null,
       messages: [],
@@ -70,7 +70,7 @@ export default function (/* { ssrContext } */) {
         state.name = payload
       },
       SET_CONNECTED_ROOM: (state, payload) => {
-        state.connectedRoom = payload
+        state.connectedRoomName = payload
       },
       SET_SHARING: (state, payload) => {
         state.sharing = payload
@@ -184,7 +184,7 @@ export default function (/* { ssrContext } */) {
         return state.name
       },
       CONNECTED_ROOM: (state) => {
-        return state.connectedRoom
+        return state.connectedRoomName
       },
       SHARING: (state) => {
         return state.sharing

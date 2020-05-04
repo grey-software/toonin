@@ -33,7 +33,7 @@
           outlined
           rounded
           :error="errorMessages.length > 0"
-          v-show="!connectedRoom"
+          v-show="!connectedRoomName"
         >
         <template v-slot:append>
           <q-btn
@@ -49,7 +49,7 @@
         </q-input>
       </q-card-section>
       <q-card-actions style="padding: 20px" align="center">
-          <span v-show="connectedRoom">
+          <span v-show="connectedRoomName">
             <q-icon
               large
               color="primary"
@@ -61,7 +61,7 @@
             @click="copyIdToClipboard"
             outlined
             rounded
-            v-show="connectedRoom"
+            v-show="connectedRoomName"
           >
             <q-icon
               color="primary"
@@ -72,7 +72,7 @@
             @click="copyLinkToClipboard"
             outlined
             rounded
-            v-show="connectedRoom"
+            v-show="connectedRoomName"
           >
             <q-icon
               color="primary"
@@ -121,10 +121,10 @@
             rounded
             :color='"primary"'
             height="42"
-            v-show="!connectedRoom"
+            v-show="!connectedRoomName"
             :disabled="!roomNameValid || tooninHappening"
           >
-            <toonin-icon />Create Room
+            <toonin-icon />Share
           </q-btn>
           <q-btn
             @click="disconnect"
@@ -133,7 +133,7 @@
             outlined
             color="warning"
             rounded
-            v-show="connectedRoom"
+            v-show="connectedRoomName"
             icon="mdi-stop"
           > Disconnect
           </q-btn>
@@ -146,8 +146,7 @@
             rounded
             :color='"primary"'
             height="42"
-            v-show="!sharingStream"
-            :disabled="!connectedRoom || tooninHappening"
+            v-show="connectedRoomName && !sharingStream"
           >
             <toonin-icon />Capture
         </q-btn>
@@ -220,8 +219,8 @@ export default {
   }),
   computed: {
     cardTitle () {
-      if (this.connectedRoom) {
-        return `Personal room name is ${this.connectedRoom}`
+      if (this.connectedRoomName) {
+        return `Personal room name is ${this.connectedRoomName}`
       }
       return 'Create your room'
     },
@@ -271,7 +270,14 @@ export default {
         this.$store.dispatch('UPDATE_SHARE_VIDEO', value)
       }
     },
-    ...mapState(['connectedRoom', 'connectedStatus', 'sharing', 'peers', 'sharingStream', 'shareAudio', 'shareVideo'])
+    ...mapState(['connectedRoomName', 'connectedStatus', 'sharing', 'peers', 'sharingStream', 'shareAudio', 'shareVideo'])
+  },
+  watch: {
+    connectedRoomName: function (newValue) {
+      if (newValue) {
+        this.startCapture()
+      }
+    }
   },
   methods: {
     createRoom () {
@@ -279,7 +285,7 @@ export default {
       this.$store.dispatch('UPDATE_PEERS', new StartShare(this, true))
     },
     async startCapture () {
-      if (this.connectedRoom) {
+      if (this.connectedRoomName) {
         var displayMediaOptions = {
           video: {
             cursor: 'motion'
@@ -336,7 +342,7 @@ export default {
       }
     },
     async disconnect () {
-      if (this.connectedRoom) {
+      if (this.connectedRoomName) {
         await this.peers.removeAllPeersAndClose()
         this.$store.dispatch('UPDATE_CONNECTED_ROOM', null)
         this.$store.dispatch('UPDATE_PEERS', null)
@@ -364,10 +370,10 @@ export default {
       this.roomNameInputErrorMessages = []
     },
     copyLinkToClipboard () {
-      copyToClipboard(`${window.location.origin}/${this.connectedRoom}`)
+      copyToClipboard(`${window.location.origin}/${this.connectedRoomName}`)
     },
     copyIdToClipboard () {
-      copyToClipboard(this.connectedRoom)
+      copyToClipboard(this.connectedRoomName)
     },
     async getUserAudio () {
       if (!this.userAudio) {
@@ -420,7 +426,7 @@ export default {
     this.videoTag = this.$refs.videoPlayerShare
     window.onunload = () => {
       if (this.sharing) {
-        this.peers.socket.emit('disconnect room', { room: this.connectedRoom })
+        this.peers.socket.emit('disconnect room', { room: this.connectedRoomName })
       }
     }
   }

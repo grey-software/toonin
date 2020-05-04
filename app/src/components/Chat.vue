@@ -75,15 +75,15 @@ export default {
     errorMessages () {
       if (this.errors > 0) {
         return this.errors
-      } else if (!this.connectedRoom && this.connectedStatus !== 'connected') {
+      } else if (!this.connectedRoomName && this.connectedStatus !== 'connected') {
         return ['Not Connected to a room.']
       } else {
         return this.errors
       }
     },
     roomname () {
-      if (this.connectedRoom) {
-        return this.connectedRoom
+      if (this.connectedRoomName) {
+        return this.connectedRoomName
       }
       if (this.room.length > 0) {
         return this.room
@@ -94,7 +94,7 @@ export default {
       'name',
       'connectedStatus',
       'room',
-      'connectedRoom',
+      'connectedRoomName',
       'peers',
       'messages'
     ])
