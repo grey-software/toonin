@@ -5,8 +5,19 @@
 </template>
 
 <script >
+const myIcons = {
+  'app:toonin': 'img:statics/toonin.svg',
+}
 export default {
-  name: 'App'
+  name: 'App',
+  created () {
+    this.$q.iconMapFn = (iconName) => {
+      const icon = myIcons[iconName]
+      if (icon !== void 0) {
+        return { icon: icon }
+      }
+    }
+  }
 }
 </script>
 

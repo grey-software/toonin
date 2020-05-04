@@ -51,6 +51,8 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
+
 const TIMELINE_ITEM_COUNT = 4
 
 export default {
@@ -65,6 +67,33 @@ export default {
       timelineWidth: 0
     }
   },
+  computed: {
+    layout () {
+      return this.$q.screen.lt.sm ? 'dense' : (this.$q.screen.lt.md ? 'comfortable' : 'loose')
+    },
+    ...mapState(['playing', 'connectedStatus', 'room'])
+  },
+  watch: {
+    playing (isPlaying) {
+      if (isPlaying) {
+        this.setTimelineIndex(3)
+      } else {
+        this.setTimelineIndex(2)
+      }
+    },
+    connectedStatus (status) {
+      if (status == 'connected') {
+        this.setTimelineIndex(2)
+      } else {
+        this.setTimelineIndex(1)
+      }
+    },
+    room (name) {
+      if (name != '') {
+        this.setTimelineIndex(1)
+      } else this.setTimelineIndex(0)
+    }
+  },
   methods: {
     handleClick (e) {
       this.timelineComponents['timelineEvents'].forEach(element => {
@@ -73,6 +102,15 @@ export default {
       e.target.classList.add('selected');
       this.updateOlderEvents(e.target);
       this.updateFilling(e.target, this.timelineComponents['fillingLine'], this.timelineWidth);
+    },
+    setTimelineIndex (index) {
+      this.timelineComponents['timelineEvents'].forEach(element => {
+        element.classList.remove('selected')
+      })
+      const timelineEvent = this.timelineComponents['timelineEvents'][index]
+      timelineEvent.classList.add('selected');
+      this.updateOlderEvents(timelineEvent);
+      this.updateFilling(timelineEvent, this.timelineComponents['fillingLine'], this.timelineWidth);
     },
     initTimeline () {
 
@@ -150,7 +188,7 @@ export default {
 @import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro);
 
 .cd-horizontal-timeline {
-  font-size: 24px !important;
+  font-size: 0px !important;
   font-family: "Source Sans Pro", sans-serif;
   color: #383838;
 }

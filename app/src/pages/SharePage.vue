@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 <template>
 
-  <div style="width:599px;height:auto;">
+  <div class="q-mt-lg" style="width:599px;height:auto;">
     <div class="video-container">
 
       <vue-plyr
@@ -393,13 +393,9 @@ export default {
 </script>
 
 <style lang="sass" scoped>
-.video-player
-  border: 1.5px solid #999
-  width: 100%
-  height: 480px
 
 .video-container
-  border: 1.5px solid #999
+  border: 1.5px solid #4296bd
   border-radius: 16px
   width: 100%
   padding-top: 56.25%

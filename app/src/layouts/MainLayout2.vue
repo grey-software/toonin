@@ -4,7 +4,7 @@
     class="column items-center"
   >
     <div
-      class="row justify-center items-center q-mt-lg"
+      class="row justify-center items-center q-mt-md"
       style="width:599px;"
     >
       <div class="row items-baseline ">
@@ -25,17 +25,22 @@
     </div>
     <q-tabs
       v-model="tab"
-      class="text-teal"
-      style="width:599px;"
+      class="toonin-tabs"
+      narrow-indicator
+      dense
+      inline-label
+      align="center"
     >
       <q-tab
         label="Toonin"
         name="toonin"
+        icon="app:toonin"
       />
       <q-tab
         label="Share"
         v-if="!$q.platform.is.mobile"
         name="share"
+        icon="mdi-access-point"
       />
     </q-tabs>
     <q-tab-panels
@@ -78,7 +83,8 @@ export default {
   },
   data () {
     return {
-      tab: this.$q.platform.is.mobile ? 'toonin' : 'share'
+      // tab: this.$q.platform.is.mobile ? 'toonin' : 'share'
+      tab: 'toonin'
     }
   },
   methods: {
@@ -94,6 +100,17 @@ export default {
 </script>
 
 <style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition-duration: 0.3s ease-out;
+  transition-property: opacity;
+}
+
+.fade-enter,
+.fade-leave-active {
+  opacity: 0;
+}
+
 .title-container {
   display: flex;
 }
@@ -111,5 +128,12 @@ export default {
 .btn-dark-mode {
   height: 56px;
   width: 56px;
+}
+.q-tab-panel {
+  padding: 0px;
+}
+
+.toonin-tabs {
+  color: #4296bd;
 }
 </style>

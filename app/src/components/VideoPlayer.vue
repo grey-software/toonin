@@ -1,13 +1,15 @@
 <template>
-  <vue-plyr style="padding: 0%;">
+  <vue-plyr
+    ref="plyr"
+    :options="{ratio: '16:9', controls: playing ? playingControls : initialControls}"
+    class="video-player"
+  >
     <video
       controls
       crossorigin
-      class="video-player"
+      class="video-source"
       ref="videoPlayer"
-      v-show="videoStream !== null"
       :srcObject.prop="playing ? combined : null"
-      @click="requestFullScreen"
       autoplay
     ></video>
   </vue-plyr>
@@ -19,7 +21,10 @@ import { mapState } from 'vuex'
 export default {
   name: 'video-player',
   data () {
-    return { videoTag: null }
+    return {
+      videoTag: null,
+      initialControls: [],
+      playingControls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen']    }
   },
   computed: {
     ...mapState(['videoStream', 'playing', 'audioStream', 'volume']),
@@ -31,6 +36,9 @@ export default {
         return new MediaStream([...this.videoStream.getVideoTracks()])
       }
       return null
+    },
+    player () {
+      return this.$refs.plyr.player
     }
   },
   watch: {
@@ -60,9 +68,13 @@ export default {
 }
 </script>
 
-<style lang="sass" scoped>
-.video-player
-  border: 1.5px solid #999;
-  width: 100%;
-  height: 480px;
+<style scoped>
+.plyr--video {
+  border-radius: 12px !important;
+}
+
+.video-player {
+  border-radius: 16px;
+  width: 599px;
+}
 </style>

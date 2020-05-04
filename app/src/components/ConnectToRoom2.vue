@@ -3,40 +3,50 @@
 
     <div class="row justify-space-between q-mt-lg">
       <q-input
-        v-show="showInput"
         v-model="roomName"
         autofocus
         @keydown.enter="toonin"
-        placeholder="Room Key"
+        placeholder="Room name"
         outlined
         rounded
+        :disabled="isConnectedToRoom"
         :error="errorMessages.length > 0"
-        class="col-8 col-auto q-mr-lg input-room"
+        class="col-7 col-auto q-mr-lg input-room"
       >
         <template v-slot:error>
           {{ errorMessages[0] }}
         </template>
       </q-input>
       <q-btn
-        @click="handleTooninButtonClick"
-        class="btn-share col-3"
-        :color='connectedStatus === "connected" ? "warning": "primary"'
+        @click="disconnect"
+        class="btn-share col-4"
+        color="warning"
         outline
         rounded
-        :disabled="sharing"
+        v-if="connectedStatus === 'connected'"
       >
         <q-icon
-          v-if="connectedStatus === 'connected'"
           name="mdi-stop"
           left
           class="q-mr-xs"
         />
-        <toonin-icon
-          v-else
+        Disconnect
+
+      </q-btn>
+      <q-btn
+        @click="toonin"
+        class="btn-share col-3"
+        color="primary"
+        outline
+        rounded
+        v-else
+      >
+        <q-icon
+          name="app:toonin"
           left
           class="q-mr-xs"
-        ></toonin-icon>
-        {{ buttonStatus }}
+        />
+        Toonin
       </q-btn>
     </div>
 
@@ -73,11 +83,6 @@ export default {
     }
   },
   methods: {
-    handleTooninButtonClick () {
-      if (this.connectedStatus === 'connected') {
-        this.disconnect()
-      } else this.toonin()
-    },
     toonin () {
       this.connectToRoom()
     },
@@ -112,7 +117,6 @@ export default {
       this.rtcConn.onconnectionstatechange = () => {
         if (this.rtcConn.connectionState === SUCCESSFUL) {
           this.$store.dispatch('UPDATE_CONNECTED_STATUS', SUCCESSFUL)
-          this.roomName = ''
           try {
             this.rtcConn.createDataChannel('mediaDescription')
           } catch (err) {
@@ -227,17 +231,15 @@ export default {
       this.$store.dispatch('UPDATE_PEERS', null)
       this.targetHost = ''
       this.failedHosts = []
+      this.roomName = ''
     }
   },
   computed: {
+    isConnectedToRoom () {
+      return this.connectedStatus === 'connected'
+    },
     showInput () {
       return this.connectedStatus === 'disconnected' || this.connectedStatus === 'failed'
-    },
-    buttonStatus () {
-      if (this.connectedStatus === 'connected') {
-        return 'Disconnect'
-      }
-      return 'Toonin'
     },
     cardTitle () {
       if (this.connectedStatus === 'connected') {
@@ -286,10 +288,16 @@ export default {
 </script>
 
 
-<style scoped>
+<style>
+.input-room {
+  font-size: 18px;
+}
 .btn-share {
-  height: 56px;
+  height: 56px !important;
   font-size: 18px;
   text-transform: capitalize;
+}
+.q-field--outlined .q-field__control {
+  padding: 0 24px !important;
 }
 </style>
