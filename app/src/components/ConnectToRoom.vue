@@ -93,6 +93,7 @@ export default {
       if (!reconnecting) {
         this.$store.dispatch('UPDATE_PEERS', new StartShare(this, false))
       } else {
+        console.log('reconnecting')
         this.peers.getSocket().emit('new peer', this.roomName)
       }
     },
@@ -104,18 +105,6 @@ export default {
       }
     },
     attachRTCliteners () {
-      this.rtcConn.onicecandidate = event => {
-        if (event.candidate) {
-          console.log('sending ice')
-          this.peers.getSocket().emit('peer new ice', {
-            id: this.peerID,
-            room: this.room,
-            candidate: event.candidate,
-            hostID: this.targetHost
-          })
-        }
-      }
-
       this.rtcConn.onconnectionstatechange = () => {
         if (this.rtcConn.connectionState === SUCCESSFUL) {
           this.$store.dispatch('UPDATE_CONNECTED_STATUS', SUCCESSFUL)
@@ -132,17 +121,11 @@ export default {
           this.rtcConn.connectionState === FAILED
         ) {
           console.log('Connection failed')
-          this.failedHosts.push(this.targetHost)
-          this.peers.getSocket().emit('logoff', {
-            room: this.$store.getters.ROOM,
-            socketID: this.peers.getSocket().id,
-            name: this.$store.getters.NAME
-          })
+          // this.failedHosts.push(this.targetHost)
           this.reconnect()
 
           this.$store.dispatch('UPDATE_CONNECTED_STATUS', DISCONNECTED)
           this.$store.dispatch('UPDATE_ROOM', '')
-          this.$store.dispatch('UPDATE_PEERID', null)
           this.$store.dispatch('UPDATE_STREAM_TITLE', '')
           this.$store.dispatch('UPDATE_PLAYING', false)
           this.$store.dispatch('UPDATE_RTCCONN', null)
@@ -208,19 +191,13 @@ export default {
       this.peers.removeAllPeersAndClose()
       this.$store.dispatch('UPDATE_AUDIO_STREAM', null)
       this.$store.dispatch('UPDATE_VIDEO_STREAM', null)
-      this.$store.dispatch('UPDATE_PEERID', null)
       this.$store.dispatch('UPDATE_RTCCONN', null)
 
       var roomKey = this.$store.getters.ROOM
       this.roomName = roomKey
-      this.connectToRoom(true)
+      this.connectToRoom(false)
     },
     async disconnect () {
-      this.peers.socket.emit('logoff', {
-        room: this.$store.getters.ROOM,
-        socketID: this.peers.getSocket().id,
-        name: this.$store.getters.NAME
-      })
       this.rtcConn.close()
       await this.peers.removeAllPeersAndClose()
       this.$store.dispatch('UPDATE_AUDIO_STREAM', null)
@@ -268,7 +245,8 @@ export default {
       'audioStream',
       'videoStream',
       'sharing',
-      'peers'
+      'peers',
+      'name'
     ])
   },
   mounted: function () {
