@@ -1,31 +1,3 @@
-/** Class representing a socket instance. */
-// class SocketInstance {
-//     /**
-//      * Create a Socket Instance
-//      * @param {SocketIOClient.Socket} socket - socket to be added.
-//      * @param {String} room - The room name in which the socket belongs.
-//      */
-//     constructor(socket, room) {
-//         this.socket = socket
-//         this.room = room
-//         this.id = socket.id
-//     }
-
-//     /**
-//      * Return a SocketIOClient.Socket
-//      */
-//     getSocket() {
-//         return this.socket
-//     }
-
-//     /**
-//      * Return the room name in which the socket belongs too.
-//      */
-//     getRoom() {
-//         return this.room
-//     }
-// }
-
 /** Class representing a socket Manager */
 class SocketManager {
     constructor() {
@@ -43,15 +15,6 @@ class SocketManager {
             this.sockets[socket.id] = {room: roomName, name: name}
         }
     }
-
-    // /**
-    //  * Find a socket connection by its id.
-    //  * @param {String} id Socket id
-    //  * @return {SocketInstance} Socket instance or undefined if not found.
-    //  */
-    // findSocket(id) {
-    //     return this.sockets.find(socket => socket.id === id)
-    // }
 
     /**
      * Return room name for a socket connection
