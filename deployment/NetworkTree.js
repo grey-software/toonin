@@ -26,12 +26,12 @@ class NetworkNode {
 class NetworkTree {
   constructor(socketID, maxClients) {
     this.node = new NetworkNode(socketID, maxClients);
-    this.childNodes = [];
+    this.children = [];
     this.reconnectingNodes = []; // nodes (& their children) which are in process of reconnecting
   }
 
   hasSpace() {
-    return this.childNodes.length < this.node.maxClients;
+    return this.children.length < this.node.maxClients;
   }
 
   /**
@@ -54,7 +54,7 @@ class NetworkTree {
 
   /**
    * Update nodes that their parent node is leaving and they need to reconnect to a new node in network
-   * The children (and their childNodes) are added to this.transferring nodes until they they
+   * The children (and their children) are added to this.transferring nodes until they they
    * join the tree again and are availible for new peers to connect
    *
    * @param {SocketIO.Server} socket Socket to notify children of leaving node about disconnection
@@ -63,7 +63,7 @@ class NetworkTree {
    */
   notifyChildren(socket, node, room, root) {
     var socketIDs = [];
-    node.childNodes.forEach((childNode) => {
+    node.children.forEach((childNode) => {
       socketIDs.push(childNode.node.socketID);
       root.reconnectingNodes.push(childNode);
     });
@@ -79,12 +79,12 @@ class NetworkTree {
    * @param {String} socketID socketID of node that is leaving the tree
    */
   removeNode(socket, socketID, room, root) {
-    if (this.childNodes.length === 0) {
+    if (this.children.length === 0) {
       return;
     }
 
     var childIndex = -1;
-    this.childNodes.forEach((childNode, index) => {
+    this.children.forEach((childNode, index) => {
       if (childNode.node.socketID === socketID) {
         childIndex = index;
         return;
@@ -96,7 +96,7 @@ class NetworkTree {
     if (childIndex !== -1) {
       this.notifyChildren(
         socket,
-        this.childNodes.splice(childIndex, 1)[0],
+        this.children.splice(childIndex, 1)[0],
         room,
         root
       );
@@ -122,7 +122,7 @@ class NetworkTree {
         // check if this node is trying to reconnect due to fallen host
         const reconnectingNode = this.isReconnecting(socketID);
         if (reconnectingNode !== null) {
-          currNode.childNodes.push(reconnectingNode);
+          currNode.children.push(reconnectingNode);
           this.reconnectingNodes.splice(
             this.reconnectingNodes.indexOf(reconnectingNode),
             1
@@ -131,10 +131,10 @@ class NetworkTree {
         }
 
         // new node joining the tree
-        currNode.childNodes.push(new NetworkTree(socketID, maxClients));
+        currNode.children.push(new NetworkTree(socketID, maxClients));
         return true;
       }
-      currNode.childNodes.forEach((childNode) => nodeQueue.enqueue(childNode));
+      currNode.children.forEach((childNode) => nodeQueue.enqueue(childNode));
     }
 
     return false;
@@ -144,7 +144,7 @@ class NetworkTree {
    * @returns {NetworkNode[]} array of possible hosts in order of preference
    */
   getConnectableNodes() {
-    if (this.childNodes.length === 0) {
+    if (this.children.length === 0) {
       return [this.node];
     }
 
@@ -162,7 +162,7 @@ class NetworkTree {
         hostPool.push(currNode.node);
       }
 
-      currNode.childNodes.forEach((node) => nodeQueue.enqueue(node));
+      currNode.children.forEach((node) => nodeQueue.enqueue(node));
     }
 
     return hostPool;

@@ -8,9 +8,11 @@ var http = require("http").Server(app);
 var io = require("socket.io")(http);
 const history = require("connect-history-api-fallback");
 const RoomManager = require("./RoomManager").RoomManager;
+const SocketManager = require("./SocketManager").SocketManager
 const MAX_CLIENTS_PER_HOST = 2;
 
 const roomManager = new RoomManager();
+const socketManager = new SocketManager();
 
 const port = process.env.PORT || 8443;
 
@@ -25,12 +27,13 @@ app.get("*", function (req, res, next) {
 //Socket create a new "room" and listens for other connections
 io.on("connection", (socket) => {
   socket.on("create room", (req) => {
-    roomManager.createRoom(socket, req.room, req.isDistributed);
+    if (roomManager.createRoom(socket, req.room, req.isDistributed)) {
+      socketManager.addSocket(socket,req.room)
+    }
   });
 
   socket.on("new peer", (roomID) => {
     const room = roomManager.getRoom(roomID);
-
     if (room) {
       if (room.room.getConnectableNodes) {
         const potentialHosts = room.room.getConnectableNodes();
@@ -54,7 +57,6 @@ io.on("connection", (socket) => {
     if (res.evalResult.hostFound) {
       const room = res.evalResult.room;
       console.log("Res room: " + room);
-
       socket.join(room, () => {
         console.log("Peer connected successfully to room: " + room);
         io.to(res.evalResult.selectedHost).emit("peer joined", {
@@ -64,6 +66,7 @@ io.on("connection", (socket) => {
         });
         socket.to(room).emit("chatFromServer", res.name + " has joined.");
         socket.emit("chatFromServer", "You have joined the room " + room + ".");
+        socketManager.addSocket(socket, room, res.name)
       });
     }
   });
@@ -72,34 +75,34 @@ io.on("connection", (socket) => {
     console.log(
       `Received new ICE Candidate from src for peer: ${iceData.id} in room: ${iceData.room}`
     );
-    socket.to(iceData.room).emit("src ice", iceData);
+    io.to(iceData.id).emit("src ice", iceData);
   });
 
   socket.on("peer new ice", (iceData) => {
     console.log(
-      `Received new ICE Candidate from peer: ${iceData.id} in room: ${iceData.room}`
+      `Received new ICE Candidate for peer: ${iceData.id} in room: ${iceData.room}`
     );
-    socket.to(iceData.room).emit("peer ice", iceData);
+    io.to(iceData.hostID).emit("peer ice", iceData);
   });
 
   socket.on("src new desc", (descData) => {
     console.log(
       `Received description from src for peer: ${descData.id} in room: ${descData.room}`
     );
-    socket.to(descData.room).emit("src desc", descData);
+    io.to(descData.id).emit("src desc", descData);
   });
 
   socket.on("peer new desc", (descData) => {
     console.log(
       `Received answer description from peer: ${descData.id} in room: ${descData.room}`
     );
-    socket.to(descData.room).emit("peer desc", descData);
-
-    const room = roomManager.getRoom(descData.room);
-    if (room.room.addNode) {
-
-      if (room.room.addNode(descData.id, MAX_CLIENTS_PER_HOST, descData.selectedHost)) {
-        io.to(room.hostId).emit("incrementPeerCount")
+    io.to(descData.selectedHost).emit("peer desc", descData);
+    if (descData.renegotiation) {
+      const room = roomManager.getRoom(descData.room);
+      if (room.room.addNode) {
+        if(room.room.addNode(descData.id, MAX_CLIENTS_PER_HOST, descData.selectedHost)) {
+          io.to(room.hostId).emit("PeerCount", socketManager.getSocketCountInRoom(descData.room))
+        }
       }
     }
   });
@@ -110,41 +113,53 @@ io.on("connection", (socket) => {
   });
 
   socket.on("logoff", (req) => {
-    const room = roomManager.getRoom(req.room);
-    if (room) {
-      if (room.room.removeNode) {
-        room.room.removeNode(socket, req.socketID, req.room, room.room);
-        io.to(room.hostID).emit("decrementPeerCount");
-      }
-      if (socket.id === req.socketID) {
-        socket.leave(req.room);
-      }
-      socket.to(room).emit("chatFromServer", req.name + " has left.");
-    }
+    console.log('Log off request from ' + req.name)
+    disconnectSocket(req, socket) 
   });
 
   socket.on("disconnect room", (req) => {
-    if (roomManager.deleteRoom(socket.id)) {
-      console.log("closing room " + req.room);
-      socket.to(req.room).emit("chatFromServer", "room being closed.");
-      // io.in(req.room).clients((err, clients) => {
-      //   clients.forEach((element) => {
-      //     io.sockets.connected.forEach(sc =>)
-      //     io.sockets.connected[element].disconnect();
-      //   });
-      // });
-      // console.log(io.in(req.room).clients.length);
-    }
+    disconnectSocket(req, socket) 
   });
 
   socket.on("disconnect", () => {
     console.log("user disconnected " + socket.id);
+    const socketInfo = socketManager.getSocket(socket.id)
+    var result = disconnectSocket(socketInfo, socket)
+    console.log("user disconnected " + result);
   });
 
   socket.on("message", (req) => {
     socket.to(req.room).emit("chatIncoming", req);
   });
 });
+
+/**
+ * Handle socket disconnect
+ * @param {Object} req request object from client.
+ * @param {SocketIOClient.Socket} socket socket object.
+ * @return {Boolean} Indicated if socket was deleted
+ */
+function disconnectSocket(req, socket) {
+  if (roomManager.deleteRoom(socket.id)) {
+    console.log("closing room " + req.room);
+    socket.to(req.room).emit("chatFromServer", "room being closed.");
+    socketManager.removeSocket(socket.id)
+    return true
+  } else {
+    if (req && req.room) {
+      const room = roomManager.getRoom(req.room);
+      if (room && room.room.removeNode) {
+        room.room.removeNode(socket, socket.id, req.room, room.room);
+        socketManager.removeSocket(socket.id)
+        io.to(room.hostId).emit("PeerCount", socketManager.getSocketCountInRoom(req.room));
+        socket.to(req.room).emit("chatFromServer", req.name + " has left.")
+        console.log('REMOVED FROM ROOM' + socket.id)
+      }
+      return true
+    }
+  }
+  return false
+}
 
 app.get("/status", (req, res) => {
   res.send("Server is alive");

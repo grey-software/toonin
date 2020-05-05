@@ -29,12 +29,14 @@ export default function (/* { ssrContext } */) {
       audioStream: null,
       videoStream: null,
       name: '',
-      connectedRoom: null,
+      connectedRoomName: null,
       sharing: false,
       peers: null,
       messages: [],
       sharingStream: null,
-      unread: 0
+      unread: 0,
+      shareAudio: false,
+      shareVideo: false
     },
     mutations: {
       SET_CONNECTED_STATUS: (state, payload) => {
@@ -68,7 +70,7 @@ export default function (/* { ssrContext } */) {
         state.name = payload
       },
       SET_CONNECTED_ROOM: (state, payload) => {
-        state.connectedRoom = payload
+        state.connectedRoomName = payload
       },
       SET_SHARING: (state, payload) => {
         state.sharing = payload
@@ -84,6 +86,14 @@ export default function (/* { ssrContext } */) {
       },
       SET_UNREAD: (state, payload) => {
         state.unread = payload
+      },
+      SET_SHARE_AUDIO: (state, payload) => {
+        state.shareAudio = payload
+        state.peers.updatePeers({ type: 'audio', value: payload })
+      },
+      SET_SHARE_VIDEO: (state, payload) => {
+        state.shareVideo = payload
+        state.peers.updatePeers({ type: 'video', value: payload })
       }
     },
     actions: {
@@ -134,6 +144,12 @@ export default function (/* { ssrContext } */) {
       },
       UPDATE_UNREAD: (context, payload) => {
         context.commit('SET_UNREAD', payload)
+      },
+      UPDATE_SHARE_AUDIO: (context, payload) => {
+        context.commit('SET_SHARE_AUDIO', payload)
+      },
+      UPDATE_SHARE_VIDEO: (context, payload) => {
+        context.commit('SET_SHARE_VIDEO', payload)
       }
     },
     getters: {
@@ -168,7 +184,7 @@ export default function (/* { ssrContext } */) {
         return state.name
       },
       CONNECTED_ROOM: (state) => {
-        return state.connectedRoom
+        return state.connectedRoomName
       },
       SHARING: (state) => {
         return state.sharing
@@ -184,6 +200,12 @@ export default function (/* { ssrContext } */) {
       },
       UNREAD: (state) => {
         return state.unread
+      },
+      SHARE_AUDIO: (state) => {
+        return state.shareAudio
+      },
+      SHARE_VIDEO: (state) => {
+        return state.shareVideo
       }
     }
   })

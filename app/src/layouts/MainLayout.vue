@@ -143,7 +143,7 @@ export default {
     Name
   },
   computed: {
-    ...mapState(['name', 'unread'])
+    ...mapState(['name', 'unread', 'peers'])
   },
   methods: {
     onDarkModeChange () {

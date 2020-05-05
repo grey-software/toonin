@@ -34,6 +34,9 @@ export default {
       if (this.videoStream) {
         return new MediaStream([...this.videoStream.getVideoTracks()])
       }
+      if (this.audioStream) {
+        return null
+      }
       return null
     },
     player () {
