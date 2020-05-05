@@ -7,6 +7,10 @@
 <script >
 const myIcons = {
   'app:toonin': 'img:statics/toonin.svg',
+  'app:guide': 'img:statics/guide.svg',
+  'app:github': 'img:statics/github.svg',
+  'app:moon': 'img:statics/moon.svg',
+  'app:sun': 'img:statics/sun.svg'
 }
 export default {
   name: 'App',
@@ -21,7 +25,14 @@ export default {
 }
 </script>
 
-<style >
+<style>
+.text-toonin {
+  color: #4296bd;
+}
+
+.bg-toonin {
+  background: #4296bd;
+}
 .fade-enter-active,
 .fade-leave-active {
   transition-duration: 0.3s ease-out;

@@ -7,7 +7,7 @@
       class="row justify-center items-center q-mt-md"
       style="width:599px;"
     >
-      <div class="row items-baseline" style="margin-right:-54px;">
+      <div class="row items-baseline">
         <img
           class="title-icon q-mr-sm"
           src="../assets/icon.png"
@@ -15,12 +15,45 @@
         <span class="title-text toonin-title q-mr-xl">Toonin</span>
       </div>
       <q-btn
-        class="btn-dark-mode q-mx-sm"
         flat
+        fab
         round
+        color="toonin"
         @click="onDarkModeChange"
-        :icon="$q.dark.isActive ? 'mdi-lightbulb-outline' : 'mdi-lightbulb-on-outline'"
       >
+        <q-icon
+          class="is-36x36"
+          v-if="!$q.dark.isActive"
+          name="app:moon"
+        />
+        <q-icon
+          class="is-36x36"
+          v-else
+          name="app:sun"
+        />
+      </q-btn>
+      <q-btn
+        flat
+        fab
+        round
+        @click="openGuide"
+      >
+        <q-icon
+          class="is-36x36"
+          name="app:guide"
+        ></q-icon>
+      </q-btn>
+      <q-btn
+        flat
+        fab
+        round
+        tyoe="a"
+        href="https://www.github.com/grey-software/toonin"
+      >
+        <q-icon
+          class="is-36x36"
+          name="app:github"
+        ></q-icon>
       </q-btn>
     </div>
     <q-tabs
@@ -90,12 +123,14 @@ export default {
     onDarkModeChange () {
       this.$q.dark.toggle()
       window.localStorage.setItem('isDark', this.$q.dark.isActive)
-    }
+    },
+    openGuide () {
+      // TODO: Implement a modal that guides the user journey
+    },
+
   },
   mounted () {
     this.$q.dark.set(window.localStorage.getItem('isDark'))
-    const annoyingArrow = document.querySelector("div.q-tabs.row.no-wrap.items-center.toonin-tabs.q-tabs--scrollable.q-tabs--horizontal.q-tabs--dense > i.q-tabs__arrow.q-tabs__arrow--left.absolute.q-tab__icon.material-icons.q-icon.notranslate")
-    console.log(annoyingArrows)
   }
 }
 </script>
@@ -126,9 +161,9 @@ export default {
   height: 64px;
 }
 
-.btn-dark-mode {
-  height: 56px;
-  width: 56px;
+.is-36x36 {
+  height: 36px;
+  width: 36px;
 }
 .q-tab-panel {
   padding: 0px;
