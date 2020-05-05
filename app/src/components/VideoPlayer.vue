@@ -5,7 +5,6 @@
     class="video-player"
   >
     <video
-      controls
       crossorigin
       class="video-source"
       ref="videoPlayer"

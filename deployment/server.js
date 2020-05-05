@@ -14,7 +14,7 @@ const roomManager = new RoomManager();
 
 const port = process.env.PORT || 8443;
 
-app.get("*", function(req, res, next) {
+app.get("*", function (req, res, next) {
   if (req.headers["x-forwarded-proto"] !== "https") {
     res.redirect("https://" + req.headers.host + req.url);
   } else {
@@ -98,7 +98,7 @@ io.on("connection", (socket) => {
     const room = roomManager.getRoom(descData.room);
     if (room.room.addNode) {
 
-      if(room.room.addNode(descData.id, MAX_CLIENTS_PER_HOST, descData.selectedHost)) {
+      if (room.room.addNode(descData.id, MAX_CLIENTS_PER_HOST, descData.selectedHost)) {
         io.to(room.hostId).emit("incrementPeerCount")
       }
     }
@@ -161,7 +161,7 @@ app.use(
 );
 app.use(staticFileMiddleware);
 
-app.get("/", function(req, res) {
+app.get("/", function (req, res) {
   res.render("../app/dist/spa/index.html");
 });
 

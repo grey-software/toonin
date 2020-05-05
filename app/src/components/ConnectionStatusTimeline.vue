@@ -17,25 +17,21 @@
               data-date="01/01/2017"
               data-index="0"
               class="selected"
-              @click="handleClick"
             >Standby</a></li>
           <li><a
               ref="eventRoomFound"
               data-date="01/01/2018"
               data-index="1"
-              @click="handleClick"
             >Room Found</a></li>
           <li><a
               ref="eventConnected"
               data-date="01/01/2019"
               data-index="2"
-              @click="handleClick"
             >Connected</a></li>
           <li><a
               ref="eventPlaying"
               data-date="01/01/2020"
               data-index="3"
-              @click="handleClick"
             >Playing</a></li>
 
           <span
@@ -95,14 +91,6 @@ export default {
     }
   },
   methods: {
-    handleClick (e) {
-      this.timelineComponents['timelineEvents'].forEach(element => {
-        element.classList.remove('selected')
-      })
-      e.target.classList.add('selected');
-      this.updateOlderEvents(e.target);
-      this.updateFilling(e.target, this.timelineComponents['fillingLine'], this.timelineWidth);
-    },
     setTimelineIndex (index) {
       this.timelineComponents['timelineEvents'].forEach(element => {
         element.classList.remove('selected')

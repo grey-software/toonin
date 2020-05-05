@@ -7,7 +7,7 @@
       class="row justify-center items-center q-mt-md"
       style="width:599px;"
     >
-      <div class="row items-baseline ">
+      <div class="row items-baseline" style="margin-right:-54px;">
         <img
           class="title-icon q-mr-sm"
           src="../assets/icon.png"
@@ -27,7 +27,6 @@
       v-model="tab"
       class="toonin-tabs"
       narrow-indicator
-      dense
       inline-label
       align="center"
     >
@@ -95,6 +94,8 @@ export default {
   },
   mounted () {
     this.$q.dark.set(window.localStorage.getItem('isDark'))
+    const annoyingArrow = document.querySelector("div.q-tabs.row.no-wrap.items-center.toonin-tabs.q-tabs--scrollable.q-tabs--horizontal.q-tabs--dense > i.q-tabs__arrow.q-tabs__arrow--left.absolute.q-tab__icon.material-icons.q-icon.notranslate")
+    console.log(annoyingArrows)
   }
 }
 </script>
