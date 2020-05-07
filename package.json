@@ -10,7 +10,7 @@
         "setup:server": "npm install --prefix packages/server",
         "setup": "npm run setup:server; npm run setup:app",
         "app": "npm run start --prefix packages/app",
-        "build:app": "npm run build --prefix packages/app",
+        "build:app": "cd packages/app && npm run build",
         "server": "npm run start --prefix packages/server &",
         "launch": "npm run server; npm run app"
     },
