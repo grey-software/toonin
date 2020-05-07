@@ -1,7 +1,8 @@
 {
     "name": "toonin",
     "version": "1.0.0",
-    "description": "Toonin is a Chrome Extension coupled with a web app that allows your friends to Tune In to what you're listening to !",
+"description" : "Toonin to each others' experiences!",
+
     "private": true,
     "image": "heroku/nodejs",
     "scripts": {
