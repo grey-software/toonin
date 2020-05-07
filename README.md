@@ -19,37 +19,24 @@ In order to exchange information, a signaling server must exist between the prov
 
 ## Development setup
 
-We provide a setup script that installs all necessary dependencies. 
 ```sh
-bash setup.sh
+npm run setup
 ```
 
 ## Running Toonin
 
-### Running the web app
-Enter the web app directory and serve the app on your machine
-```sh
-cd client
-npm run serve
+Toonin comes with a launch script that launches the server and app simultaneuously: 
+
+```sh 
+npm run launch
 ```
 
-### Running the extension
-Enter the extension directory and run the development script for the extension. 
+### Running the web app independently
 ```sh
-cd extension
-npm run dev
+npm run app
 ```
 
-This packs the extension under the build directory and watches your extension files for local changes. 
-
-Use [this guide](https://developer.chrome.com/extensions/getstarted) to load the extension into chrome. 
-
-### Running the signalling server
-Enter the backend directory and run the signalling server. 
+### Running the signalling server independently
 ```sh
-cd backend
-node index.js
+npm run server
 ```
-
-
-[![Grey Software](https://github.com/grey-software/Grey-Software/blob/master/grey-software.png?raw=true)](https://www.grey.software/)

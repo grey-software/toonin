@@ -1,65 +1,70 @@
 {
-  "name": "toonin",
-  "version": "1.0.0",
-  "description": "Toonin is a Chrome Extension coupled with a web app that allows your friends to Tune In to what you're listening to !",
-  "private": true,
-  "image": "heroku/nodejs",
-  "scripts": {
-    "start": "cd deployment && npm start",
-    "setup": "npm install --prefix app;npm install --prefix deployment"
-  },
-  "dependencies": {
-    "core-js": "^2.6.5",
-    "cors": "^2.8.4",
-    "express": "^4.17.1",
-    "node-static": "^0.7.10",
-    "serve-static": "^1.14.1",
-    "socket.io": "^2.1.0",
-    "socket.io-client": "^2.3.0",
-    "vue-plyr": "^6.0.4"
-  },
-  "devDependencies": {
-    "@vue/cli-plugin-babel": "^3.11.0",
-    "@vue/cli-plugin-eslint": "^3.11.0",
-    "@vue/cli-service": "^3.11.0",
-    "babel-eslint": "^10.0.1",
-    "eslint": "^5.16.0",
-    "eslint-plugin-vue": "^5.0.0",
-    "sass": "^1.17.4",
-    "sass-loader": "^7.1.0",
-    "vue-template-compiler": "^2.6.10"
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
+    "name": "toonin",
+    "version": "1.0.0",
+"description" : "Toonin to each others' experiences!",
+
+    "private": true,
+    "image": "heroku/nodejs",
+    "scripts": {
+        "start": "cd deployment && npm start",
+        "setup:app": "npm install --prefix packages/app",
+        "setup:server": "npm install --prefix packages/server",
+        "setup": "npm run setup:server; npm run setup:app",
+        "server": "npm run start --prefix packages/server &",
+        "app": "npm run start --prefix packages/app",
+        "build:app": "cd packages/app && npm run build",
+        "launch": "npm run server; npm run app"
     },
-    "extends": [
-      "plugin:vue/essential",
-      "eslint:recommended"
+    "dependencies": {
+        "core-js": "^2.6.5",
+        "cors": "^2.8.4",
+        "express": "^4.17.1",
+        "node-static": "^0.7.10",
+        "serve-static": "^1.14.1",
+        "socket.io": "^2.1.0",
+        "socket.io-client": "^2.3.0",
+        "vue-plyr": "^6.0.4"
+    },
+    "devDependencies": {
+        "@vue/cli-plugin-babel": "^3.11.0",
+        "@vue/cli-plugin-eslint": "^3.11.0",
+        "@vue/cli-service": "^3.11.0",
+        "babel-eslint": "^10.0.1",
+        "eslint": "^5.16.0",
+        "eslint-plugin-vue": "^5.0.0",
+        "sass": "^1.17.4",
+        "sass-loader": "^7.1.0",
+        "vue-template-compiler": "^2.6.10"
+    },
+    "eslintConfig": {
+        "root": true,
+        "env": {
+            "node": true
+        },
+        "extends": [
+            "plugin:vue/essential", "eslint:recommended"
+        ],
+        "rules": {},
+        "parserOptions": {
+            "parser": "babel-eslint"
+        }
+    },
+    "postcss": {
+        "plugins": {
+            "autoprefixer": {}
+        }
+    },
+    "browserslist": [
+        "> 1%", "last 2 versions"
     ],
-    "rules": {},
-    "parserOptions": {
-      "parser": "babel-eslint"
-    }
-  },
-  "postcss": {
-    "plugins": {
-      "autoprefixer": {}
-    }
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/grey-software/toonin.git"
-  },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/grey-software/toonin/issues"
-  },
-  "homepage": "https://github.com/grey-software/toonin#readme"
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/grey-software/toonin.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/grey-software/toonin/issues"
+    },
+    "homepage": "https://github.com/grey-software/toonin#readme"
 }
