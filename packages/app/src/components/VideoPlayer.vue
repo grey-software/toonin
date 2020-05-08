@@ -75,7 +75,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .plyr {
   margin: 0px 20px;
   border-radius: 4px;

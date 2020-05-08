@@ -299,7 +299,7 @@ export default {
 }
 
 .btn-disconnect {
-  color: #FFC400;
+  color: #ffc400;
 }
 .q-field--outlined .q-field__control {
   padding: 0 24px !important;
@@ -316,6 +316,6 @@ export default {
 }
 
 .body--dark .btn-disconnect {
-  color: #F6D45A;
+  color: #f6d45a;
 }
 </style>

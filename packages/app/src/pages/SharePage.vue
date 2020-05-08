@@ -6,35 +6,18 @@
     class="q-mt-lg"
     style="width:599px;height:auto;"
   >
-    <div class="video-container">
+    <div class="row justify-space-between q-mt-lg">
 
-      <vue-plyr
-        style="padding: 0%;"
-        muted
-      >
-        <video
-          class="video"
-          ref="videoPlayerShare"
-          :srcObject.prop="sharingStream"
-          @click="requestFullScreen"
-          preload="auto"
-          muted
-          autoplay
-          controls
-        ></video>
-      </vue-plyr>
-    </div>
-    <q-card-section class="text--primary">
       <q-input
         v-model="roomName"
-        style="color: white;"
         autofocus
-        text-weight-regular
         label="Name your room"
+        @keydown.enter="startCapture"
         outlined
+        :disabled="isConnectedToRoom"
         rounded
         :error="errorMessages.length > 0"
-        v-show="!connectedRoom"
+        class="col-7 col-auto q-mr-lg input-room"
       >
         <template v-slot:append>
           <q-btn
@@ -48,12 +31,67 @@
           {{ errorMessages[0] }}
         </template>
       </q-input>
-    </q-card-section>
+
+      <!-- <q-btn
+        @click="startCapture"
+        class="btn-share pr-4"
+        outline
+        rounded
+        :color='"primary"'
+        height="42"
+        v-if="!sharingStream"
+      >
+        <toonin-icon />Share
+      </q-btn>
+      <q-btn
+        @click="stopCapture"
+        class="btn-share pr-4"
+        height="42"
+        outlined
+        color="warning"
+        rounded
+        v-else
+        icon="mdi-stop"
+      >Stop Sharing
+      </q-btn> -->
+
+      <q-btn
+        @click="createRoom"
+        class="btn-share col-3"
+        outline
+        rounded
+        v-if="!sharingStream"
+      >
+        <q-icon
+          :name="$q.dark.isActive ? 'app:toonin-dark' : 'app:toonin'"
+          left
+          class="q-mr-xs"
+        />
+        Share
+      </q-btn>
+      <q-btn
+        @click="stopCapture"
+        class="btn-share btn-disconnect col-4"
+        outline
+        rounded
+        v-else
+      >
+        <q-icon
+          name="mdi-stop"
+          left
+          class="q-mr-xs"
+        />
+        Stop Sharing
+
+      </q-btn>
+
+    </div>
+
     <q-card-actions
       style="padding: 20px"
       align="center"
     >
-      <span v-show="connectedRoom">
+      <span v-show="connectedRoomName">
         <q-icon
           large
           color="primary"
@@ -68,7 +106,7 @@
         @click="copyIdToClipboard"
         outlined
         rounded
-        v-show="connectedRoom"
+        v-show="connectedRoomName"
       >
         <q-icon
           color="primary"
@@ -79,7 +117,7 @@
         @click="copyLinkToClipboard"
         outlined
         rounded
-        v-show="connectedRoom"
+        v-show="connectedRoomName"
       >
         <q-icon
           color="primary"
@@ -88,28 +126,6 @@
       </q-btn>
       <q-space />
 
-      <q-btn
-        @click="startCapture"
-        class="btn-share pr-4"
-        outline
-        rounded
-        :color='"primary"'
-        height="42"
-        v-show="connectedRoomName && !sharingStream"
-      >
-        <toonin-icon />Capture
-      </q-btn>
-      <q-btn
-        @click="stopCapture"
-        class="btn-share pr-4"
-        height="42"
-        outlined
-        color="warning"
-        rounded
-        v-show="sharingStream"
-        icon="mdi-stop"
-      >Stop Sharing
-      </q-btn>
       <q-checkbox
         v-model="sendAudio"
         color="secondary"
@@ -124,6 +140,27 @@
       />
 
     </q-card-actions>
+
+    <div
+      class="video-container"
+      v-if="sharing"
+    >
+
+      <vue-plyr
+        style="padding: 0%;"
+        muted
+      >
+        <video
+          class="video"
+          ref="videoPlayerShare"
+          :srcObject.prop="sharingStream"
+          muted
+          autoplay
+          controls
+        ></video>
+      </vue-plyr>
+    </div>
+
   </div>
 </template>
 
@@ -167,6 +204,9 @@ export default {
     userAudio: null
   }),
   computed: {
+    isConnectedToRoom () {
+      return this.connectedStatus === 'connected'
+    },
     cardTitle () {
       if (this.connectedRoomName) {
         return `Personal room name is ${this.connectedRoomName}`
@@ -382,19 +422,40 @@ export default {
 }
 </script>
 
-<style lang="sass" scoped>
-.video-container
-  border: 1.5px solid #4296bd
-  border-radius: 16px
-  width: 100%
-  padding-top: 56.25%
-  height: 0px
-  position: relative
+<style scoped>
+.plyr {
+  margin: 0px 20px;
+  border-radius: 4px;
+}
 
-.video
-  width: 100%
-  height: 100%
-  position: absolute
-  top: 0
-  left: 0
+.video-player {
+  border-radius: 16px;
+  width: 599px;
+}
+
+.input-room {
+  font-size: 18px;
+  color: var(--q-color-primary);
+}
+
+.btn-share {
+  height: 56px !important;
+  font-size: 18px;
+  text-transform: capitalize;
+  color: var(--q-color-primary);
+}
+</style>
+
+<style scoped>
+.body--dark .btn-share {
+  color: #b9bbbe;
+}
+
+.body--dark .input-room {
+  color: #b9bbbe;
+}
+
+.body--dark .btn-disconnect {
+  color: #f6d45a;
+}
 </style>

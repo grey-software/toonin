@@ -28,7 +28,7 @@ export default function (/* { ssrContext } */) {
       peerID: null,
       audioStream: null,
       videoStream: null,
-      name: '',
+      name: 'Tone',
       connectedRoomName: null,
       sharing: false,
       peers: null,
