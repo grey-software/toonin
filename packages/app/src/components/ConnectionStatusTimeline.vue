@@ -120,8 +120,6 @@ export default {
     },
     setDatePosition (timelineComponents, stepDistance, totalWidth) {
       for (let i = 0; i < timelineComponents['timelineDates'].length; i++) {
-        var timelineEventWidth = window.getComputedStyle(this.timelineComponents['timelineEvents'][i]).getPropertyValue('width');
-        timelineEventWidth = Number(timelineEventWidth.replace('px', ''))
         const offset = ((i / TIMELINE_ITEM_COUNT) * totalWidth) + 24
         timelineComponents['timelineEvents'][i].style['left'] = offset + 'px';
       }
@@ -136,7 +134,6 @@ export default {
       return totalWidth;
     },
     updateFilling (selectedEvent, filling, totalWidth) {
-      const timelineWidth = this.$refs.eventsWrapper.style['width']
       const selectedEventIndex = selectedEvent.getAttribute('data-index')
       var timelineEventWidth = window.getComputedStyle(selectedEvent).getPropertyValue('width');
       timelineEventWidth = Number(timelineEventWidth.replace('px', ''))

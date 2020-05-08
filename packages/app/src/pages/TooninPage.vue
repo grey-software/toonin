@@ -1,6 +1,6 @@
 <template>
   <div class="column items-center">
-    <ConnectToRoom2></ConnectToRoom2>
+    <ConnectToRoom></ConnectToRoom>
     <div class="video-container">
       <div class="absolute">
         <transition
@@ -38,15 +38,13 @@
 
 <script>
 import { mapState } from "vuex"
-import ConnectToRoom2 from "../components/ConnectToRoom2"
+import ConnectToRoom from "../components/ConnectToRoom"
 import VideoPlayer from "../components/VideoPlayer"
-import PlayerControls from "../components/PlayerControls"
 
 export default {
   components: {
-    ConnectToRoom2,
+    ConnectToRoom,
     VideoPlayer,
-    PlayerControls
   },
   computed: {
     ...mapState(['connectedStatus', 'playing'])

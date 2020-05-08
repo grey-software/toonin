@@ -25,11 +25,6 @@ export default {
       initialControls: [],
       playingControls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen']    }
   },
-  watch: {
-    playing(newValue, oldValue) {
-      console.log(newValue, oldValue)
-    }
-  },
   computed: {
     ...mapState(['videoStream', 'playing', 'audioStream', 'volume']),
     combined () {
@@ -51,6 +46,9 @@ export default {
   watch: {
     volume () {
       this.videoTag.volume = this.volume / 100
+    },
+    playing (newValue, oldValue) {
+      console.log(newValue, oldValue)
     }
   },
   methods: {

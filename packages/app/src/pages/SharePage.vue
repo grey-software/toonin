@@ -165,7 +165,6 @@
 </template>
 
 <script>
-import TooninIcon from '../components/TooninIcon'
 
 function makeid (length) {
   var result = ''
@@ -193,9 +192,6 @@ import { mapState } from 'vuex'
 import { StartShare } from '../host'
 export default {
   name: 'screen-cap',
-  components: {
-    TooninIcon
-  },
   data: () => ({
     videoTag: null,
     roomName: '',
