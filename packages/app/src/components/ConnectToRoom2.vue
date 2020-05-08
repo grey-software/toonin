@@ -19,8 +19,7 @@
       </q-input>
       <q-btn
         @click="disconnect"
-        class="btn-share col-4"
-        color="warning"
+        class="btn-share btn-disconnect col-4"
         outline
         rounded
         v-if="connectedStatus === 'connected'"
@@ -36,13 +35,12 @@
       <q-btn
         @click="toonin"
         class="btn-share col-3"
-        color="primary"
         outline
         rounded
         v-else
       >
         <q-icon
-          name="app:toonin"
+          :name="$q.dark.isActive ? 'app:toonin-dark' : 'app:toonin'"
           left
           class="q-mr-xs"
         />
@@ -288,16 +286,36 @@ export default {
 </script>
 
 
-<style>
+<style scoped>
 .input-room {
   font-size: 18px;
+  color: var(--q-color-primary);
 }
 .btn-share {
   height: 56px !important;
   font-size: 18px;
   text-transform: capitalize;
+  color: var(--q-color-primary);
+}
+
+.btn-disconnect {
+  color: #FFC400;
 }
 .q-field--outlined .q-field__control {
   padding: 0 24px !important;
+}
+</style>
+
+<style scoped>
+.body--dark .btn-share {
+  color: #b9bbbe;
+}
+
+.body--dark .input-room {
+  color: #b9bbbe;
+}
+
+.body--dark .btn-disconnect {
+  color: #F6D45A;
 }
 </style>

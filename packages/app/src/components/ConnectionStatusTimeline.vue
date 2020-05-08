@@ -172,7 +172,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 @import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro);
 
 .cd-horizontal-timeline {
@@ -378,5 +378,28 @@ Main Components
     -o-transform: translateX(0%);
     transform: translateX(0%);
   }
+}
+</style>
+
+<style scoped>
+.body--dark .events a {
+  color: #b9bbbe;
+}
+
+.body--dark .events a.selected::after {
+  background-color: #00b0f4 !important;
+  border-color: #00b0f4 !important;
+}
+.body--dark .events a.older-event::after {
+  border-color: #00b0f4 !important;
+  background-color: #00b0f4 !important;
+}
+
+.body--dark .filling-line {
+  background-color: #00b0f4 !important;
+}
+
+.body--dark a {
+  color: #b9bbbe !important;
 }
 </style>

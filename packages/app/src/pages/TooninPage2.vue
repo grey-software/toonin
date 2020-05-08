@@ -28,7 +28,7 @@
         </q-btn>
         <q-icon
           v-else
-          class="player-icon text-primary"
+          class="player-icon"
           name="mdi-dots-horizontal"
         ></q-icon>
       </div>
@@ -53,7 +53,7 @@ export default {
   },
   methods: {
     startPlaying () {
-      this.$store.dispatch('UPDATE_PLAYING', true)
+      this.$store.commit('SET_PLAYING', true)
     }
   },
 }

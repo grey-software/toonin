@@ -32,7 +32,7 @@
           name="app:sun"
         />
       </q-btn>
-      <q-btn
+      <!-- <q-btn
         flat
         fab
         round
@@ -42,17 +42,18 @@
           class="is-36x36"
           name="app:guide"
         ></q-icon>
-      </q-btn>
+      </q-btn> -->
       <q-btn
         flat
         fab
         round
-        tyoe="a"
+        type="a"
         href="https://www.github.com/grey-software/toonin"
+        target="_blank"
       >
         <q-icon
           class="is-36x36"
-          name="app:github"
+          :name="$q.dark.isActive ? 'app:github-dark' : 'app:github'"
         ></q-icon>
       </q-btn>
     </div>
@@ -66,7 +67,7 @@
       <q-tab
         label="Toonin"
         name="toonin"
-        icon="app:toonin"
+        :icon="$q.dark.isActive ? 'app:toonin-dark' : 'app:toonin'"
       />
       <q-tab
         label="Share"
@@ -78,6 +79,7 @@
     <q-tab-panels
       v-model="tab"
       animated
+      class="toonin-tab-panels"
     >
       <q-tab-panel name="toonin">
         <TooninPage2 />
@@ -171,5 +173,15 @@ export default {
 
 .toonin-tabs {
   color: #4296bd;
+}
+</style>
+
+<style scoped>
+.body--dark .toonin-tabs {
+  color: #b9bbbe !important;
+}
+
+.body--dark .toonin-tab-panels {
+  background: #2f3136;
 }
 </style>

@@ -7,8 +7,10 @@
 <script >
 const myIcons = {
   'app:toonin': 'img:statics/toonin.svg',
+  'app:toonin-dark': 'img:statics/toonin-dark.svg',
   'app:guide': 'img:statics/guide.svg',
   'app:github': 'img:statics/github.svg',
+  'app:github-dark': 'img:statics/github-dark.svg',
   'app:moon': 'img:statics/moon.svg',
   'app:sun': 'img:statics/sun.svg'
 }
@@ -26,6 +28,9 @@ export default {
 </script>
 
 <style>
+body.body--dark {
+  background: #2f3136;
+}
 .text-toonin {
   color: #4296bd;
 }

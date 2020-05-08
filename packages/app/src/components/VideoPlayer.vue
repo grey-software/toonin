@@ -25,6 +25,11 @@ export default {
       initialControls: [],
       playingControls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen']    }
   },
+  watch: {
+    playing(newValue, oldValue) {
+      console.log(newValue, oldValue)
+    }
+  },
   computed: {
     ...mapState(['videoStream', 'playing', 'audioStream', 'volume']),
     combined () {
@@ -70,9 +75,10 @@ export default {
 }
 </script>
 
-<style scoped>
-.plyr--video {
-  border-radius: 12px !important;
+<style>
+.plyr {
+  margin: 0px 20px;
+  border-radius: 4px;
 }
 
 .video-player {
