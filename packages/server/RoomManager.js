@@ -24,7 +24,7 @@ class Room {
     this.room = room;
     this.hostId = hostId;
     this.hash = null
-    if (password.length > 0) {
+    if (password && password.length > 0) {
       this.createHash(password).then(res => {
         this.hash = res
       })
