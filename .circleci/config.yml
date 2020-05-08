@@ -22,7 +22,7 @@ jobs:
       - run:
           name: Building App
           command: |
-            npm run build:app
+            npm run build
   Deploy-App:
     docker:
       - image: circleci/node:latest
