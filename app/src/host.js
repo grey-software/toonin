@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 /* eslint no-console: ["error", { allow: ["log"] }] */
-const serverUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:8443' : 'https://www.toonin.ml'
+const serverUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:8443' : window.location.origin
 console.log(serverUrl)
 const servers = {
   iceServers: [
