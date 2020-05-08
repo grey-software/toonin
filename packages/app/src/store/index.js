@@ -35,8 +35,8 @@ export default function (/* { ssrContext } */) {
       messages: [],
       sharingStream: null,
       unread: 0,
-      shareAudio: false,
-      shareVideo: false
+      shareAudio: true,
+      shareVideo: true
     },
     mutations: {
       SET_CONNECTED_STATUS: (state, payload) => {
