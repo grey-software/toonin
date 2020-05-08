@@ -1,56 +1,87 @@
 <template>
-  <div>
-    <div>
-      <q-layout
-        class="row main-card"
-        align="center"
-        fixed-center
+  <div class="column items-center">
+    <ConnectToRoom2></ConnectToRoom2>
+    <div class="video-container">
+      <div class="absolute">
+        <transition
+          name="fade"
+          mode="out-in"
+        >
+          <video-player v-show="connectedStatus == 'connected'" />
+        </transition>
+      </div>
+      <div
+        v-if="!playing"
+        class="player-button"
       >
-        <div
-          style="padding: 5px"
-          class="col-xs-12 col-md-6"
+        <q-btn
+          class="toonin-play"
+          fab
+          color="primary"
+          v-if="connectedStatus == 'connected'"
+          @click="startPlaying"
         >
-          <connect-to-room />
-        </div>
-        <div
-          style="padding: 5px"
-          class="col-xs-12 col-md-6"
-        >
-          <connection-status />
-        </div>
-        <div
-          v-show="connectedStatus === 'connected'"
-          style="padding: 30px"
-          class="col-xs-12"
-        >
-          <video-player></video-player>
-        </div>
-      </q-layout>
+          <q-icon
+            class="player-icon text-white"
+            name="mdi-play"
+          ></q-icon>
+        </q-btn>
+        <q-icon
+          v-else
+          class="player-icon"
+          name="mdi-dots-horizontal"
+        ></q-icon>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import ConnectToRoom from '../components/ConnectToRoom.vue'
-import ConnectionStatus from '../components/Connection.vue'
-import PlayerControls from '../components/PlayerControls.vue'
-import Title from '../components/Title.vue'
-import VideoPlayer from '../components/VideoPlayer.vue'
-import { mapState } from 'vuex'
+import { mapState } from "vuex"
+import ConnectToRoom2 from "../components/ConnectToRoom2"
+import VideoPlayer from "../components/VideoPlayer"
+import PlayerControls from "../components/PlayerControls"
 
 export default {
-  name: 'Home',
   components: {
-    ConnectToRoom,
-    ConnectionStatus,
-    PlayerControls,
-    Title,
-    VideoPlayer
+    ConnectToRoom2,
+    VideoPlayer,
+    PlayerControls
   },
   computed: {
-    ...mapState(['name', 'connectedStatus'])
-  }
+    ...mapState(['connectedStatus', 'playing'])
+  },
+  methods: {
+    startPlaying () {
+      this.$store.commit('SET_PLAYING', true)
+    }
+  },
 }
 </script>
 
-<style></style>
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.3s ease-out;
+}
+
+.fade-enter,
+.fade-leave-active {
+  opacity: 0;
+}
+.video-container {
+  position: relative;
+  width: 599px;
+  height: 337px;
+}
+
+.player-button {
+  position: absolute;
+  left: 45%;
+  top: 36%;
+}
+
+.player-icon {
+  font-size: 42px;
+}
+</style>

@@ -1,19 +1,15 @@
 const routes = [
   {
     path: '/',
-    component: () => import('layouts/MainLayout2.vue'),
+    component: () => import('layouts/MainLayout.vue'),
     children: [
       {
         path: 'toonin',
-        component: () => import('pages/TooninPage2.vue')
+        component: () => import('pages/TooninPage.vue')
       },
       {
         path: 'share',
         component: () => import('pages/SharePage.vue')
-      },
-      {
-        path: 'chat',
-        component: () => import('pages/ChatPage.vue')
       }
     ]
   }
