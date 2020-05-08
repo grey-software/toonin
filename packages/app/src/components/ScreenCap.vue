@@ -47,6 +47,23 @@
           {{ errorMessages[0] }}
         </template>
         </q-input>
+        <q-input
+          v-model="password"
+          v-show="!connectedRoomName"
+          style="color: white;"
+          placeholder="Room password"
+          outlined
+          rounded
+          :type="isPwd ? 'password' : 'text'"
+        >
+        <template v-slot:append>
+          <q-icon
+            :name="isPwd ? 'visibility_off' : 'visibility'"
+            class="cursor-pointer"
+            @click="isPwd = !isPwd"
+          />
+        </template>
+        </q-input>
       </q-card-section>
       <q-card-actions style="padding: 20px" align="center">
           <span v-show="connectedRoomName">
@@ -215,7 +232,9 @@ export default {
     roomName: '',
     roomNameInputErrorMessages: [],
     userVideo: null,
-    userAudio: null
+    userAudio: null,
+    password: '',
+    isPwd: true
   }),
   computed: {
     cardTitle () {

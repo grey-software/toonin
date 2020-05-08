@@ -24,7 +24,7 @@
         </div>
       </q-toolbar>
     </q-header>
-    <div style="padding: 100px" align="center" >
+    <div style="padding-top: 100px" align="center" >
       <q-card class=" toonin-title my-card q-pa-md" v-if="name">
         <q-card-section>
         <div class="text-h4">Welcome, {{ name }}</div>
@@ -109,7 +109,7 @@ export default {
   max-width: 1366px
   max-height: 1366px
 .main-card
-  width: 90%
+  width: 98%
   max-width: 900px
 </style>
 <style>
