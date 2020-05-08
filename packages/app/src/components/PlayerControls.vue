@@ -1,53 +1,62 @@
 <template>
   <q-card class="controls-container">
-      <q-card-actions style="padding: 20px" align="around">
-        <div class="volume-slider">
-          <q-item>
-            <q-item-section side>
-              <q-btn
-                outlined
-                flat
-                @click="mute()"
-                icon="volume_down"
-              />
-            </q-item-section>
-            <q-slider
-              v-model="volume"
-              :min="0"
-              :max="100"
-              :step="1"
-              label
-            ></q-slider>
-          </q-item>
-        </div>
-        <q-btn
-          v-show="playing == false"
-          :disabled="audioStream || videoStream ? false : true"
-          outlined
-          fab
-          color="light-blue"
-          @click="playTrack()"
-        >
-          <q-icon large name="play_arrow"></q-icon>
-        </q-btn>
-        <q-btn
-          v-show="connectedStatus == 'connected' && playing == true"
-          outlined
-          fab
-          color="light-blue"
-          @click="pauseTrack()"
-        >
-          <q-icon large name="pause"></q-icon>
-        </q-btn>
-      </q-card-actions>
+    <q-card-actions
+      style="padding: 20px"
+      align="around"
+    >
+      <div class="volume-slider">
+        <q-item>
+          <q-item-section side>
+            <q-btn
+              outlined
+              flat
+              @click="mute()"
+              icon="volume_down"
+            />
+          </q-item-section>
+          <q-slider
+            v-model="volume"
+            :min="0"
+            :max="100"
+            :step="1"
+            label
+          ></q-slider>
+        </q-item>
+      </div>
+      <q-btn
+        v-show="playing == false"
+        :disabled="audioStream || videoStream ? false : true"
+        outlined
+        fab
+        color="light-blue"
+        @click="playTrack()"
+      >
+        <q-icon
+          large
+          name="play_arrow"
+        ></q-icon>
+      </q-btn>
+      <q-btn
+        v-show="connectedStatus == 'connected' && playing == true"
+        outlined
+        fab
+        color="light-blue"
+        @click="pauseTrack()"
+      >
+        <q-icon
+          large
+          name="pause"
+        ></q-icon>
+      </q-btn>
+    </q-card-actions>
     <audio
-        v-if="!videoStream"
-        :srcObject.prop="playing ? audioStream : null"
-        style="display: none;"
-        preload="auto"
-        autoplay
-        ref="audio"
-      />
+      v-if="!videoStream"
+      :srcObject.prop="playing ? audioStream : null"
+      style="display: none;"
+      preload="auto"
+      autoplay
+      ref="audio"
+    />
   </q-card>
 </template>
 <script>
@@ -96,15 +105,18 @@ export default {
 }
 </script>
 
-<style lang="sass" scoped>
-.controls-container
+<style scoped>
+.controls-container {
   max-width: 400px;
   border-radius: 16px !important;
+}
 
-.controls-row
+.controls-row {
   display: flex;
   align-items: center;
+}
 
-.volume-slider
-  width: 80%
+.volume-slider {
+  width: 80%;
+}
 </style>
