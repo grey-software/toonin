@@ -63,9 +63,10 @@ export default {
 }
 </script>
 
-<style lang="sass" scoped>
-.video-player
+<style scoped>
+.video-player {
   border: 1.5px solid #999;
   width: 100%;
   height: 480px;
+}
 </style>

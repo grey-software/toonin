@@ -3,12 +3,12 @@
     <div class="toonin-title">{{ cardTitle }}</div>
     <q-card class="main-card">
       <q-card-section>
-         <q-scroll-area
+        <q-scroll-area
           ref="chat"
           class="logs"
         >
           <template v-for="(item, index) in messages">
-             <div
+            <div
               v-if="item.name === 'Admin'"
               :key="index"
               class="text-body1"
@@ -43,7 +43,7 @@
           @keydown.enter="sendMessage"
           :error="errorMessages.length > 0"
         >
-        <template v-slot:append>
+          <template v-slot:append>
             <q-btn
               icon="mdi-send-circle"
               round
@@ -54,7 +54,7 @@
           <template v-slot:error>
             {{ errorMessages[0] }}
           </template>
-          </q-input>
+        </q-input>
       </q-card-section>
     </q-card>
   </div>
@@ -141,11 +141,12 @@ export default {
 }
 </script>
 
-<style lang="sass">
-.logs
-  height: 300px
-  max-width: 100%
-  overflow-y: auto
-  overflow-x: hidden
-  font-size: 12px !important
+<style >
+.logs {
+  height: 300px;
+  max-width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  font-size: 12px !important;
+}
 </style>
