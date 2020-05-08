@@ -6,13 +6,15 @@
     "private": true,
     "image": "heroku/nodejs",
     "scripts": {
-        "start": "cd deployment && npm start",
+        "start": "npm run server",
         "setup:app": "npm install --prefix packages/app",
         "setup:server": "npm install --prefix packages/server",
         "setup": "npm run setup:server; npm run setup:app",
-        "server": "npm run start --prefix packages/server &",
+        "server": "npm run start --prefix packages/server",
+        "server:bg": "npm run start --prefix packages/server &",
         "app": "npm run start --prefix packages/app",
-        "build:app": "cd packages/app && npm run build",
+        "rebuild": "cd packages/app && npm rebuild node-sass",
+        "build": "cd packages/app && npm run build",
         "launch": "npm run server; npm run app"
     },
     "dependencies": {

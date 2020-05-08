@@ -24,26 +24,55 @@
         </div>
       </q-toolbar>
     </q-header>
-    <div style="padding-top: 100px" align="center" >
-      <q-card class=" toonin-title my-card q-pa-md" v-if="name">
+    <div
+      style="padding-top: 100px"
+      align="center"
+    >
+      <q-card
+        class=" toonin-title my-card q-pa-md"
+        v-if="name"
+      >
         <q-card-section>
-        <div class="text-h4">Welcome, {{ name }}</div>
-      </q-card-section>
-        <q-tabs v-model="tab" class="text-teal">
-          <q-tab label="Toonin" name="toonin" />
-          <q-tab label="Share" v-if="!$q.platform.is.mobile" name="share" />
-          <q-tab label="Chat" name="chat" >
-            <q-badge v-if="unread>0" color="red" floating>{{ unread }}</q-badge>
+          <div class="text-h4">Welcome, {{ name }}</div>
+        </q-card-section>
+        <q-tabs
+          v-model="tab"
+          class="text-teal"
+        >
+          <q-tab
+            label="Toonin"
+            name="toonin"
+          />
+          <q-tab
+            label="Share"
+            v-if="!$q.platform.is.mobile"
+            name="share"
+          />
+          <q-tab
+            label="Chat"
+            name="chat"
+          >
+            <q-badge
+              v-if="unread>0"
+              color="red"
+              floating
+            >{{ unread }}</q-badge>
           </q-tab>
         </q-tabs>
 
         <q-separator />
 
-        <q-tab-panels v-model="tab" animated>
+        <q-tab-panels
+          v-model="tab"
+          animated
+        >
           <q-tab-panel name="toonin">
             <TooninPage />
           </q-tab-panel>
-          <q-tab-panel v-if="!$q.platform.is.mobile" name="share">
+          <q-tab-panel
+            v-if="!$q.platform.is.mobile"
+            name="share"
+          >
             <SharePage />
           </q-tab-panel>
           <q-tab-panel name="chat">
@@ -113,13 +142,13 @@ export default {
   max-width: 900px
 </style>
 <style>
-@import url('https://fonts.googleapis.com/css?family=Nunito+Sans:800&display=swap');
+@import url("https://fonts.googleapis.com/css?family=Nunito+Sans:800&display=swap");
 :root {
   --color-blue: #4296bd;
   --color-title-text: #f6d45a;
 }
 .toonin-title {
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: "Nunito Sans", sans-serif;
   font-size: 28px !important ;
   color: var(--color-blue);
 }

@@ -1,11 +1,13 @@
 /* eslint-disable no-console */
 <template>
-  <q-card
-    class="main-card"
-  >
+  <q-card class="main-card">
     <q-card-section class="toonin-title">{{ cardTitle }}</q-card-section>
     <div>
-      <vue-plyr style="padding: 0%;" v-if="sharingStream !== null" muted>
+      <vue-plyr
+        style="padding: 0%;"
+        v-if="sharingStream !== null"
+        muted
+      >
         <video
           class="video-player"
           ref="videoPlayerShare"
@@ -35,17 +37,17 @@
           :error="errorMessages.length > 0"
           v-show="!connectedRoomName"
         >
-        <template v-slot:append>
-          <q-btn
-            icon="mdi-cached"
-            round
-            flat
-            @click="randomRoomName"
-          />
-        </template>
-        <template v-slot:error>
-          {{ errorMessages[0] }}
-        </template>
+          <template v-slot:append>
+            <q-btn
+              icon="mdi-cached"
+              round
+              flat
+              @click="randomRoomName"
+            />
+          </template>
+          <template v-slot:error>
+            {{ errorMessages[0] }}
+          </template>
         </q-input>
         <q-input
           v-model="password"
@@ -65,131 +67,141 @@
         </template>
         </q-input>
       </q-card-section>
-      <q-card-actions style="padding: 20px" align="center">
-          <span v-show="connectedRoomName">
-            <q-icon
-              large
-              color="primary"
-              name="mdi-account"
-            ></q-icon>
-            <span class="label-room-name ml-3" style="padding-right: 10px">{{ this.peerCounter }} peers</span>
-          </span>
-          <q-btn
-            @click="copyIdToClipboard"
-            outlined
-            rounded
-            v-show="connectedRoomName"
-          >
-            <q-icon
-              color="primary"
-              name="mdi-content-copy"
-            />
-          </q-btn>
-          <q-btn
-            @click="copyLinkToClipboard"
-            outlined
-            rounded
-            v-show="connectedRoomName"
-          >
-            <q-icon
-              color="primary"
-              name="mdi-earth"
-            />
-          </q-btn>
-          <q-space />
-          <q-btn
-            @click="getUserVideo"
-            disabled
-            outlined
-            rounded
-          >
-            <q-icon
-              v-if="userVideo"
-              color="warning"
-              name="mdi-video"
-            />
-            <q-icon
-              v-else
-              color="primary"
-              name="mdi-video"
-            />
-          </q-btn>
-          <q-btn
-            @click="getUserAudio"
-            disabled
-            outlined
-            rounded
-          >
-            <q-icon
-              v-if="userAudio"
-              color="warning"
-              name="mdi-microphone"
-            ></q-icon>
-            <q-icon
-              v-else
-              color="primary"
-              name="mdi-microphone"
-            ></q-icon>
-          </q-btn>
-          <q-btn
-            @click="createRoom"
-            class="btn-share pr-4"
-            outline
-            rounded
-            :color='"primary"'
-            height="42"
-            v-show="!connectedRoomName"
-            :disabled="!roomNameValid || tooninHappening"
-          >
-            <toonin-icon />Share
-          </q-btn>
-          <q-btn
-            @click="disconnect"
-            class="btn-share pr-4"
-            height="42"
-            outlined
-            color="warning"
-            rounded
-            v-show="connectedRoomName"
-            icon="mdi-stop"
-          > Disconnect
-          </q-btn>
-      </q-card-actions>
-      <q-card-actions align="right" class="checkboxes" style="padding: 20px">
+      <q-card-actions
+        style="padding: 20px"
+        align="center"
+      >
+        <span v-show="connectedRoomName">
+          <q-icon
+            large
+            color="primary"
+            name="mdi-account"
+          ></q-icon>
+          <span
+            class="label-room-name ml-3"
+            style="padding-right: 10px"
+          >{{ this.peerCounter }} peers</span>
+        </span>
         <q-btn
-            @click="startCapture"
-            class="btn-share pr-4"
-            outline
-            rounded
-            :color='"primary"'
-            height="42"
-            v-show="connectedRoomName && !sharingStream"
-          >
-            <toonin-icon />Capture
+          @click="copyIdToClipboard"
+          outlined
+          rounded
+          v-show="connectedRoomName"
+        >
+          <q-icon
+            color="primary"
+            name="mdi-content-copy"
+          />
         </q-btn>
         <q-btn
-            @click="stopCapture"
-            class="btn-share pr-4"
-            height="42"
-            outlined
+          @click="copyLinkToClipboard"
+          outlined
+          rounded
+          v-show="connectedRoomName"
+        >
+          <q-icon
+            color="primary"
+            name="mdi-earth"
+          />
+        </q-btn>
+        <q-space />
+        <q-btn
+          @click="getUserVideo"
+          disabled
+          outlined
+          rounded
+        >
+          <q-icon
+            v-if="userVideo"
             color="warning"
-            rounded
-            v-show="sharingStream"
-            icon="mdi-stop"
-          >Stop Sharing
-          </q-btn>
+            name="mdi-video"
+          />
+          <q-icon
+            v-else
+            color="primary"
+            name="mdi-video"
+          />
+        </q-btn>
+        <q-btn
+          @click="getUserAudio"
+          disabled
+          outlined
+          rounded
+        >
+          <q-icon
+            v-if="userAudio"
+            color="warning"
+            name="mdi-microphone"
+          ></q-icon>
+          <q-icon
+            v-else
+            color="primary"
+            name="mdi-microphone"
+          ></q-icon>
+        </q-btn>
+        <q-btn
+          @click="createRoom"
+          class="btn-share pr-4"
+          outline
+          rounded
+          :color='"primary"'
+          height="42"
+          v-show="!connectedRoomName"
+          :disabled="!roomNameValid || tooninHappening"
+        >
+          <toonin-icon />Share
+        </q-btn>
+        <q-btn
+          @click="disconnect"
+          class="btn-share pr-4"
+          height="42"
+          outlined
+          color="warning"
+          rounded
+          v-show="connectedRoomName"
+          icon="mdi-stop"
+        > Disconnect
+        </q-btn>
+      </q-card-actions>
+      <q-card-actions
+        align="right"
+        class="checkboxes"
+        style="padding: 20px"
+      >
+        <q-btn
+          @click="startCapture"
+          class="btn-share pr-4"
+          outline
+          rounded
+          :color='"primary"'
+          height="42"
+          v-show="connectedRoomName && !sharingStream"
+        >
+          <toonin-icon />Capture
+        </q-btn>
+        <q-btn
+          @click="stopCapture"
+          class="btn-share pr-4"
+          height="42"
+          outlined
+          color="warning"
+          rounded
+          v-show="sharingStream"
+          icon="mdi-stop"
+        >Stop Sharing
+        </q-btn>
         <q-checkbox
-            v-model="sendAudio"
-            color="secondary"
-            label="Share Audio"
-            v-show="sharingStream"
-          />
-          <q-checkbox
-            v-model="sendVideo"
-            color="secondary"
-            label="Share Video"
-            v-show="sharingStream"
-          />
+          v-model="sendAudio"
+          color="secondary"
+          label="Share Audio"
+          v-show="sharingStream"
+        />
+        <q-checkbox
+          v-model="sendVideo"
+          color="secondary"
+          label="Share Video"
+          v-show="sharingStream"
+        />
       </q-card-actions>
     </div>
   </q-card>
@@ -452,13 +464,15 @@ export default {
 }
 </script>
 
-<style lang="sass" scoped>
-.video-player
+<style scoped>
+.video-player {
   border: 1.5px solid #999;
   width: 100%;
   height: 480px;
+}
 
-.checkboxes
-  text-align right
-  font-size: 12px
+.checkboxes {
+  text-align: right;
+  font-size: 12px;
+}
 </style>
