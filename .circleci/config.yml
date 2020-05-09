@@ -45,6 +45,28 @@ jobs:
             heroku container:login
             heroku container:push web
             heroku container:release web
+  Deploy-App-staging:
+    docker:
+      - image: circleci/node:latest
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build Docker image
+          command: docker build -t toonin-staging:$CIRCLE_SHA1 .
+      - run:
+          name: Setup Heroku
+          command: |
+            chmod +x .circleci/setup-heroku.sh
+            .circleci/setup-heroku.sh
+      - run:
+          name: Deploy to Heroku
+          command: |
+            docker login --username=$HEROKU_LOGIN --password=$HEROKU_API_KEY registry.heroku.com
+            docker tag toonin-staging:$CIRCLE_SHA1 registry.heroku.com/$HEROKU_APP_STAGING_NAME/web
+            heroku container:login
+            heroku container:push web
+            heroku container:release web
 workflows:
   version: 2
   Validate_Build:
@@ -58,6 +80,9 @@ workflows:
               only:
                 - master
                 - heroku
+      - Deploy-App-staging:
+        requires:
+          - Build-App
 notify:
   webhooks:
     - url: https://outlook.office.com/webhook/04e18692-6efb-49e9-9028-139bf917ab16@78aac226-2f03-4b4d-9037-b46d56c55210/CircleCI/30437ffdcb3e400baa80214e81552edc/5b046f8c-07ba-4e2f-a006-653143830ede
