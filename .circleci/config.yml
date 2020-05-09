@@ -23,6 +23,28 @@ jobs:
           name: Building App
           command: |
             npm run build
+  Staging:
+    docker:
+      - image: circleci/node:latest
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build Docker image
+          command: docker build -t toonin-staging:$CIRCLE_SHA1 .
+      - run:
+          name: Setup Heroku
+          command: |
+            chmod +x .circleci/setup-heroku.sh
+            .circleci/setup-heroku.sh
+      - run:
+          name: Deploy to Heroku
+          command: |
+            docker login --username=$HEROKU_LOGIN --password=$HEROKU_API_KEY registry.heroku.com
+            docker tag toonin-staging:$CIRCLE_SHA1 registry.heroku.com/$HEROKU_APP_STAGING_NAME/web
+            heroku container:login
+            heroku container:push web
+            heroku container:release web
   Deploy-App:
     docker:
       - image: circleci/node:latest
@@ -45,28 +67,6 @@ jobs:
             heroku container:login
             heroku container:push web
             heroku container:release web
-  Deploy-App-staging:
-    docker:
-      - image: circleci/node:latest
-    steps:
-      - checkout
-      - setup_remote_docker
-      - run:
-          name: Build Docker image
-          command: docker build -t toonin-staging:$CIRCLE_SHA1 .
-      - run:
-          name: Setup Heroku
-          command: |
-            chmod +x .circleci/setup-heroku.sh
-            .circleci/setup-heroku.sh
-      - run:
-          name: Deploy to Heroku
-          command: |
-            docker login --username=$HEROKU_LOGIN --password=$HEROKU_API_KEY registry.heroku.com
-            docker tag toonin-staging:$CIRCLE_SHA1 registry.heroku.com/$HEROKU_APP_STAGING_NAME/web
-            heroku container:login
-            heroku container:push web
-            heroku container:release web
 workflows:
   version: 2
   Validate_Build:
@@ -79,8 +79,7 @@ workflows:
             branches:
               only:
                 - master
-                - heroku
-      - Deploy-App-staging:
+      - Staging:
           requires:
             - Build-App
 notify:
