@@ -27,7 +27,7 @@ app.get("*", function(req, res, next) {
 //Socket create a new "room" and listens for other connections
 io.on("connection", (socket) => {
   socket.on("create room", (req) => {
-    if (roomManager.createRoom(socket, req.room, req.isDistributed)) {
+    if (roomManager.createRoom(socket, req.room, req.isDistributed, req.password)) {
       socketManager.addSocket(socket,req.room)
     }
   });
@@ -35,17 +35,56 @@ io.on("connection", (socket) => {
   socket.on("new peer", (roomID) => {
     const room = roomManager.getRoom(roomID);
     if (room) {
-      if (room.room.getConnectableNodes) {
-        const potentialHosts = room.room.getConnectableNodes();
-        socket.emit("host pool", { potentialHosts, roomID });
+      if (room.hash) {
+        socket.emit("require-password");
       } else {
-        socket.join(roomID, () => {
-          console.log("Peer connected successfully to room: " + roomID);
-          socket.to(roomID).emit("peer joined", {
-            room: roomID,
-            id: socket.id,
+        if (room.room.getConnectableNodes) {
+          const potentialHosts = room.room.getConnectableNodes();
+          socket.emit("host pool", { potentialHosts, roomID });
+        } else {
+          socket.join(roomID, () => {
+            console.log("Peer connected successfully to room: " + roomID);
+            socket.to(roomID).emit("peer joined", {
+              room: roomID,
+              id: socket.id,
+            });
           });
+        }
+      }
+    } else {
+      console.log("invalid room");
+      socket.emit("room null");
+    }
+  });
+
+  socket.on("new peer password", (req) => {
+    const room = roomManager.getRoom(req.roomID);
+    if (room) {
+      if (room.hash && !req.password) {
+        socket.emit("require-password");
+      } else {
+        room.verifyPassword(req.password).then((verified) => {
+          if (verified) {
+            if (room.room.getConnectableNodes) {
+              const potentialHosts = room.room.getConnectableNodes();
+              socket.emit("host pool", { potentialHosts, roomID: req.roomID });
+            } else {
+              socket.join(req.roomID, () => {
+                console.log("Peer connected successfully to room: " + req.roomID);
+                socket.to(req.roomID).emit("peer joined", {
+                  room: req.roomID,
+                  id: socket.id,
+                });
+              });
+            }
+          } else {
+            socket.emit("require-password");
+          }
+        }).catch((reason) => {
+          console.log(reason);
+          socket.emit("require-password");
         });
+        
       }
     } else {
       console.log("invalid room");

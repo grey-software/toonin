@@ -155,7 +155,8 @@ class StartShare {
       this.setSocketListenersSharing()
       this.socket.emit('create room', {
         room: this.app.roomName,
-        isDistributed: true
+        isDistributed: true,
+        password: this.app.password
       })
     }
     if (this.socket && !this.sharing) {
@@ -172,6 +173,14 @@ class StartShare {
       this.socket.emit('new peer', this.app.roomName)
     })
 
+    this.socket.on('require-password', () => {
+      if (this.app.passwordRequired) {
+        this.app.errors.push('Incorrect Password')
+      }
+      this.app.passwordRequired = true
+      this.app.auth = true
+    })
+
     this.socket.on('room null', () => {
       this.app.roomName = ''
       this.app.errors.push('Room name is invalid.')
@@ -180,6 +189,8 @@ class StartShare {
 
     this.socket.on('host pool', (hostPool) => {
       this.app.errors = []
+      this.app.password = ''
+      this.app.auth = false
       console.log('recieved host pool to evaluate')
       console.log(hostPool)
       const evalResult = this.app.evaluateHosts(hostPool.potentialHosts)

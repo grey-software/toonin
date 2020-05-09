@@ -14,7 +14,7 @@
     <q-card-section class="text--primary">
       <q-input
         v-show="
-          connectedStatus === 'disconnected' || connectedStatus === 'failed'
+          (connectedStatus === 'disconnected' || connectedStatus === 'failed') && !passwordRequired
         "
         v-model="roomName"
         style="color: white;"
@@ -25,6 +25,28 @@
         rounded
         :error="errorMessages.length > 0"
       >
+        <template v-slot:error>
+          {{ errorMessages[0] }}
+        </template>
+      </q-input>
+      <q-input
+        v-show="auth"
+        v-model="password"
+        style="color: white;"
+        @keydown.enter="toonin"
+        placeholder="Room password"
+        outlined
+        rounded
+        :error="errorMessages.length > 0"
+        :type="isPwd ? 'password' : 'text'"
+      >
+        <template v-slot:append>
+          <q-icon
+            :name="isPwd ? 'visibility_off' : 'visibility'"
+            class="cursor-pointer"
+            @click="isPwd = !isPwd"
+          />
+        </template>
         <template v-slot:error>
           {{ errorMessages[0] }}
         </template>
@@ -51,6 +73,17 @@
         ></toonin-icon>
         {{ buttonStatus }}
       </q-btn>
+      <q-btn
+        @click="cancelAuth"
+        class="btn-share pr-4"
+        height="42"
+        outline
+        rounded
+        :disabled="sharing"
+        v-show="auth"
+      >
+        Cancel
+      </q-btn>
     </q-card-actions>
   </q-card>
 </template>
@@ -76,16 +109,43 @@ export default {
       roomName: null,
       targetHost: '',
       failedHosts: [],
-      errors: []
+      errors: [],
+      passwordRequired: false,
+      password: '',
+      auth: false,
+      isPwd: true
     }
   },
   methods: {
+    sendPassword () {
+      if (this.password.length > 0) {
+        this.errors = []
+        this.peers.socket.emit('new peer password', { roomID: this.roomName, password: this.password })
+      } else {
+        this.errors.push('Password is required for this room.')
+        this.password = ''
+      }
+    },
+    cancelAuth () {
+      this.auth = false
+      this.password = ''
+      this.disconnect()
+    },
     handleTooninButtonClick () {
+      if (this.auth) {
+        this.sendPassword()
+        return
+      }
       if (this.connectedStatus === 'connected') {
         this.disconnect()
       } else this.toonin()
     },
     toonin () {
+      if (this.auth) {
+        console.log('auth came')
+        this.sendPassword()
+        return
+      }
       this.connectToRoom()
     },
     connectToRoom (reconnecting) {
@@ -195,10 +255,13 @@ export default {
 
       var roomKey = this.$store.getters.ROOM
       this.roomName = roomKey
+      this.passwordRequired = false
       this.connectToRoom(false)
     },
     async disconnect () {
-      this.rtcConn.close()
+      if (this.rtcConn) {
+        this.rtcConn.close()
+      }
       await this.peers.removeAllPeersAndClose()
       this.$store.dispatch('UPDATE_AUDIO_STREAM', null)
       this.$store.dispatch('UPDATE_VIDEO_STREAM', null)
@@ -211,6 +274,7 @@ export default {
       this.$store.dispatch('UPDATE_PEERS', null)
       this.targetHost = ''
       this.failedHosts = []
+      this.passwordRequired = false
     }
   },
   computed: {

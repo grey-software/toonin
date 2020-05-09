@@ -25,7 +25,7 @@
       </q-toolbar>
     </q-header>
     <div
-      style="padding: 100px"
+      style="padding-top: 100px"
       align="center"
     >
       <q-card
@@ -132,16 +132,14 @@ export default {
 }
 </script>
 
-<style>
-.my-card {
-  width: 100%;
-  max-width: 1366px;
-  max-height: 1366px;
-}
-.main-card {
-  width: 90%;
-  max-width: 900px;
-}
+<style lang="sass">
+.my-card
+  width: 100%
+  max-width: 1366px
+  max-height: 1366px
+.main-card
+  width: 98%
+  max-width: 900px
 </style>
 <style>
 @import url("https://fonts.googleapis.com/css?family=Nunito+Sans:800&display=swap");
