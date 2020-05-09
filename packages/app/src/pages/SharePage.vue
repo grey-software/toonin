@@ -11,11 +11,11 @@
       <q-input
         v-model="roomName"
         autofocus
-        label="Name your room"
-        @keydown.enter="startCapture"
+        :label="!connectedRoomName ? 'Name your room': connectedRoomName"
+        @keydown.enter="createRoom"
         outlined
-        :disabled="isConnectedToRoom"
         rounded
+        v-show="!connectedRoomName"
         :error="errorMessages.length > 0"
         class="col-7 col-auto q-mr-lg input-room"
       >
@@ -31,33 +31,25 @@
           {{ errorMessages[0] }}
         </template>
       </q-input>
-
-      <!-- <q-btn
-        @click="startCapture"
-        class="btn-share pr-4"
-        outline
+      <q-input
+        v-model="isConnectedToRoom"
+        outlined
         rounded
-        :color='"primary"'
-        height="42"
-        v-if="!sharingStream"
-      >
-        <toonin-icon />Share
+        disabled
+        class="col-5 q-mr-lg input-room"
+        v-show="connectedRoomName"
+      />
+      <q-btn
+          @click="disconnect"
+          class="btn-share col-2"
+          outline
+          rounded
+          v-show="connectedRoomName"
+        >Disconnect
       </q-btn>
       <q-btn
-        @click="stopCapture"
-        class="btn-share pr-4"
-        height="42"
-        outlined
-        color="warning"
-        rounded
-        v-else
-        icon="mdi-stop"
-      >Stop Sharing
-      </q-btn> -->
-
-      <q-btn
         @click="createRoom"
-        class="btn-share col-3"
+        class="btn-share col-4"
         outline
         rounded
         v-if="!sharingStream"
@@ -82,9 +74,7 @@
           class="q-mr-xs"
         />
         Stop Sharing
-
       </q-btn>
-
     </div>
 
     <q-card-actions
@@ -131,6 +121,7 @@
         color="secondary"
         label="Share Audio"
         v-show="sharingStream"
+        :disabled="sharingStream ? sharingStream.getAudioTracks().length === 0 : true"
       />
       <q-checkbox
         v-model="sendVideo"
@@ -201,7 +192,8 @@ export default {
   }),
   computed: {
     isConnectedToRoom () {
-      return this.connectedStatus === 'connected'
+      this.roomNameInputErrorMessages = []
+      return "Connected to " + this.connectedRoomName
     },
     cardTitle () {
       if (this.connectedRoomName) {
@@ -266,8 +258,12 @@ export default {
   },
   methods: {
     createRoom () {
-      this.roomNameInputErrorMessages = []
-      this.$store.dispatch('UPDATE_PEERS', new StartShare(this, true))
+      if (!this.peers) {
+        this.roomNameInputErrorMessages = []
+        this.$store.dispatch('UPDATE_PEERS', new StartShare(this, true))
+      } else {
+        this.startCapture()
+      }
     },
     async startCapture () {
       if (this.connectedRoomName) {
@@ -312,16 +308,22 @@ export default {
             audioSourceNode.connect(remoteDestination)
             const combined = new MediaStream([...captureStream.getVideoTracks(), ...localStream.getAudioTracks()])
             this.$store.dispatch('UPDATE_SHARING_STREAM', combined)
+            this.$store.dispatch('UPDATE_SHARE_AUDIO', true)
+            this.$store.dispatch('UPDATE_SHARE_VIDEO', true)
           } else {
             this.$store.dispatch('UPDATE_SHARING_STREAM', captureStream)
+            this.$store.dispatch('UPDATE_SHARE_VIDEO', true)
           }
         }
       }
     },
     stopCapture () {
       if (this.sharingStream) {
+        this.$store.dispatch('UPDATE_SHARE_AUDIO', false)
+        this.$store.dispatch('UPDATE_SHARE_VIDEO', false)
         const tracks = this.sharingStream.getTracks()
-        tracks.forEach((track) => track.stop())
+        tracks.forEach((track) => track.enabled = false)
+        setTimeout(function(){ tracks.forEach((track) => track.stop()) }, 1000);
         this.$store.dispatch('UPDATE_SHARING_STREAM', null)
         this.$store.dispatch('UPDATE_SHARING', false)
       }
@@ -436,8 +438,9 @@ export default {
 
 .btn-share {
   height: 56px !important;
-  font-size: 18px;
+  font-size: 16px;
   text-transform: capitalize;
+  margin: 5px;
   color: var(--q-color-primary);
 }
 </style>

@@ -148,8 +148,7 @@ class StartShare {
    * Initialize socket connection
    */
   async initSocket () {
-    // console.log(window);
-    this.socket = await io('https://www.toonin.ml')
+    this.socket = await io('localhost:8443')
     if (this.socket && this.sharing) {
       this.setSocketListenersSharing()
       this.socket.emit('create room', {
@@ -272,7 +271,6 @@ class StartShare {
       console.log(
         'Ice Candidate for me: ' + iceData.hostID + ' in room: ' + iceData.room
       )
-      // check if this ice data is for us or someone else in the room
       this.addPeerIceCandidate(iceData)
     })
 

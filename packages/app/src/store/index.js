@@ -35,8 +35,8 @@ export default function (/* { ssrContext } */) {
       messages: [],
       sharingStream: null,
       unread: 0,
-      shareAudio: true,
-      shareVideo: true
+      shareAudio: false,
+      shareVideo: false
     },
     mutations: {
       SET_CONNECTED_STATUS: (state, payload) => {
@@ -89,11 +89,15 @@ export default function (/* { ssrContext } */) {
       },
       SET_SHARE_AUDIO: (state, payload) => {
         state.shareAudio = payload
-        state.peers.updatePeers({ type: 'audio', value: payload })
+        if (state.peers) {
+          state.peers.updatePeers({ type: 'audio', value: payload })
+        }
       },
       SET_SHARE_VIDEO: (state, payload) => {
         state.shareVideo = payload
-        state.peers.updatePeers({ type: 'video', value: payload })
+        if (state.peers) {
+          state.peers.updatePeers({ type: 'video', value: payload })
+        }
       }
     },
     actions: {

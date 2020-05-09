@@ -129,7 +129,7 @@ export default {
 
   },
   mounted () {
-    this.$q.dark.set(window.localStorage.getItem('isDark'))
+    this.$q.dark.set(window.localStorage.getItem('isDark') === 'true')
   }
 }
 </script>
