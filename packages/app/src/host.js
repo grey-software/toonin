@@ -148,7 +148,7 @@ class StartShare {
    * Initialize socket connection
    */
   async initSocket () {
-    this.socket = await io('localhost:8443')
+    this.socket = await io('https://www.toonin.ml')
     if (this.socket && this.sharing) {
       this.setSocketListenersSharing()
       this.socket.emit('create room', {
