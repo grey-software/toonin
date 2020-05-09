@@ -14,7 +14,7 @@ jobs:
       - run:
           name: Installing app dependencies
           command: |
-            npm --prefix ./app install
+            npm run setup:app
       - save_cache:
           paths:
             - node_modules
@@ -22,7 +22,7 @@ jobs:
       - run:
           name: Building App
           command: |
-            npm --prefix ./app run build
+            npm run build:app
   Deploy-App:
     docker:
       - image: circleci/node:latest
@@ -30,8 +30,8 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
-         name: Build Docker image
-         command: docker build -t toonin/client:$CIRCLE_SHA1 .
+          name: Build Docker image
+          command: docker build -t toonin/client:$CIRCLE_SHA1 .
       - run:
           name: Setup Heroku
           command: |
@@ -40,11 +40,11 @@ jobs:
       - run:
           name: Deploy to Heroku
           command: |
-             docker login --username=$HEROKU_LOGIN --password=$HEROKU_API_KEY registry.heroku.com
-             docker tag toonin/client:$CIRCLE_SHA1 registry.heroku.com/$HEROKU_APP_NAME/web
-             heroku container:login
-             heroku container:push web
-             heroku container:release web
+            docker login --username=$HEROKU_LOGIN --password=$HEROKU_API_KEY registry.heroku.com
+            docker tag toonin/client:$CIRCLE_SHA1 registry.heroku.com/$HEROKU_APP_NAME/web
+            heroku container:login
+            heroku container:push web
+            heroku container:release web
 workflows:
   version: 2
   Validate_Build:
@@ -55,7 +55,7 @@ workflows:
             - Build-App
           filters:
             branches:
-              only: 
+              only:
                 - master
                 - heroku
 notify:
