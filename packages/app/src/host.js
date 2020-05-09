@@ -628,20 +628,6 @@ class StartShare {
   }
 
   /**
-   * Update Tracks for all Peer Connections.
-   * @param {MediaStreamTrack} track
-   */
-  updateOutgoingTracks (track) {
-    if (this.getPeerCount() > 0) {
-      if (track.kind === 'audio') {
-        this.peers.forEach((peer) => peer.updateOutgoingAudioTrack(track))
-      } else {
-        this.peers.forEach((peer) => peer.updateOutgoingVideoTrack(track))
-      }
-    }
-  }
-
-  /**
    * Method called when a message needs to be sent to all Peers over RTCDataChannel.
    * @param {Object} data
    */
@@ -700,6 +686,27 @@ class StartShare {
             peer.updateTracks(track, params.value)
           }
           if (track.kind === 'audio' && params.type === 'audio') {
+            peer.updateTracks(track, params.value)
+          }
+        })
+      })
+      return
+    }
+    const audioStream = this.app.$store.getters.AUDIO_STREAM
+    const videoStream = this.app.$store.getters.VIDEO_STREAM
+    if (audioStream) {
+      this.peers.forEach(peer => {
+        audioStream.getTracks().forEach(track => {
+          if (track.kind === 'audio' && params.type === 'audio') {
+            peer.updateTracks(track, params.value)
+          }
+        })
+      })
+    }
+    if (videoStream) {
+      this.peers.forEach(peer => {
+        audioStream.getTracks().forEach(track => {
+          if (track.kind === 'video' && params.type === 'video') {
             peer.updateTracks(track, params.value)
           }
         })

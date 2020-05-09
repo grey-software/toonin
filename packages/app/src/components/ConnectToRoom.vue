@@ -189,8 +189,6 @@ export default {
 
       this.rtcConn.ontrack = event => {
         var incomingStream = new MediaStream([event.track])
-        this.peers.updateOutgoingTracks(event.track)
-
         var _iOSDevice = !!navigator.platform.match(
           /iPhone|iPod|iPad|Macintosh|MacIntel/
         )

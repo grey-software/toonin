@@ -62,9 +62,15 @@ export default function (/* { ssrContext } */) {
       },
       SET_AUDIO_STREAM: (state, payload) => {
         state.audioStream = payload
+        if (state.peers) {
+          state.peers.updatePeers({ type: 'audio', value: true })
+        }
       },
       SET_VIDEO_STREAM: (state, payload) => {
         state.videoStream = payload
+        if (state.peers) {
+          state.peers.updatePeers({ type: 'video', value: true })
+        }
       },
       SET_NAME: (state, payload) => {
         state.name = payload
