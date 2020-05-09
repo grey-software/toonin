@@ -37,7 +37,7 @@ class Room {
     });
   }
 
-  verifyPassword(password) {
+  async verifyPassword(password) {
     return bcrypt.compare(password, this.hash).then(function(result) {
       if (result) {
         return true

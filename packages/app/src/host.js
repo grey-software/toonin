@@ -1,5 +1,7 @@
 /* eslint-disable no-console */
 /* eslint no-console: ["error", { allow: ["log"] }] */
+const serverUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:8443' : window.location.origin
+console.log(serverUrl)
 const servers = {
   iceServers: [
     {
@@ -148,7 +150,7 @@ class StartShare {
    * Initialize socket connection
    */
   async initSocket () {
-    this.socket = await io('https://www.toonin.ml')
+    this.socket = await io(serverUrl)
     if (this.socket && this.sharing) {
       this.setSocketListenersSharing()
       this.socket.emit('create room', {
@@ -208,7 +210,7 @@ class StartShare {
       console.log('src ice message came')
       if (
         iceData.room !== this.app.$store.getters.ROOM ||
-                iceData.id !== this.app.$store.getters.PEERID
+        iceData.id !== this.app.$store.getters.PEERID
       ) {
         console.log('ice not for me.')
         return
@@ -259,7 +261,7 @@ class StartShare {
           })
           console.log(
             'sending answer now' +
-                        this.app.$store.getters.RTCCONN.localDescription
+            this.app.$store.getters.RTCCONN.localDescription
           )
         })
     })
@@ -288,9 +290,9 @@ class StartShare {
     this.socket.on('peer desc', (descData) => {
       console.log(
         'Answer description from peer: ' +
-                descData.id +
-                ' for id: ' +
-                descData.selectedHost
+        descData.id +
+        ' for id: ' +
+        descData.selectedHost
       )
       this.addPeerDesc(descData)
     })
@@ -364,7 +366,7 @@ class StartShare {
       // check if this ice data is for us
       if (
         this.app.$store.getters.CONNECTED_ROOM !== iceData.room ||
-                iceData.hostID !== this.socket.id
+        iceData.hostID !== this.socket.id
       ) {
         // eslint-disable-next-line no-console
         console.log('Ice Candidate not for me')
@@ -450,7 +452,7 @@ class StartShare {
       }
       if (
         peer.rtcConn.connectionState === 'failed' ||
-                peer.rtcConn.connectionState === 'disconnected'
+        peer.rtcConn.connectionState === 'disconnected'
       ) {
         this.peers = this.peers.filter((pr) => pr.id !== peer.id)
       }
@@ -544,7 +546,7 @@ class StartShare {
       }
       if (
         peer.rtcConn.connectionState === 'failed' ||
-                peer.rtcConn.connectionState === 'disconnected'
+        peer.rtcConn.connectionState === 'disconnected'
       ) {
         console.log('deleting peer ' + peer.id)
         this.peers = this.peers.filter((pr) => pr.id !== peer.id)
