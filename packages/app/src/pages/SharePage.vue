@@ -40,14 +40,6 @@
         v-show="connectedRoomName"
       />
       <q-btn
-          @click="disconnect"
-          class="btn-share col-2"
-          outline
-          rounded
-          v-show="connectedRoomName"
-        >Disconnect
-      </q-btn>
-      <q-btn
         @click="createRoom"
         class="btn-share col-4"
         outline
@@ -74,6 +66,31 @@
           class="q-mr-xs"
         />
         Stop Sharing
+      </q-btn>
+      <q-input
+        v-model="password"
+        v-show="!connectedRoomName"
+        placeholder="Password (Optional)"
+        class="col-5 q-mr-lg input-room"
+        outlined
+        rounded
+        :type="isPwd ? 'password' : 'text'"
+      >
+        <template v-slot:append>
+          <q-icon
+            :name="isPwd ? 'visibility_off' : 'visibility'"
+            class="cursor-pointer"
+            @click="isPwd = !isPwd"
+          />
+        </template>
+      </q-input>
+      <q-btn
+          @click="disconnect"
+          class="btn-share col-2"
+          outline
+          rounded
+          v-show="connectedRoomName"
+        >Disconnect
       </q-btn>
     </div>
 
@@ -188,7 +205,9 @@ export default {
     roomName: '',
     roomNameInputErrorMessages: [],
     userVideo: null,
-    userAudio: null
+    userAudio: null,
+    password: '',
+    isPwd: true
   }),
   computed: {
     isConnectedToRoom () {
@@ -432,7 +451,7 @@ export default {
 }
 
 .input-room {
-  font-size: 18px;
+  font-size: 16px;
   color: var(--q-color-primary);
 }
 
@@ -440,7 +459,7 @@ export default {
   height: 56px !important;
   font-size: 16px;
   text-transform: capitalize;
-  margin: 5px;
+  margin-right: 10px;
   color: var(--q-color-primary);
 }
 </style>

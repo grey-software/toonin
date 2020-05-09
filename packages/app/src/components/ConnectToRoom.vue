@@ -3,6 +3,7 @@
 
     <div class="row justify-space-between q-mt-lg">
       <q-input
+        v-if="!auth"
         v-model="roomName"
         autofocus
         @keydown.enter="toonin"
@@ -12,17 +13,50 @@
         :disabled="isConnectedToRoom"
         :error="errorMessages.length > 0"
         class="col-7 col-auto q-mr-lg input-room"
+        
       >
         <template v-slot:error>
           {{ errorMessages[0] }}
         </template>
       </q-input>
+      <q-input
+        v-else
+        v-model="password"
+        class="col-5 col-auto q-mr-lg input-room"
+        @keydown.enter="toonin"
+        placeholder="Room password"
+        outlined
+        rounded
+        :error="errorMessages.length > 0"
+        :type="isPwd ? 'password' : 'text'"
+      >
+        <template v-slot:append>
+          <q-icon
+            :name="isPwd ? 'visibility_off' : 'visibility'"
+            class="cursor-pointer"
+            @click="isPwd = !isPwd"
+          />
+        </template>
+        <template v-slot:error>
+          {{ errorMessages[0] }}
+        </template>
+      </q-input>
+      <q-btn
+        @click="cancelAuth"
+        class="btn-share col-3"
+        outline
+        rounded
+        :disabled="sharing"
+        v-show="auth"
+      >
+        Cancel
+      </q-btn>
       <q-btn
         @click="disconnect"
         class="btn-share btn-disconnect col-4"
         outline
         rounded
-        v-if="connectedStatus === 'connected'"
+        v-if="connectedStatus === 'connected' && !auth"
       >
         <q-icon
           name="mdi-stop"
@@ -30,7 +64,6 @@
           class="q-mr-xs"
         />
         Disconnect
-
       </q-btn>
       <q-btn
         @click="toonin"
@@ -75,11 +108,34 @@ export default {
       roomName: null,
       targetHost: '',
       failedHosts: [],
-      errors: []
+      errors: [],
+      passwordRequired: false,
+      password: '',
+      auth: false,
+      isPwd: true
     }
   },
   methods: {
+    sendPassword () {
+      if (this.password.length > 0) {
+        this.errors = []
+        this.peers.socket.emit('new peer password', { roomID: this.roomName, password: this.password })
+      } else {
+        this.errors.push('Password is required for this room.')
+        this.password = ''
+      }
+    },
+    cancelAuth () {
+      this.auth = false
+      this.password = ''
+      this.disconnect()
+    },
     toonin () {
+      if (this.auth) {
+        console.log('auth came')
+        this.sendPassword()
+        return
+      }
       this.connectToRoom()
     },
     connectToRoom (reconnecting) {
@@ -188,10 +244,13 @@ export default {
 
       var roomKey = this.$store.getters.ROOM
       this.roomName = roomKey
+      this.passwordRequired = false
       this.connectToRoom(false)
     },
     async disconnect () {
-      this.rtcConn.close()
+      if (this.rtcConn) {
+        this.rtcConn.close()
+      }
       await this.peers.removeAllPeersAndClose()
       this.$store.dispatch('UPDATE_AUDIO_STREAM', null)
       this.$store.dispatch('UPDATE_VIDEO_STREAM', null)
@@ -205,6 +264,7 @@ export default {
       this.targetHost = ''
       this.failedHosts = []
       this.roomName = ''
+      this.passwordRequired = false
     }
   },
   computed: {
@@ -264,12 +324,13 @@ export default {
 
 <style scoped>
 .input-room {
-  font-size: 18px;
+  font-size: 16px;
   color: var(--q-color-primary);
 }
 .btn-share {
   height: 56px !important;
-  font-size: 18px;
+  font-size: 16px;
+  margin-right: 10px;
   text-transform: capitalize;
   color: var(--q-color-primary);
 }

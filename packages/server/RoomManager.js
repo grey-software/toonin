@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 const NetworkTree = require("./NetworkTree").NetworkTree;
+const bcrypt = require('bcrypt');
 const MAX_CLIENTS_PER_HOST = 2;
 
 const genRoomID = (rooms) => {
@@ -18,11 +19,34 @@ const genRoomID = (rooms) => {
 };
 
 class Room {
-  constructor(roomID, room, hostId) {
+  constructor(roomID, room, hostId, password) {
     this.roomID = roomID;
     this.room = room;
     this.hostId = hostId;
+    this.hash = null
+    if (password && password.length > 0) {
+      this.createHash(password).then(res => {
+        this.hash = res
+      })
+    }
   }
+
+  async createHash(password) {
+    return bcrypt.hash(password, 10).then(function(hash) {
+      return hash
+    });
+  }
+
+  verifyPassword(password) {
+    return bcrypt.compare(password, this.hash).then(function(result) {
+      if (result) {
+        return true
+      } else {
+        return false
+      }
+    });
+  }
+
 }
 
 class RoomManager {
@@ -34,7 +58,7 @@ class RoomManager {
    * @param {SocketIO.Socket} socket
    * @param {string} roomName
    */
-  createRoom(socket, roomName, isDistributed) {
+  createRoom(socket, roomName, isDistributed, password) {
     var newRoomID = "";
     console.log("Received request to create new room " + roomName);
     const hasCustomRoomName = roomName.length > 0;
@@ -50,7 +74,8 @@ class RoomManager {
             new Room(
               newRoomID,
               new NetworkTree(socket.id, MAX_CLIENTS_PER_HOST),
-              socket.id
+              socket.id,
+              password
             )
           );
         } else {
@@ -71,7 +96,8 @@ class RoomManager {
           new Room(
             newRoomID,
             new NetworkTree(socket.id, MAX_CLIENTS_PER_HOST),
-            socket.id
+            socket.id,
+            password
           )
         );
       } else {
@@ -84,6 +110,11 @@ class RoomManager {
     }
   }
 
+  /**
+   * Return a Room Object
+   * @param {String} roomID room id
+   * @return {Room} Room if found or null
+   */
   getRoom(roomID) {
     var returnRoom = this.rooms.filter((room) => room.roomID === roomID);
     if (returnRoom.length > 0) {
@@ -93,9 +124,9 @@ class RoomManager {
   }
 
   /**
-     * Delete a Room from Room Manager
-     * @param {String} id Socket id
-     */
+   * Delete a Room from Room Manager
+   * @param {String} id Socket id
+   */
   deleteRoom(id) {
     var size = this.rooms.length;
     this.rooms = this.rooms.filter((room) => room.hostId !== id);
