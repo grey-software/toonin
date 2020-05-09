@@ -63,22 +63,28 @@ io.on("connection", (socket) => {
       if (room.hash && !req.password) {
         socket.emit("require-password");
       } else {
-        if (room.verifyPassword(req.password)) {
-          if (room.room.getConnectableNodes) {
-            const potentialHosts = room.room.getConnectableNodes();
-            socket.emit("host pool", { potentialHosts, roomID: req.roomID });
-          } else {
-            socket.join(req.roomID, () => {
-              console.log("Peer connected successfully to room: " + req.roomID);
-              socket.to(req.roomID).emit("peer joined", {
-                room: req.roomID,
-                id: socket.id,
+        room.verifyPassword(req.password).then((verified) => {
+          if (verified) {
+            if (room.room.getConnectableNodes) {
+              const potentialHosts = room.room.getConnectableNodes();
+              socket.emit("host pool", { potentialHosts, roomID: req.roomID });
+            } else {
+              socket.join(req.roomID, () => {
+                console.log("Peer connected successfully to room: " + req.roomID);
+                socket.to(req.roomID).emit("peer joined", {
+                  room: req.roomID,
+                  id: socket.id,
+                });
               });
-            });
+            }
+          } else {
+            socket.emit("require-password");
           }
-        } else {
+        }).catch((reason) => {
+          console.log(reason);
           socket.emit("require-password");
-        }
+        });
+        
       }
     } else {
       console.log("invalid room");
