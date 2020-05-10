@@ -1,38 +1,28 @@
 <template>
-  <q-card
-    max-width="400"
-    max-height="600px"
-    rounded
-    :elevation="8"
-  >
-    <q-card-section class="toonin-title">{{ cardTitle }}</q-card-section>
-    <q-img
-      contain
-      src="../assets/icon.png"
-      style="margin-top: 1%; padding-top: 20px;max-height:240px"
-    />
-    <q-card-section class="text--primary">
+  <div style="width: 556px;">
+
+    <div class="row justify-space-between q-mt-lg">
       <q-input
-        v-show="
-          (connectedStatus === 'disconnected' || connectedStatus === 'failed') && !passwordRequired
-        "
+        v-if="!auth"
         v-model="roomName"
-        style="color: white;"
         autofocus
         @keydown.enter="toonin"
-        placeholder="Room Key"
+        placeholder="Room name"
         outlined
         rounded
+        :disabled="isConnectedToRoom"
         :error="errorMessages.length > 0"
+        class="col-7 col-auto q-mr-lg input-room"
+        
       >
         <template v-slot:error>
           {{ errorMessages[0] }}
         </template>
       </q-input>
       <q-input
-        v-show="auth"
+        v-else
         v-model="password"
-        style="color: white;"
+        class="col-5 col-auto q-mr-lg input-room"
         @keydown.enter="toonin"
         placeholder="Room password"
         outlined
@@ -51,32 +41,9 @@
           {{ errorMessages[0] }}
         </template>
       </q-input>
-    </q-card-section>
-    <q-card-actions align="center">
-      <q-btn
-        @click="handleTooninButtonClick"
-        class="btn-share pr-4"
-        :color='connectedStatus === "connected" ? "warning": "primary"'
-        height="42"
-        outline
-        rounded
-        :disabled="sharing"
-      >
-        <q-icon
-          v-if="connectedStatus === 'connected'"
-          name="mdi-stop"
-          left
-        />
-        <toonin-icon
-          v-else
-          left
-        ></toonin-icon>
-        {{ buttonStatus }}
-      </q-btn>
       <q-btn
         @click="cancelAuth"
-        class="btn-share pr-4"
-        height="42"
+        class="btn-share col-3"
         outline
         rounded
         :disabled="sharing"
@@ -84,17 +51,49 @@
       >
         Cancel
       </q-btn>
-    </q-card-actions>
-  </q-card>
+      <q-btn
+        @click="disconnect"
+        class="btn-share btn-disconnect col-4"
+        outline
+        rounded
+        v-if="connectedStatus === 'connected' && !auth"
+      >
+        <q-icon
+          name="mdi-stop"
+          left
+          class="q-mr-xs"
+        />
+        Disconnect
+      </q-btn>
+      <q-btn
+        @click="toonin"
+        class="btn-share col-3"
+        outline
+        rounded
+        v-else
+      >
+        <q-icon
+          :name="$q.dark.isActive ? 'app:toonin-dark' : 'app:toonin'"
+          left
+          class="q-mr-xs"
+        />
+        Toonin
+      </q-btn>
+    </div>
+
+    <ConnectionStatusTimeline />
+
+  </div>
 </template>
 
 <script>
 import { mapState } from 'vuex'
 import { StartShare } from '../host'
-import TooninIcon from './TooninIcon'
 const SUCCESSFUL = 'connected'
 const DISCONNECTED = 'disconnected'
 const FAILED = 'failed'
+import ConnectionStatusTimeline from "../components/ConnectionStatusTimeline"
+
 
 /* eslint no-console: ["error", { allow: ["log"] }] */
 
@@ -102,7 +101,7 @@ export default {
   name: 'connect-to-room',
   props: {},
   components: {
-    TooninIcon
+    ConnectionStatusTimeline
   },
   data () {
     return {
@@ -131,15 +130,6 @@ export default {
       this.password = ''
       this.disconnect()
     },
-    handleTooninButtonClick () {
-      if (this.auth) {
-        this.sendPassword()
-        return
-      }
-      if (this.connectedStatus === 'connected') {
-        this.disconnect()
-      } else this.toonin()
-    },
     toonin () {
       if (this.auth) {
         console.log('auth came')
@@ -153,7 +143,6 @@ export default {
       if (!reconnecting) {
         this.$store.dispatch('UPDATE_PEERS', new StartShare(this, false))
       } else {
-        console.log('reconnecting')
         this.peers.getSocket().emit('new peer', this.roomName)
       }
     },
@@ -168,7 +157,6 @@ export default {
       this.rtcConn.onconnectionstatechange = () => {
         if (this.rtcConn.connectionState === SUCCESSFUL) {
           this.$store.dispatch('UPDATE_CONNECTED_STATUS', SUCCESSFUL)
-          this.roomName = ''
           try {
             this.rtcConn.createDataChannel('mediaDescription')
           } catch (err) {
@@ -181,7 +169,6 @@ export default {
           this.rtcConn.connectionState === FAILED
         ) {
           console.log('Connection failed')
-          // this.failedHosts.push(this.targetHost)
           this.reconnect()
 
           this.$store.dispatch('UPDATE_CONNECTED_STATUS', DISCONNECTED)
@@ -202,8 +189,6 @@ export default {
 
       this.rtcConn.ontrack = event => {
         var incomingStream = new MediaStream([event.track])
-        this.peers.updateOutgoingTracks(event.track)
-
         var _iOSDevice = !!navigator.platform.match(
           /iPhone|iPod|iPad|Macintosh|MacIntel/
         )
@@ -247,7 +232,9 @@ export default {
       // continue regardless of error
     },
     reconnect () {
-      this.rtcConn.close()
+      if (this.rtcConn) {
+        this.rtcConn.close()
+      }
       this.peers.removeAllPeersAndClose()
       this.$store.dispatch('UPDATE_AUDIO_STREAM', null)
       this.$store.dispatch('UPDATE_VIDEO_STREAM', null)
@@ -274,15 +261,16 @@ export default {
       this.$store.dispatch('UPDATE_PEERS', null)
       this.targetHost = ''
       this.failedHosts = []
+      this.roomName = ''
       this.passwordRequired = false
     }
   },
   computed: {
-    buttonStatus () {
-      if (this.connectedStatus === 'connected') {
-        return 'Disconnect'
-      }
-      return 'Toonin'
+    isConnectedToRoom () {
+      return this.connectedStatus === 'connected'
+    },
+    showInput () {
+      return this.connectedStatus === 'disconnected' || this.connectedStatus === 'failed'
     },
     cardTitle () {
       if (this.connectedStatus === 'connected') {
@@ -318,7 +306,7 @@ export default {
       this.roomName = this.$route.params.room
       setTimeout(() => this.toonin(), 500)
     }
-    window.onbeforeunload = function () {
+    window.onunload = () => {
       if (this.room) {
         this.peers.socket.emit('logoff', {
           room: this.$store.getters.ROOM,
@@ -326,15 +314,43 @@ export default {
           name: this.$store.getters.NAME
         })
       }
-      return null
     }
   }
 }
 </script>
 
-<style>
-div.q-input {
-  width: 100%;
-  margin-right: 0%;
+
+<style scoped>
+.input-room {
+  font-size: 16px;
+  color: var(--q-color-primary);
+}
+.btn-share {
+  height: 56px !important;
+  font-size: 16px;
+  margin-right: 10px;
+  text-transform: capitalize;
+  color: var(--q-color-primary);
+}
+
+.btn-disconnect {
+  color: #ffc400;
+}
+.q-field--outlined .q-field__control {
+  padding: 0 24px !important;
+}
+</style>
+
+<style scoped>
+.body--dark .btn-share {
+  color: #b9bbbe;
+}
+
+.body--dark .input-room {
+  color: #b9bbbe;
+}
+
+.body--dark .btn-disconnect {
+  color: #f6d45a;
 }
 </style>

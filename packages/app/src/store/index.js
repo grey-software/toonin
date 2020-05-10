@@ -28,7 +28,7 @@ export default function (/* { ssrContext } */) {
       peerID: null,
       audioStream: null,
       videoStream: null,
-      name: '',
+      name: 'Tone',
       connectedRoomName: null,
       sharing: false,
       peers: null,
@@ -62,9 +62,15 @@ export default function (/* { ssrContext } */) {
       },
       SET_AUDIO_STREAM: (state, payload) => {
         state.audioStream = payload
+        if (state.peers) {
+          state.peers.updatePeers({ type: 'audio', value: true })
+        }
       },
       SET_VIDEO_STREAM: (state, payload) => {
         state.videoStream = payload
+        if (state.peers) {
+          state.peers.updatePeers({ type: 'video', value: true })
+        }
       },
       SET_NAME: (state, payload) => {
         state.name = payload
@@ -89,11 +95,15 @@ export default function (/* { ssrContext } */) {
       },
       SET_SHARE_AUDIO: (state, payload) => {
         state.shareAudio = payload
-        state.peers.updatePeers({ type: 'audio', value: payload })
+        if (state.peers) {
+          state.peers.updatePeers({ type: 'audio', value: payload })
+        }
       },
       SET_SHARE_VIDEO: (state, payload) => {
         state.shareVideo = payload
-        state.peers.updatePeers({ type: 'video', value: payload })
+        if (state.peers) {
+          state.peers.updatePeers({ type: 'video', value: payload })
+        }
       }
     },
     actions: {

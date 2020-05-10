@@ -16,7 +16,7 @@ const socketManager = new SocketManager();
 
 const port = process.env.PORT || 8443;
 
-app.get("*", function(req, res, next) {
+app.get("*", function (req, res, next) {
   if (req.headers["x-forwarded-proto"] !== "https") {
     res.redirect("https://" + req.headers.host + req.url);
   } else {
@@ -81,7 +81,6 @@ io.on("connection", (socket) => {
             socket.emit("require-password");
           }
         }).catch((reason) => {
-          console.log(reason);
           socket.emit("require-password");
         });
         
@@ -215,7 +214,7 @@ app.use(
 );
 app.use(staticFileMiddleware);
 
-app.get("/", function(req, res) {
+app.get("/", function (req, res) {
   res.render("../app/dist/spa/index.html");
 });
 

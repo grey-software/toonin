@@ -10,10 +10,6 @@ const routes = [
       {
         path: 'share',
         component: () => import('pages/SharePage.vue')
-      },
-      {
-        path: 'chat',
-        component: () => import('pages/ChatPage.vue')
       }
     ]
   }

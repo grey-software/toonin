@@ -1,130 +1,132 @@
 <template>
-  <q-layout view="hHh lpR fFf">
-
-    <q-header
-      elevated
-      class="bg-primary text-white"
-      height-hint="98"
-    >
-      <q-toolbar>
-        <q-toolbar-title class="toonin-title">
-          <q-avatar>
-            <img src="../assets/icon40.png">
-          </q-avatar>
-          Toonin
-        </q-toolbar-title>
-        <div>
-          <q-btn
-            flat
-            round
-            @click="onDarkModeChange"
-            :icon="$q.dark.isActive ? 'mdi-lightbulb-outline' : 'mdi-lightbulb-on-outline'"
-          >
-          </q-btn>
-        </div>
-      </q-toolbar>
-    </q-header>
+  <q-layout
+    view="hHh lpR fFf"
+    class="column items-center"
+  >
     <div
-      style="padding-top: 100px"
+      class="row justify-center items-center q-mt-md"
+      style="width:599px;"
+    >
+      <div class="row items-baseline">
+        <img
+          class="title-icon q-mr-sm"
+          src="../assets/icon.png"
+        />
+        <span class="title-text toonin-title q-mr-xl">Toonin</span>
+      </div>
+      <q-btn
+        flat
+        fab
+        round
+        color="toonin"
+        @click="onDarkModeChange"
+      >
+        <q-icon
+          class="is-36x36"
+          v-if="!$q.dark.isActive"
+          name="app:moon"
+        />
+        <q-icon
+          class="is-36x36"
+          v-else
+          name="app:sun"
+        />
+      </q-btn>
+      <!-- <q-btn
+        flat
+        fab
+        round
+        @click="openGuide"
+      >
+        <q-icon
+          class="is-36x36"
+          name="app:guide"
+        ></q-icon>
+      </q-btn> -->
+      <q-btn
+        flat
+        fab
+        round
+        type="a"
+        href="https://www.github.com/grey-software/toonin"
+        target="_blank"
+      >
+        <q-icon
+          class="is-36x36"
+          :name="$q.dark.isActive ? 'app:github-dark' : 'app:github'"
+        ></q-icon>
+      </q-btn>
+    </div>
+    <q-tabs
+      v-model="tab"
+      class="toonin-tabs"
+      narrow-indicator
+      inline-label
       align="center"
     >
-      <q-card
-        class=" toonin-title my-card q-pa-md"
-        v-if="name"
-      >
-        <q-card-section>
-          <div class="text-h4">Welcome, {{ name }}</div>
-        </q-card-section>
-        <q-tabs
-          v-model="tab"
-          class="text-teal"
-        >
-          <q-tab
-            label="Toonin"
-            name="toonin"
-          />
-          <q-tab
-            label="Share"
-            v-if="!$q.platform.is.mobile"
-            name="share"
-          />
-          <q-tab
-            label="Chat"
-            name="chat"
-          >
-            <q-badge
-              v-if="unread>0"
-              color="red"
-              floating
-            >{{ unread }}</q-badge>
-          </q-tab>
-        </q-tabs>
-
-        <q-separator />
-
-        <q-tab-panels
-          v-model="tab"
-          animated
-        >
-          <q-tab-panel name="toonin">
-            <TooninPage />
-          </q-tab-panel>
-          <q-tab-panel
-            v-if="!$q.platform.is.mobile"
-            name="share"
-          >
-            <SharePage />
-          </q-tab-panel>
-          <q-tab-panel name="chat">
-            <ChatPage />
-          </q-tab-panel>
-        </q-tab-panels>
-      </q-card>
-      <Name v-else />
-    </div>
-    <q-footer
-      elevated
-      class="bg-grey-8 text-white"
+      <q-tab
+        label="Toonin"
+        name="toonin"
+        :icon="$q.dark.isActive ? 'app:toonin-dark' : 'app:toonin'"
+      />
+      <q-tab
+        label="Share"
+        v-if="!$q.platform.is.mobile"
+        name="share"
+        icon="mdi-access-point"
+      />
+    </q-tabs>
+    <q-tab-panels
+      v-model="tab"
+      animated
+      class="toonin-tab-panels"
     >
-      <q-toolbar>
-        <q-toolbar-title align="right">
-          <span>
-            &copy;
-            <strong>Toonin</strong>
-            - {{ new Date().getFullYear() }}
-          </span>
-        </q-toolbar-title>
-      </q-toolbar>
-    </q-footer>
+      <q-tab-panel name="toonin">
+        <TooninPage />
+      </q-tab-panel>
+      <q-tab-panel
+        v-if="!$q.platform.is.mobile"
+        name="share"
+      >
+        <SharePage />
+      </q-tab-panel>
+    </q-tab-panels>
+
+    <q-page-container>
+      <transition
+        name="fade"
+        mode="out-in"
+      >
+        <router-view />
+      </transition>
+    </q-page-container>
+
   </q-layout>
 </template>
 
 <script>
 import SharePage from '../pages/SharePage'
 import TooninPage from '../pages/TooninPage'
-import ChatPage from '../pages/ChatPage'
-import Name from '../components/Name'
-import { mapState } from 'vuex'
+
 export default {
+  components: {
+    SharePage,
+    TooninPage
+  },
   data () {
     return {
       tab: this.$q.platform.is.mobile ? 'toonin' : 'share'
     }
   },
-  components: {
-    SharePage,
-    TooninPage,
-    ChatPage,
-    Name
-  },
-  computed: {
-    ...mapState(['name', 'unread', 'peers'])
-  },
   methods: {
     onDarkModeChange () {
       this.$q.dark.toggle()
       window.localStorage.setItem('isDark', this.$q.dark.isActive)
-    }
+    },
+    openGuide () {
+      // TODO: Implement a modal that guides the user journey
+    },
+
   },
   mounted () {
     this.$q.dark.set(window.localStorage.getItem('isDark') === 'true')
@@ -132,24 +134,51 @@ export default {
 }
 </script>
 
-<style lang="sass">
-.my-card
-  width: 100%
-  max-width: 1366px
-  max-height: 1366px
-.main-card
-  width: 98%
-  max-width: 900px
-</style>
-<style>
-@import url("https://fonts.googleapis.com/css?family=Nunito+Sans:800&display=swap");
-:root {
-  --color-blue: #4296bd;
-  --color-title-text: #f6d45a;
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition-duration: 0.3s ease-out;
+  transition-property: opacity;
 }
-.toonin-title {
-  font-family: "Nunito Sans", sans-serif;
-  font-size: 28px !important ;
-  color: var(--color-blue);
+
+.fade-enter,
+.fade-leave-active {
+  opacity: 0;
+}
+
+.title-container {
+  display: flex;
+}
+
+.title-text {
+  font-size: 69px;
+  color: #f6d45a;
+  -webkit-text-stroke: 1px #4296bd;
+}
+.title-icon {
+  width: 64px;
+  height: 64px;
+}
+
+.is-36x36 {
+  height: 36px;
+  width: 36px;
+}
+.q-tab-panel {
+  padding: 0px;
+}
+
+.toonin-tabs {
+  color: #4296bd;
+}
+</style>
+
+<style scoped>
+.body--dark .toonin-tabs {
+  color: #b9bbbe !important;
+}
+
+.body--dark .toonin-tab-panels {
+  background: #2f3136;
 }
 </style>
