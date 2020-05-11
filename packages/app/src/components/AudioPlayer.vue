@@ -1,26 +1,34 @@
 <template>
-    <audio
-      ref="player"
-      controls
-      autoplay
-    />
+  <audio
+    ref="player"
+    controls
+    autoplay
+  />
 </template>
 <script>
+
+import { mapState } from 'vuex';
+
 export default {
   props: {
     stream: {
       type: MediaStream,
     },
   },
-  data () {
-    return {
-      media: null
+  computed: {
+    ...mapState([
+      'playing',
+    ])
+  },
+  watch: {
+    playing (newValue, oldValue) {
+      const audioStream = new MediaStream([...this.stream.getAudioTracks()])
+      this.$refs.player.srcObject = this.playing ? audioStream : null
     }
   },
   mounted () {
     const audioStream = new MediaStream([...this.stream.getAudioTracks()])
-    this.$refs.player.srcObject = audioStream
-    this.media = audioStream
+    this.$refs.player.srcObject = this.playing ? audioStream : null
   }
 }
 </script>

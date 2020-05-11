@@ -5,7 +5,7 @@
       <div
         class="absolute row justify-center"
         style="width:100%;"
-        v-show="connectedStatus == 'connected'"
+        v-show="connectedStatus == 'connected' && playing"
       >
         <transition
           name="fade"
