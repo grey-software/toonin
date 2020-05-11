@@ -8,13 +8,13 @@
 
 [![CircleCI](https://circleci.com/gh/grey-software/toonin/tree/master.svg?style=svg)](https://circleci.com/gh/grey-software/toonin/tree/master) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/d7e992618c424b9a8f1604bf7bb00403)](https://www.codacy.com/gh/grey-software/toonin?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=grey-software/toonin&amp;utm_campaign=Badge_Grade) [![Netlify Status](https://api.netlify.com/api/v1/badges/fc6849cb-e7ae-4de9-be09-660d51342bf6/deploy-status)](https://app.netlify.com/sites/toonin/deploys)
 
-Toonin is a Chrome Extension coupled with a web app that allows your friends to Tune In to what you're listening to. 
+Toonin is technology that allows you to tune in to your friends and family in realtime using peer to peer sharing. 
 
 ## Overview
 
-Toonin consists of a Chrome extension, a web application, and a signaling server. WebRTC is used to stream the music from the provider to its peers. 
+Toonin consists of a web app and a signaling server. WebRTC is used to stream the music from the provider to its peers. 
 
-In order to exchange information, a signaling server must exist between the provider (Chrome Extension) and the peers (Web App)
+The signaling server facilitates a WebRTC handshake between two Toonin web app instances, after which the two apps speak directly to each other over WebRTC streams.
 
 
 ## Development setup
@@ -25,10 +25,10 @@ npm run setup
 
 ## Running Toonin
 
-Toonin comes with a launch script that launches the server and app simultaneuously: 
+Toonin comes with a local development script that launches the server and app simultaneuously.  
 
 ```sh 
-npm run launch
+npm run dev
 ```
 
 ### Running the web app independently
