@@ -15,7 +15,7 @@
         "app": "npm run start --prefix packages/app",
         "rebuild": "cd packages/app && npm rebuild node-sass",
         "build": "cd packages/app && npm run build",
-        "launch": "npm run server:bg; npm run app"
+        "dev": "npm run server:bg; npm run app"
     },
     "dependencies": {
         "core-js": "^2.6.5",
