@@ -1,9 +1,9 @@
 <template>
-  <audio
-    ref="player"
-    controls
-    autoplay
-  />
+    <audio
+      ref="player"
+      controls
+      autoplay
+    />
 </template>
 <script>
 export default {
