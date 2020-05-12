@@ -1,5 +1,6 @@
 <template>
   <vue-plyr
+    :key="refreshKey"
     ref="plyr"
     :options="{ratio: '16:9', controls: playing ? playingControls : initialControls}"
     class="video-player"
@@ -23,7 +24,9 @@ export default {
     return {
       videoTag: null,
       initialControls: [],
-      playingControls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen']    }
+      playingControls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'],
+      refreshKey: 0
+    }
   },
   computed: {
     ...mapState(['videoStream', 'playing', 'audioStream', 'volume']),
@@ -48,7 +51,8 @@ export default {
       this.videoTag.volume = this.volume / 100
     },
     playing (newValue, oldValue) {
-      console.log(newValue, oldValue)
+      // We use this watcher to force a re-render of the video element
+      this.key++;
     }
   },
   methods: {

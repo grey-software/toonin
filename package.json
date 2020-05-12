@@ -1,8 +1,7 @@
 {
     "name": "toonin",
     "version": "1.0.0",
-"description" : "Toonin to each others' experiences!",
-
+    "description": "Toonin to each others' experiences!",
     "private": true,
     "image": "heroku/nodejs",
     "scripts": {
@@ -44,7 +43,8 @@
             "node": true
         },
         "extends": [
-            "plugin:vue/essential", "eslint:recommended"
+            "plugin:vue/essential",
+            "eslint:recommended"
         ],
         "rules": {},
         "parserOptions": {
@@ -57,7 +57,8 @@
         }
     },
     "browserslist": [
-        "> 1%", "last 2 versions"
+        "> 1%",
+        "last 2 versions"
     ],
     "repository": {
         "type": "git",
