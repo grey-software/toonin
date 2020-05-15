@@ -85,6 +85,22 @@ export default {
 
 .video-player {
   border-radius: 16px;
-  width: 599px;
 }
+</style>
+
+
+<style>
+@media only screen and (max-width: 599px) {
+  .plyr--video {
+    margin-top: 24px;
+    width: 343px;
+  }
+}
+
+@media only screen and (min-width: 600px) {
+  .plyr--video {
+    width: 550px;
+  }
+}
+
 </style>

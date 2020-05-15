@@ -1,18 +1,15 @@
 <template>
   <q-layout
     view="hHh lpR fFf"
-    class="column items-center"
+    class="column items-center col-xs-12 col-sm-6 col-md-4"
   >
-    <div
-      class="row justify-center items-center q-mt-md"
-      style="width:599px;"
-    >
+    <div class="row items-center q-mt-md">
       <div class="row items-baseline">
         <img
           class="title-icon q-mr-sm"
           src="../assets/icon.png"
         />
-        <span class="title-text toonin-title q-mr-xl">Toonin</span>
+        <span class="title-text toonin-title q-mr-md">Toonin</span>
       </div>
       <q-btn
         flat
@@ -22,27 +19,16 @@
         @click="onDarkModeChange"
       >
         <q-icon
-          class="is-36x36"
+          class="header-icon"
           v-if="!$q.dark.isActive"
           name="app:moon"
         />
         <q-icon
-          class="is-36x36"
+          class="header-icon"
           v-else
           name="app:sun"
         />
       </q-btn>
-      <!-- <q-btn
-        flat
-        fab
-        round
-        @click="openGuide"
-      >
-        <q-icon
-          class="is-36x36"
-          name="app:guide"
-        ></q-icon>
-      </q-btn> -->
       <q-btn
         flat
         fab
@@ -52,7 +38,7 @@
         target="_blank"
       >
         <q-icon
-          class="is-36x36"
+          class="header-icon"
           :name="$q.dark.isActive ? 'app:github-dark' : 'app:github'"
         ></q-icon>
       </q-btn>
@@ -63,6 +49,7 @@
       narrow-indicator
       inline-label
       align="center"
+      v-if="!$q.platform.is.mobile"
     >
       <q-tab
         label="Toonin"
@@ -71,7 +58,6 @@
       />
       <q-tab
         label="Share"
-        v-if="!$q.platform.is.mobile"
         name="share"
         icon="mdi-access-point"
       />
@@ -84,10 +70,7 @@
       <q-tab-panel name="toonin">
         <TooninPage />
       </q-tab-panel>
-      <q-tab-panel
-        v-if="!$q.platform.is.mobile"
-        name="share"
-      >
+      <q-tab-panel name="share">
         <SharePage />
       </q-tab-panel>
     </q-tab-panels>
@@ -155,12 +138,13 @@ export default {
   color: #f6d45a;
   -webkit-text-stroke: 1px #4296bd;
 }
+
 .title-icon {
   width: 64px;
   height: 64px;
 }
 
-.is-36x36 {
+.header-icon {
   height: 36px;
   width: 36px;
 }
@@ -180,5 +164,24 @@ export default {
 
 .body--dark .toonin-tab-panels {
   background: #2f3136;
+}
+</style>
+<style scoped>
+@media only screen and (max-width: 599px) {
+  .header-icon {
+    height: 28px;
+    width: 28px;
+  }
+
+  .title-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .title-text {
+    font-size: 48px;
+    color: #f6d45a;
+    -webkit-text-stroke: 1px #4296bd;
+  }
 }
 </style>

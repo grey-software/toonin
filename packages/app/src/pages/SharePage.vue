@@ -319,7 +319,7 @@ export default {
         if (captureStream) {
           this.roomNameInputErrorMessages = []
           this.$store.dispatch('UPDATE_SHARING', true)
-          if (captureStream.getAudioTracks() > 0) {
+          if (captureStream.getAudioTracks().length > 0) {
             var localStream = new MediaStream(captureStream.getAudioTracks())
             var audioContext = new AudioContext()
             var audioSourceNode = audioContext.createMediaStreamSource(localStream)
