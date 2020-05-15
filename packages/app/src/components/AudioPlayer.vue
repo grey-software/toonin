@@ -1,5 +1,6 @@
 <template>
   <audio
+    class="q-mt-lg"
     ref="player"
     controls
     autoplay

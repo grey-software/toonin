@@ -1,6 +1,5 @@
 <template>
-  <div style="width: 556px;">
-
+  <div class="connect-container">
     <div class="row justify-space-between q-mt-lg">
       <q-input
         v-if="!auth"
@@ -13,7 +12,6 @@
         :disabled="isConnectedToRoom"
         :error="errorMessages.length > 0"
         class="col-7 col-auto q-mr-lg input-room"
-        
       >
         <template v-slot:error>
           {{ errorMessages[0] }}
@@ -22,7 +20,7 @@
       <q-input
         v-else
         v-model="password"
-        class="col-5 col-auto q-mr-lg input-room"
+        class="col-7 col-auto q-mr-lg input-room"
         @keydown.enter="toonin"
         placeholder="Room password"
         outlined
@@ -42,18 +40,8 @@
         </template>
       </q-input>
       <q-btn
-        @click="cancelAuth"
-        class="btn-share col-3"
-        outline
-        rounded
-        :disabled="sharing"
-        v-show="auth"
-      >
-        Cancel
-      </q-btn>
-      <q-btn
         @click="disconnect"
-        class="btn-share btn-disconnect col-4"
+        class="btn-share btn-disconnect col-3"
         outline
         rounded
         v-if="connectedStatus === 'connected' && !auth"
@@ -63,7 +51,6 @@
           left
           class="q-mr-xs"
         />
-        Disconnect
       </q-btn>
       <q-btn
         @click="toonin"
@@ -77,11 +64,20 @@
           left
           class="q-mr-xs"
         />
-        Toonin
+      </q-btn>
+       <q-btn
+        @click="cancelAuth"
+        class="btn-share col-3"
+        outline
+        rounded
+        :disabled="sharing"
+        v-show="auth"
+      >
+        Cancel
       </q-btn>
     </div>
 
-    <ConnectionStatusTimeline />
+    <ConnectionStatusTimeline v-if="!$q.platform.is.mobile" />
 
   </div>
 </template>
@@ -353,4 +349,19 @@ export default {
 .body--dark .btn-disconnect {
   color: #f6d45a;
 }
+</style>
+
+<style scoped>
+@media only screen and (max-width: 599px) {
+  .connect-container {
+    width: 343px;
+  }
+}
+
+@media only screen and (min-width: 600px) {
+  .connect-container {
+    width: 550px;
+  }
+}
+
 </style>

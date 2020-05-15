@@ -1,5 +1,5 @@
 <template>
-  <div class="column items-center">
+  <div class="column items-center toonin-page-container q-px-md">
     <ConnectToRoom></ConnectToRoom>
     <div class="players-container">
       <div
@@ -79,7 +79,6 @@ export default {
 }
 .players-container {
   position: relative;
-  width: 599px;
   height: 337px;
 }
 
@@ -92,4 +91,19 @@ export default {
 .player-icon {
   font-size: 42px;
 }
+</style>
+
+<style scoped>
+@media only screen and (max-width: 599px) {
+  .players-container {
+    width: 343px;
+  }
+}
+
+@media only screen and (min-width: 600px) {
+  .players-container {
+    width: 550px;
+  }
+}
+
 </style>

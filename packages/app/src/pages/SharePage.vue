@@ -156,13 +156,12 @@
 
       <vue-plyr
         style="padding: 0%;"
-        muted
+        ref="videoPlayer"
       >
         <video
           class="video"
-          ref="videoPlayerShare"
+          ref="videoTag"
           :srcObject.prop="sharingStream"
-          muted
           autoplay
           controls
         ></video>
@@ -202,6 +201,7 @@ export default {
   name: 'screen-cap',
   data: () => ({
     videoTag: null,
+    videoPlayer: null,
     roomName: '',
     roomNameInputErrorMessages: [],
     userVideo: null,
@@ -319,7 +319,7 @@ export default {
         if (captureStream) {
           this.roomNameInputErrorMessages = []
           this.$store.dispatch('UPDATE_SHARING', true)
-          if (captureStream.getAudioTracks() > 0) {
+          if (captureStream.getAudioTracks().length > 0) {
             var localStream = new MediaStream(captureStream.getAudioTracks())
             var audioContext = new AudioContext()
             var audioSourceNode = audioContext.createMediaStreamSource(localStream)
@@ -329,6 +329,7 @@ export default {
             this.$store.dispatch('UPDATE_SHARING_STREAM', combined)
             this.$store.dispatch('UPDATE_SHARE_AUDIO', true)
             this.$store.dispatch('UPDATE_SHARE_VIDEO', true)
+            this.videoPlayer.increaseVolume()
           } else {
             this.$store.dispatch('UPDATE_SHARING_STREAM', captureStream)
             this.$store.dispatch('UPDATE_SHARE_VIDEO', true)
@@ -429,7 +430,8 @@ export default {
     }
   },
   mounted () {
-    this.videoTag = this.$refs.videoPlayerShare
+    this.videoTag = this.$refs.videoTag
+    this.videoPlayer = this.$refs.videoPlayer
     window.onunload = () => {
       if (this.sharing) {
         this.peers.socket.emit('disconnect room', { room: this.connectedRoomName })
