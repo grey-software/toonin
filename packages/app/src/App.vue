@@ -8,25 +8,26 @@
       transition-hide="scale"
     >
       <q-card
-        class="bg-teal text-white"
+        class="text-white"
         style="width: 300px"
       >
         <q-card-section>
-          <div class="text-h6">Are you using Chrome?</div>
+          <div style="color:#343434;" class="text-h6">Are you using Chrome?</div>
         </q-card-section>
 
-        <q-card-section class="q-pt-none">
-          For the optimal toonin experience on desktop and mobile, we recommend using Google Chrome.
+        <q-card-section style="color:#343434;" class="q-pt-none">
+          For the optimal Toonin experience on desktop and mobile, we recommend using Google Chrome.
         </q-card-section>
 
         <q-card-actions
           align="right"
-          class="bg-white text-teal"
+          class="bg-white"
         >
           <q-btn
             flat
             label="I understand"
             v-close-popup
+            style="color:#343434;"
             @click="showBrowserCompatDialog = false"
           />
         </q-card-actions>
