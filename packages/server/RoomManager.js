@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
 const NetworkTree = require("./NetworkTree").NetworkTree;
 const bcrypt = require('bcrypt');
-const winston = require('winston')
 const MAX_CLIENTS_PER_HOST = 2;
 const logger = require('./logger.js')
 
