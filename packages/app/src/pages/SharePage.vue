@@ -2,10 +2,7 @@
 /* eslint-disable no-console */
 <template>
 
-  <div
-    class="q-mt-lg"
-    style="width:599px;height:auto;"
-  >
+  <div class="share-container q-mt-lg">
     <div class="row justify-space-between q-mt-lg">
 
       <q-input
@@ -74,13 +71,13 @@
         class="col-5 q-mr-lg input-room"
         outlined
         rounded
-        :type="isPwd ? 'password' : 'text'"
+        :type="revealPassword ? 'password' : 'text'"
       >
         <template v-slot:append>
           <q-icon
-            :name="isPwd ? 'visibility_off' : 'visibility'"
+            :name="revealPassword ? 'visibility_off' : 'visibility'"
             class="cursor-pointer"
-            @click="isPwd = !isPwd"
+            @click="revealPassword = !revealPassword"
           />
         </template>
       </q-input>
@@ -94,25 +91,20 @@
       </q-btn>
     </div>
 
-    <q-card-actions
-      style="padding: 20px"
-      align="center"
-    >
+    <div class="row items-center q-py-lg q-px-lg">
       <span v-show="connectedRoomName">
         <q-icon
-          large
           color="primary"
           name="mdi-account"
+          class="peer-count-icon"
         ></q-icon>
-        <span
-          class="label-room-name ml-3"
-          style="padding-right: 10px"
-        >{{ this.peerCounter }} peers</span>
+        <span class="peer-count-text q-mt-xs">{{ this.peerCounter }} peers</span>
       </span>
       <q-btn
         @click="copyIdToClipboard"
         outlined
         rounded
+        flat
         v-show="connectedRoomName"
       >
         <q-icon
@@ -124,6 +116,7 @@
         @click="copyLinkToClipboard"
         outlined
         rounded
+        flat
         v-show="connectedRoomName"
       >
         <q-icon
@@ -147,7 +140,7 @@
         v-show="sharingStream"
       />
 
-    </q-card-actions>
+    </div>
 
     <div
       class="video-container"
@@ -207,7 +200,7 @@ export default {
     userVideo: null,
     userAudio: null,
     password: '',
-    isPwd: true
+    revealPassword: true
   }),
   computed: {
     isConnectedToRoom () {
@@ -226,18 +219,8 @@ export default {
         return []
       }
     },
-    tooninHappening () {
-      if (this.connectedStatus === 'connected') {
-        return true
-      }
-      return false
-    },
     peerCounter () {
-      if (this.peers) {
-        return this.peers.getPeerCount()
-      } else {
-        return 0
-      }
+      return this.peers ? this.peers.getPeerCount() : 0
     },
     sendAudio: {
       get () {
@@ -383,6 +366,22 @@ export default {
 </script>
 
 <style scoped>
+.share-container {
+  width: 599px;
+  height: auto;
+}
+
+.peer-count-icon {
+  font-size: 28px;
+}
+
+.peer-count-text {
+  padding: 0px 8px;
+  font-size: 18px;
+  font-family: 'TooninTitle';
+  color: #696969;
+}
+
 .plyr {
   margin: 0px 20px;
   border-radius: 4px;
