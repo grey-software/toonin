@@ -3,6 +3,8 @@ const NetworkTree = require("./NetworkTree").NetworkTree;
 const bcrypt = require('bcrypt');
 const winston = require('winston')
 const MAX_CLIENTS_PER_HOST = 2;
+const logger = require('./logger.js')
+
 
 const genRoomID = (rooms) => {
   for (; ;) {
@@ -61,14 +63,14 @@ class RoomManager {
    */
   createRoom (socket, roomID, isDistributed, password) {
     var newRoomID = "";
-    winston.log('info', "Received request to create a new room ", {
+    logger.log( "Received request to create a new room ", {
       roomID: roomID
     });
     const hasCustomRoomName = roomID.length > 0;
 
     if (hasCustomRoomName) {
       if (this.getRoom(roomID)) {
-        winston.log('info', "Room with name already exists", {
+        logger.log('info', "Room with name already exists", {
           roomID: roomID
         });
         socket.emit("room creation failed", "name already exists");

@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 "use strict";
-const winston = require('winston')
+const logger = require('./logger.js')
 const express = require("express");
 const app = express();
 const cors = require("cors");
@@ -35,7 +35,7 @@ io.on("connection", (socket) => {
 
   socket.on("new peer", (roomID) => {
     const room = roomManager.getRoom(roomID);
-    winston.log('info', 'New peer.', {
+    logger.log('info', 'New peer.', {
       roomID: roomID
     })
     if (room) {
@@ -47,7 +47,7 @@ io.on("connection", (socket) => {
           socket.emit("host pool", { potentialHosts, roomID });
         } else {
           socket.join(roomID, () => {
-            winston.log('info', 'Peer connected successfully to room.', {
+            logger.log('info', 'Peer connected successfully to room.', {
               roomID: roomID
             })
             socket.to(roomID).emit("peer joined", {
@@ -58,7 +58,7 @@ io.on("connection", (socket) => {
         }
       }
     } else {
-      winston.log('info', 'Room not found.', {
+      logger.log('info', 'Room not found.', {
         roomID: roomID
       })
       socket.emit("room null");
@@ -78,7 +78,7 @@ io.on("connection", (socket) => {
               socket.emit("host pool", { potentialHosts, roomID: req.roomID });
             } else {
               socket.join(req.roomID, () => {
-                winston.log('info', 'Peer connected successfully to room.', {
+                logger.log('info', 'Peer connected successfully to room.', {
                   roomID: req.roomID
                 })
                 socket.to(req.roomID).emit("peer joined", {
@@ -91,7 +91,7 @@ io.on("connection", (socket) => {
             socket.emit("require-password");
           }
         }).catch((e) => {
-          winston.log('error', 'Error when verifying password', {
+          logger.log('error', 'Error when verifying password', {
             error: e
           })
           socket.emit("require-password");
@@ -99,7 +99,7 @@ io.on("connection", (socket) => {
 
       }
     } else {
-      winston.log('info', 'Room not found.', {
+      logger.log('info', 'Room not found.', {
         roomID: req.roomID
       })
       socket.emit("room null");
@@ -110,7 +110,7 @@ io.on("connection", (socket) => {
     if (res.evalResult.hostFound) {
       const room = res.evalResult.room;
       socket.join(room, () => {
-        winston.log('info', "Peer connected successfully to room: ", {
+        logger.log('info', "Peer connected successfully to room: ", {
           roomID: room
         });
         io.to(res.evalResult.selectedHost).emit("peer joined", {
@@ -126,28 +126,28 @@ io.on("connection", (socket) => {
   });
 
   socket.on("src new ice", (iceData) => {
-    winston.log('debug',
+    logger.log('debug',
       `Received new ICE Candidate from src for peer: ${iceData.id} in room: ${iceData.room}`
     );
     io.to(iceData.id).emit("src ice", iceData);
   });
 
   socket.on("peer new ice", (iceData) => {
-    winston.log('debug',
+    logger.log('debug',
       `Received new ICE Candidate for peer: ${iceData.id} in room: ${iceData.room}`
     );
     io.to(iceData.hostID).emit("peer ice", iceData);
   });
 
   socket.on("src new desc", (descData) => {
-    winston.log('debug',
+    logger.log('debug',
       `Received description from src for peer: ${descData.id} in room: ${descData.room}`
     );
     io.to(descData.id).emit("src desc", descData);
   });
 
   socket.on("peer new desc", (descData) => {
-    winston.log('debug',
+    logger.log('debug',
       `Received answer description from peer: ${descData.id} in room: ${descData.room}`
     );
     io.to(descData.selectedHost).emit("peer desc", descData);
@@ -166,7 +166,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("logoff", (req) => {
-    winston.log('info', 'Log off request from ' + req.name)
+    logger.log('info', 'Log off request from ' + req.name)
     disconnectSocket(req, socket)
   });
 
@@ -177,7 +177,7 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     const socketInfo = socketManager.getSocket(socket.id)
     const disconnectSuccessful = disconnectSocket(socketInfo, socket)
-    winston.log('info', "User disconnected", {
+    logger.log('info', "User disconnected", {
       peerID: socket.id,
       disconnectSuccessful: disconnectSuccessful
     });
@@ -196,7 +196,7 @@ io.on("connection", (socket) => {
  */
 function disconnectSocket (req, socket) {
   if (roomManager.deleteRoom(socket.id)) {
-    winston.log('info', "Closing room", { roomID: req.room });
+    logger.log('info', "Closing room", { roomID: req.room });
     socket.to(req.room).emit("chatFromServer", "room being closed.");
     socketManager.removeSocket(socket.id)
     return true
@@ -208,7 +208,7 @@ function disconnectSocket (req, socket) {
         socketManager.removeSocket(socket.id)
         io.to(room.hostId).emit("PeerCount", socketManager.getSocketCountInRoom(req.room));
         socket.to(req.room).emit("chatFromServer", req.name + " has left.")
-        winston.log('info', "Peer has left the room", { peerID: socket.id });
+        logger.log('info', "Peer has left the room", { peerID: socket.id });
       }
       return true
     }
@@ -236,7 +236,7 @@ app.get("/", (req, res) => {
 });
 
 http.listen(port, () => {
-  winston.log('info', "HTTP server live", {
+  logger.log('info', "HTTP server live", {
     port: port
   });
 });
