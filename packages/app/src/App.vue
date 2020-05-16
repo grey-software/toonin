@@ -16,6 +16,16 @@ const myIcons = {
 }
 export default {
   name: 'App',
+  data () {
+    return {
+      userId: ''
+    }
+  },
+  watch: {
+    userId (id) {
+      this.$store.commit('SET_USER_TRACKING_ID', id)
+    }
+  },
   created () {
     this.$q.iconMapFn = (iconName) => {
       const icon = myIcons[iconName]
@@ -23,7 +33,10 @@ export default {
         return { icon: icon }
       }
     }
-  }
+    var appVisitorId
+    _paq.push([function () { appVisitorId = this.getVisitorId(); }]);
+    setTimeout(() => this.userId = appVisitorId, 343)
+  },
 }
 </script>
 
