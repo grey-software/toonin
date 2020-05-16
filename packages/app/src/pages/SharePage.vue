@@ -85,12 +85,12 @@
         </template>
       </q-input>
       <q-btn
-          @click="disconnect"
-          class="btn-share col-2"
-          outline
-          rounded
-          v-show="connectedRoomName"
-        >Disconnect
+        @click="disconnect"
+        class="btn-share col-2"
+        outline
+        rounded
+        v-show="connectedRoomName"
+      >Disconnect
       </q-btn>
     </div>
 
@@ -266,7 +266,7 @@ export default {
         this.$store.dispatch('UPDATE_SHARE_VIDEO', value)
       }
     },
-    ...mapState(['connectedRoomName', 'connectedStatus', 'sharing', 'peers', 'sharingStream', 'shareAudio', 'shareVideo'])
+    ...mapState(['connectedRoomName', 'connectedStatus', 'sharing', 'peers', 'sharingStream', 'shareAudio', 'shareVideo', 'userTrackingId'])
   },
   watch: {
     connectedRoomName: function (newValue) {
@@ -317,6 +317,7 @@ export default {
           )
         }
         if (captureStream) {
+          _paq.push(['trackEvent', 'Share', this.userTrackingId, "Captured their stream"]);
           this.roomNameInputErrorMessages = []
           this.$store.dispatch('UPDATE_SHARING', true)
           if (captureStream.getAudioTracks().length > 0) {
@@ -339,17 +340,19 @@ export default {
     },
     stopCapture () {
       if (this.sharingStream) {
+        _paq.push(['trackEvent', 'Share', this.userTrackingId, "Stopped sharing their stream"]);
         this.$store.dispatch('UPDATE_SHARE_AUDIO', false)
         this.$store.dispatch('UPDATE_SHARE_VIDEO', false)
         const tracks = this.sharingStream.getTracks()
         tracks.forEach((track) => track.enabled = false)
-        setTimeout(function(){ tracks.forEach((track) => track.stop()) }, 1000);
+        setTimeout(function () { tracks.forEach((track) => track.stop()) }, 1000);
         this.$store.dispatch('UPDATE_SHARING_STREAM', null)
         this.$store.dispatch('UPDATE_SHARING', false)
       }
     },
     async disconnect () {
       if (this.connectedRoomName) {
+        _paq.push(['trackEvent', 'Share', this.userTrackingId, "Disconnected from their room"]);
         await this.peers.removeAllPeersAndClose()
         this.$store.dispatch('UPDATE_CONNECTED_ROOM', null)
         this.$store.dispatch('UPDATE_PEERS', null)
