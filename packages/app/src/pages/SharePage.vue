@@ -85,12 +85,12 @@
         </template>
       </q-input>
       <q-btn
-          @click="disconnect"
-          class="btn-share col-2"
-          outline
-          rounded
-          v-show="connectedRoomName"
-        >Disconnect
+        @click="disconnect"
+        class="btn-share col-2"
+        outline
+        rounded
+        v-show="connectedRoomName"
+      >Disconnect
       </q-btn>
     </div>
 
@@ -214,19 +214,8 @@ export default {
       this.roomNameInputErrorMessages = []
       return "Connected to " + this.connectedRoomName
     },
-    cardTitle () {
-      if (this.connectedRoomName) {
-        return `Personal room name is ${this.connectedRoomName}`
-      }
-      return 'Create your room'
-    },
     roomNameValid () {
-      const valid = this.roomName.match(VALID_ROOM_REGEX)
-      if (valid) {
-        return true
-      } else {
-        return false
-      }
+      return this.roomName.match(VALID_ROOM_REGEX)
     },
     errorMessages () {
       if (this.roomNameInputErrorMessages.length > 0) {
@@ -307,55 +296,53 @@ export default {
         } catch (err) {
           // eslint-disable-next-line no-console
           console.log(err)
-          if (typeof window.orientation !== 'undefined') {
-            this.roomNameInputErrorMessages.push(
-              'Error: screen capture not available on mobile devices.'
-            )
-          }
           this.roomNameInputErrorMessages.push(
             'Error: screen capture not available. ' + err.message
           )
         }
-        if (captureStream) {
-          this.roomNameInputErrorMessages = []
-          this.$store.dispatch('UPDATE_SHARING', true)
-          if (captureStream.getAudioTracks().length > 0) {
-            var localStream = new MediaStream(captureStream.getAudioTracks())
-            var audioContext = new AudioContext()
-            var audioSourceNode = audioContext.createMediaStreamSource(localStream)
-            var remoteDestination = audioContext.createMediaStreamDestination()
-            audioSourceNode.connect(remoteDestination)
-            const combined = new MediaStream([...captureStream.getVideoTracks(), ...localStream.getAudioTracks()])
-            this.$store.dispatch('UPDATE_SHARING_STREAM', combined)
-            this.$store.dispatch('UPDATE_SHARE_AUDIO', true)
-            this.$store.dispatch('UPDATE_SHARE_VIDEO', true)
-            this.videoPlayer.increaseVolume()
-          } else {
-            this.$store.dispatch('UPDATE_SHARING_STREAM', captureStream)
-            this.$store.dispatch('UPDATE_SHARE_VIDEO', true)
-          }
+        if (!captureStream) {
+          return
+        }
+        this.roomNameInputErrorMessages = []
+        this.$store.dispatch('UPDATE_SHARING', true)
+        if (captureStream.getAudioTracks().length > 0) {
+          const localStream = new MediaStream(captureStream.getAudioTracks())
+          const audioContext = new AudioContext()
+          const audioSourceNode = audioContext.createMediaStreamSource(localStream)
+          const remoteDestination = audioContext.createMediaStreamDestination()
+          audioSourceNode.connect(remoteDestination)
+          const combined = new MediaStream([...captureStream.getVideoTracks(), ...localStream.getAudioTracks()])
+          this.$store.dispatch('UPDATE_SHARING_STREAM', combined)
+          this.$store.dispatch('UPDATE_SHARE_AUDIO', true)
+          this.$store.dispatch('UPDATE_SHARE_VIDEO', true)
+          this.videoPlayer.increaseVolume()
+        } else {
+          this.$store.dispatch('UPDATE_SHARING_STREAM', captureStream)
+          this.$store.dispatch('UPDATE_SHARE_VIDEO', true)
         }
       }
     },
     stopCapture () {
-      if (this.sharingStream) {
-        this.$store.dispatch('UPDATE_SHARE_AUDIO', false)
-        this.$store.dispatch('UPDATE_SHARE_VIDEO', false)
-        const tracks = this.sharingStream.getTracks()
-        tracks.forEach((track) => track.enabled = false)
-        setTimeout(function(){ tracks.forEach((track) => track.stop()) }, 1000);
-        this.$store.dispatch('UPDATE_SHARING_STREAM', null)
-        this.$store.dispatch('UPDATE_SHARING', false)
+      if (!this.sharingStream) {
+        return
       }
+      this.$store.dispatch('UPDATE_SHARE_AUDIO', false)
+      this.$store.dispatch('UPDATE_SHARE_VIDEO', false)
+      const tracks = this.sharingStream.getTracks()
+      tracks.forEach((track) => track.enabled = false)
+      setTimeout(function () { tracks.forEach((track) => track.stop()) }, 1000);
+      this.$store.dispatch('UPDATE_SHARING_STREAM', null)
+      this.$store.dispatch('UPDATE_SHARING', false)
     },
     async disconnect () {
-      if (this.connectedRoomName) {
-        await this.peers.removeAllPeersAndClose()
-        this.$store.dispatch('UPDATE_CONNECTED_ROOM', null)
-        this.$store.dispatch('UPDATE_PEERS', null)
-        this.roomName = ''
-        this.stopCapture()
+      if (!this.connectedRoomName) {
+        return
       }
+      await this.peers.removeAllPeersAndClose()
+      this.$store.dispatch('UPDATE_CONNECTED_ROOM', null)
+      this.$store.dispatch('UPDATE_PEERS', null)
+      this.roomName = ''
+      this.stopCapture()
     },
     requestFullScreen () {
       if (this.videoTag.requestFullscreen) {
@@ -381,52 +368,6 @@ export default {
     },
     copyIdToClipboard () {
       copyToClipboard(this.connectedRoomName)
-    },
-    async getUserAudio () {
-      if (!this.userAudio) {
-        let stream = null
-
-        try {
-          stream = await navigator.mediaDevices.getUserMedia({
-            audio: true
-          })
-          /* use the stream */
-        } catch (err) {
-          // eslint-disable-next-line no-console
-          console.log(err)
-        }
-        this.userAudio = stream
-      } else {
-        const tracks = this.userAudio.getTracks()
-
-        tracks.forEach((track) => track.stop())
-        this.userAudio = null
-        // eslint-disable-next-line no-console
-        console.log('Audio off')
-      }
-    },
-    async getUserVideo () {
-      if (!this.userVideo) {
-        let stream = null
-
-        try {
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: 'user' }
-          })
-          /* use the stream */
-        } catch (err) {
-          // eslint-disable-next-line no-console
-          console.log(err)
-        }
-        this.userVideo = stream
-      } else {
-        const tracks = this.userVideo.getTracks()
-
-        tracks.forEach((track) => track.stop())
-        this.userVideo = null
-        // eslint-disable-next-line no-console
-        console.log('Video off')
-      }
     }
   },
   mounted () {
