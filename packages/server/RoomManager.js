@@ -1,10 +1,11 @@
 /* eslint-disable no-console */
 const NetworkTree = require("./NetworkTree").NetworkTree;
 const bcrypt = require('bcrypt');
+const winston = require('winston')
 const MAX_CLIENTS_PER_HOST = 2;
 
 const genRoomID = (rooms) => {
-  for (;;) {
+  for (; ;) {
     const id =
       Math.random()
         .toString(36)
@@ -31,14 +32,14 @@ class Room {
     }
   }
 
-  async createHash(password) {
-    return bcrypt.hash(password, 10).then(function(hash) {
+  async createHash (password) {
+    return bcrypt.hash(password, 10).then(function (hash) {
       return hash
     });
   }
 
-  async verifyPassword(password) {
-    return bcrypt.compare(password, this.hash).then(function(result) {
+  async verifyPassword (password) {
+    return bcrypt.compare(password, this.hash).then(function (result) {
       if (result) {
         return true
       } else {
@@ -56,19 +57,24 @@ class RoomManager {
 
   /**
    * @param {SocketIO.Socket} socket
-   * @param {string} roomName
+   * @param {string} roomID
    */
-  createRoom(socket, roomName, isDistributed, password) {
+  createRoom (socket, roomID, isDistributed, password) {
     var newRoomID = "";
-    console.log("Received request to create new room " + roomName);
-    const hasCustomRoomName = roomName.length > 0;
+    winston.log('info', "Received request to create a new room ", {
+      roomID: roomID
+    });
+    const hasCustomRoomName = roomID.length > 0;
 
     if (hasCustomRoomName) {
-      if (this.getRoom(roomName)) {
+      if (this.getRoom(roomID)) {
+        winston.log('info', "Room with name already exists", {
+          roomID: roomID
+        });
         socket.emit("room creation failed", "name already exists");
         return false
       } else {
-        newRoomID = roomName;
+        newRoomID = roomID;
         if (isDistributed) {
           this.rooms.push(
             new Room(
@@ -115,7 +121,7 @@ class RoomManager {
    * @param {String} roomID room id
    * @return {Room} Room if found or null
    */
-  getRoom(roomID) {
+  getRoom (roomID) {
     var returnRoom = this.rooms.filter((room) => room.roomID === roomID);
     if (returnRoom.length > 0) {
       return returnRoom[0];
@@ -127,8 +133,8 @@ class RoomManager {
    * Delete a Room from Room Manager
    * @param {String} id Socket id
    */
-  deleteRoom(id) {
-    var size = this.rooms.length;
+  deleteRoom (id) {
+    const size = this.rooms.length;
     this.rooms = this.rooms.filter((room) => room.hostId !== id);
     if (size > this.rooms.length) {
       return true;
