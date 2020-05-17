@@ -2,10 +2,7 @@
 /* eslint-disable no-console */
 <template>
 
-  <div
-    class="q-mt-lg"
-    style="width:599px;height:auto;"
-  >
+  <div class="share-container q-mt-lg">
     <div class="row justify-space-between q-mt-lg">
 
       <q-input
@@ -74,13 +71,13 @@
         class="col-5 q-mr-lg input-room"
         outlined
         rounded
-        :type="isPwd ? 'password' : 'text'"
+        :type="revealPassword ? 'password' : 'text'"
       >
         <template v-slot:append>
           <q-icon
-            :name="isPwd ? 'visibility_off' : 'visibility'"
+            :name="revealPassword ? 'visibility_off' : 'visibility'"
             class="cursor-pointer"
-            @click="isPwd = !isPwd"
+            @click="revealPassword = !revealPassword"
           />
         </template>
       </q-input>
@@ -94,25 +91,20 @@
       </q-btn>
     </div>
 
-    <q-card-actions
-      style="padding: 20px"
-      align="center"
-    >
+    <div class="row items-center q-py-lg q-px-lg">
       <span v-show="connectedRoomName">
         <q-icon
-          large
           color="primary"
           name="mdi-account"
+          class="peer-count-icon"
         ></q-icon>
-        <span
-          class="label-room-name ml-3"
-          style="padding-right: 10px"
-        >{{ this.peerCounter }} peers</span>
+        <span class="peer-count-text q-mt-xs">{{ this.peerCounter }} peers</span>
       </span>
       <q-btn
         @click="copyIdToClipboard"
         outlined
         rounded
+        flat
         v-show="connectedRoomName"
       >
         <q-icon
@@ -124,6 +116,7 @@
         @click="copyLinkToClipboard"
         outlined
         rounded
+        flat
         v-show="connectedRoomName"
       >
         <q-icon
@@ -147,7 +140,7 @@
         v-show="sharingStream"
       />
 
-    </q-card-actions>
+    </div>
 
     <div
       class="video-container"
@@ -207,26 +200,15 @@ export default {
     userVideo: null,
     userAudio: null,
     password: '',
-    isPwd: true
+    revealPassword: true
   }),
   computed: {
     isConnectedToRoom () {
       this.roomNameInputErrorMessages = []
       return "Connected to " + this.connectedRoomName
     },
-    cardTitle () {
-      if (this.connectedRoomName) {
-        return `Personal room name is ${this.connectedRoomName}`
-      }
-      return 'Create your room'
-    },
     roomNameValid () {
-      const valid = this.roomName.match(VALID_ROOM_REGEX)
-      if (valid) {
-        return true
-      } else {
-        return false
-      }
+      return this.roomName.match(VALID_ROOM_REGEX)
     },
     errorMessages () {
       if (this.roomNameInputErrorMessages.length > 0) {
@@ -237,18 +219,8 @@ export default {
         return []
       }
     },
-    tooninHappening () {
-      if (this.connectedStatus === 'connected') {
-        return true
-      }
-      return false
-    },
     peerCounter () {
-      if (this.peers) {
-        return this.peers.getPeerCount()
-      } else {
-        return 0
-      }
+      return this.peers ? this.peers.getPeerCount() : 0
     },
     sendAudio: {
       get () {
@@ -307,58 +279,56 @@ export default {
         } catch (err) {
           // eslint-disable-next-line no-console
           console.log(err)
-          if (typeof window.orientation !== 'undefined') {
-            this.roomNameInputErrorMessages.push(
-              'Error: screen capture not available on mobile devices.'
-            )
-          }
           this.roomNameInputErrorMessages.push(
             'Error: screen capture not available. ' + err.message
           )
         }
-        if (captureStream) {
-          _paq.push(['trackEvent', 'Share', this.userTrackingId, "Captured their stream"]);
-          this.roomNameInputErrorMessages = []
-          this.$store.dispatch('UPDATE_SHARING', true)
-          if (captureStream.getAudioTracks().length > 0) {
-            var localStream = new MediaStream(captureStream.getAudioTracks())
-            var audioContext = new AudioContext()
-            var audioSourceNode = audioContext.createMediaStreamSource(localStream)
-            var remoteDestination = audioContext.createMediaStreamDestination()
-            audioSourceNode.connect(remoteDestination)
-            const combined = new MediaStream([...captureStream.getVideoTracks(), ...localStream.getAudioTracks()])
-            this.$store.dispatch('UPDATE_SHARING_STREAM', combined)
-            this.$store.dispatch('UPDATE_SHARE_AUDIO', true)
-            this.$store.dispatch('UPDATE_SHARE_VIDEO', true)
-            this.videoPlayer.increaseVolume()
-          } else {
-            this.$store.dispatch('UPDATE_SHARING_STREAM', captureStream)
-            this.$store.dispatch('UPDATE_SHARE_VIDEO', true)
-          }
+        if (!captureStream) {
+          return
+        }
+        _paq.push(['trackEvent', 'Share', this.userTrackingId, "Captured their stream"]);
+        this.roomNameInputErrorMessages = []
+        this.$store.dispatch('UPDATE_SHARING', true)
+        if (captureStream.getAudioTracks().length > 0) {
+          const localStream = new MediaStream(captureStream.getAudioTracks())
+          const audioContext = new AudioContext()
+          const audioSourceNode = audioContext.createMediaStreamSource(localStream)
+          const remoteDestination = audioContext.createMediaStreamDestination()
+          audioSourceNode.connect(remoteDestination)
+          const combined = new MediaStream([...captureStream.getVideoTracks(), ...localStream.getAudioTracks()])
+          this.$store.dispatch('UPDATE_SHARING_STREAM', combined)
+          this.$store.dispatch('UPDATE_SHARE_AUDIO', true)
+          this.$store.dispatch('UPDATE_SHARE_VIDEO', true)
+          this.videoPlayer.increaseVolume()
+        } else {
+          this.$store.dispatch('UPDATE_SHARING_STREAM', captureStream)
+          this.$store.dispatch('UPDATE_SHARE_VIDEO', true)
         }
       }
     },
     stopCapture () {
-      if (this.sharingStream) {
-        _paq.push(['trackEvent', 'Share', this.userTrackingId, "Stopped sharing their stream"]);
-        this.$store.dispatch('UPDATE_SHARE_AUDIO', false)
-        this.$store.dispatch('UPDATE_SHARE_VIDEO', false)
-        const tracks = this.sharingStream.getTracks()
-        tracks.forEach((track) => track.enabled = false)
-        setTimeout(function () { tracks.forEach((track) => track.stop()) }, 1000);
-        this.$store.dispatch('UPDATE_SHARING_STREAM', null)
-        this.$store.dispatch('UPDATE_SHARING', false)
+      if (!this.sharingStream) {
+        return
       }
+      _paq.push(['trackEvent', 'Share', this.userTrackingId, "Stopped sharing their stream"]);
+      this.$store.dispatch('UPDATE_SHARE_AUDIO', false)
+      this.$store.dispatch('UPDATE_SHARE_VIDEO', false)
+      const tracks = this.sharingStream.getTracks()
+      tracks.forEach((track) => track.enabled = false)
+      setTimeout(function () { tracks.forEach((track) => track.stop()) }, 1000);
+      this.$store.dispatch('UPDATE_SHARING_STREAM', null)
+      this.$store.dispatch('UPDATE_SHARING', false)
     },
     async disconnect () {
-      if (this.connectedRoomName) {
-        _paq.push(['trackEvent', 'Share', this.userTrackingId, "Disconnected from their room"]);
-        await this.peers.removeAllPeersAndClose()
-        this.$store.dispatch('UPDATE_CONNECTED_ROOM', null)
-        this.$store.dispatch('UPDATE_PEERS', null)
-        this.roomName = ''
-        this.stopCapture()
+      if (!this.connectedRoomName) {
+        return
       }
+      _paq.push(['trackEvent', 'Share', this.userTrackingId, "Disconnected from their room"]);
+      await this.peers.removeAllPeersAndClose()
+      this.$store.dispatch('UPDATE_CONNECTED_ROOM', null)
+      this.$store.dispatch('UPDATE_PEERS', null)
+      this.roomName = ''
+      this.stopCapture()
     },
     requestFullScreen () {
       if (this.videoTag.requestFullscreen) {
@@ -384,52 +354,6 @@ export default {
     },
     copyIdToClipboard () {
       copyToClipboard(this.connectedRoomName)
-    },
-    async getUserAudio () {
-      if (!this.userAudio) {
-        let stream = null
-
-        try {
-          stream = await navigator.mediaDevices.getUserMedia({
-            audio: true
-          })
-          /* use the stream */
-        } catch (err) {
-          // eslint-disable-next-line no-console
-          console.log(err)
-        }
-        this.userAudio = stream
-      } else {
-        const tracks = this.userAudio.getTracks()
-
-        tracks.forEach((track) => track.stop())
-        this.userAudio = null
-        // eslint-disable-next-line no-console
-        console.log('Audio off')
-      }
-    },
-    async getUserVideo () {
-      if (!this.userVideo) {
-        let stream = null
-
-        try {
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: 'user' }
-          })
-          /* use the stream */
-        } catch (err) {
-          // eslint-disable-next-line no-console
-          console.log(err)
-        }
-        this.userVideo = stream
-      } else {
-        const tracks = this.userVideo.getTracks()
-
-        tracks.forEach((track) => track.stop())
-        this.userVideo = null
-        // eslint-disable-next-line no-console
-        console.log('Video off')
-      }
     }
   },
   mounted () {
@@ -445,6 +369,22 @@ export default {
 </script>
 
 <style scoped>
+.share-container {
+  width: 599px;
+  height: auto;
+}
+
+.peer-count-icon {
+  font-size: 28px;
+}
+
+.peer-count-text {
+  padding: 0px 8px;
+  font-size: 18px;
+  font-family: "TooninTitle";
+  color: #696969;
+}
+
 .plyr {
   margin: 0px 20px;
   border-radius: 4px;
