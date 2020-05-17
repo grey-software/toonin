@@ -1,6 +1,38 @@
 <template>
   <div id="q-app">
     <router-view />
+    <q-dialog
+      v-model="showBrowserCompatDialog"
+      persistent
+      transition-show="scale"
+      transition-hide="scale"
+    >
+      <q-card
+        class="text-white"
+        style="width: 300px"
+      >
+        <q-card-section>
+          <div style="color:#343434;" class="text-h6">Are you using Chrome?</div>
+        </q-card-section>
+
+        <q-card-section style="color:#343434;" class="q-pt-none">
+          For the optimal Toonin experience on desktop and mobile, we recommend using Google Chrome.
+        </q-card-section>
+
+        <q-card-actions
+          align="right"
+          class="bg-white"
+        >
+          <q-btn
+            flat
+            label="I understand"
+            v-close-popup
+            style="color:#343434;"
+            @click="showBrowserCompatDialog = false"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
@@ -16,12 +48,22 @@ const myIcons = {
 }
 export default {
   name: 'App',
+  data () {
+    return {
+      showBrowserCompatDialog: false,
+    }
+  },
   created () {
     this.$q.iconMapFn = (iconName) => {
       const icon = myIcons[iconName]
       if (icon !== void 0) {
         return { icon: icon }
       }
+    }
+  },
+  mounted () {
+    if (!this.$q.platform.is.chrome) {
+      this.showBrowserCompatDialog = true
     }
   }
 }
