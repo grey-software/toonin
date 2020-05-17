@@ -50,7 +50,13 @@ export default {
   name: 'App',
   data () {
     return {
-      showBrowserCompatDialog: false,
+      userId: '',
+      showBrowserCompatDialog: false
+    }
+  },
+  watch: {
+    userId (id) {
+      this.$store.commit('SET_USER_TRACKING_ID', id)
     }
   },
   created () {
@@ -60,6 +66,9 @@ export default {
         return { icon: icon }
       }
     }
+    var appVisitorId
+    _paq.push([function () { appVisitorId = this.getVisitorId(); }]);
+    setTimeout(() => this.userId = appVisitorId, 343)
   },
   mounted () {
     if (!this.$q.platform.is.chrome) {

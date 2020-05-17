@@ -36,9 +36,13 @@ export default function (/* { ssrContext } */) {
       sharingStream: null,
       unread: 0,
       shareAudio: false,
-      shareVideo: false
+      shareVideo: false,
+      userTrackingId: ''
     },
     mutations: {
+      SET_USER_TRACKING_ID: (state, payload) => {
+        state.userTrackingId = payload
+      },
       SET_CONNECTED_STATUS: (state, payload) => {
         state.connectedStatus = payload
       },

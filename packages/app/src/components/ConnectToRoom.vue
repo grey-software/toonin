@@ -65,7 +65,7 @@
           class="q-mr-xs"
         />
       </q-btn>
-       <q-btn
+      <q-btn
         @click="cancelAuth"
         class="btn-share col-3"
         outline
@@ -128,13 +128,13 @@ export default {
     },
     toonin () {
       if (this.auth) {
-        console.log('auth came')
         this.sendPassword()
         return
       }
       this.connectToRoom()
     },
     connectToRoom (reconnecting) {
+      _paq.push(['trackEvent', 'Toonin', this.userTrackingId, `Connected to room: ${this.roomName}`]);
       this.$store.dispatch('UPDATE_ROOM', this.roomName)
       if (!reconnecting) {
         this.$store.dispatch('UPDATE_PEERS', new StartShare(this, false))
@@ -242,6 +242,7 @@ export default {
       this.connectToRoom(false)
     },
     async disconnect () {
+      _paq.push(['trackEvent', 'Toonin', this.userTrackingId, `Disconnected from room: ${this.roomName}`]); 
       if (this.rtcConn) {
         this.rtcConn.close()
       }
@@ -294,7 +295,8 @@ export default {
       'videoStream',
       'sharing',
       'peers',
-      'name'
+      'name',
+      'userTrackingId'
     ])
   },
   mounted: function () {
@@ -363,5 +365,4 @@ export default {
     width: 550px;
   }
 }
-
 </style>
