@@ -1,5 +1,5 @@
 <template>
-  <div class="column items-center toonin-page-container q-px-md">
+  <q-page class="column items-center toonin-page-container q-px-md">
     <ConnectToRoom></ConnectToRoom>
     <div class="players-container">
       <div
@@ -41,7 +41,7 @@
         ></q-icon>
       </div>
     </div>
-  </div>
+  </q-page>
 </template>
 
 <script>
