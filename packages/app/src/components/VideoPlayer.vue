@@ -2,7 +2,6 @@
   <vue-plyr
     :key="refreshKey"
     ref="plyr"
-    :options="{ratio: '16:9', controls: playing ? playingControls : initialControls}"
     class="video-player"
   >
     <video
@@ -11,6 +10,7 @@
       ref="videoPlayer"
       :srcObject.prop="playing ? combined : null"
       autoplay
+      controls
     ></video>
   </vue-plyr>
 </template>
@@ -23,8 +23,6 @@ export default {
   data () {
     return {
       videoTag: null,
-      initialControls: [],
-      playingControls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'],
       refreshKey: 0
     }
   },
