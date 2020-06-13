@@ -1,6 +1,6 @@
 <template>
   <q-page class="column items-center toonin-page-container q-px-md">
-    <ConnectToRoom></ConnectToRoom>
+    <ConnectToRoom :roomFromUrl="roomFromUrl"></ConnectToRoom>
     <div class="players-container">
       <div
         class="absolute row justify-center"
@@ -56,6 +56,17 @@ export default {
     VideoPlayer,
     AudioPlayer
   },
+  created () {
+    console.log(this.$route.query.room)
+    if (this.$route.query.room) {
+      this.roomFromUrl = this.$route.query.room
+    }
+  },
+  data () {
+    return {
+      roomFromUrl: ''
+    }
+  },
   computed: {
     ...mapState(['connectedStatus', 'videoStream', 'playing', 'audioStream', 'volume']),
   },
@@ -64,6 +75,7 @@ export default {
       this.$store.commit('SET_PLAYING', true)
     }
   },
+
 }
 </script>
 
@@ -105,5 +117,4 @@ export default {
     width: 550px;
   }
 }
-
 </style>

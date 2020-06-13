@@ -101,18 +101,6 @@
         <span class="peer-count-text q-mt-xs">{{ this.peerCounter }} peers</span>
       </span>
       <q-btn
-        @click="copyIdToClipboard"
-        outlined
-        rounded
-        flat
-        v-show="connectedRoomName"
-      >
-        <q-icon
-          color="primary"
-          name="mdi-content-copy"
-        />
-      </q-btn>
-      <q-btn
         @click="copyLinkToClipboard"
         outlined
         rounded
@@ -121,7 +109,7 @@
       >
         <q-icon
           color="primary"
-          name="mdi-earth"
+          name="mdi-content-copy"
         />
       </q-btn>
       <q-space />
@@ -191,7 +179,6 @@ const copyToClipboard = (str) => {
 import { mapState } from 'vuex'
 import { StartShare } from '../host'
 export default {
-  name: 'screen-cap',
   data: () => ({
     videoTag: null,
     videoPlayer: null,
@@ -350,18 +337,15 @@ export default {
       this.roomNameInputErrorMessages = []
     },
     copyLinkToClipboard () {
-      copyToClipboard(`${window.location.origin}/${this.connectedRoomName}`)
+      copyToClipboard(`${window.location.origin}/?room=${this.connectedRoomName}`)
     },
-    copyIdToClipboard () {
-      copyToClipboard(this.connectedRoomName)
-    }
-  },
-  mounted () {
-    this.videoTag = this.$refs.videoTag
-    this.videoPlayer = this.$refs.videoPlayer
-    window.onunload = () => {
-      if (this.sharing) {
-        this.peers.socket.emit('disconnect room', { room: this.connectedRoomName })
+    mounted () {
+      this.videoTag = this.$refs.videoTag
+      this.videoPlayer = this.$refs.videoPlayer
+      window.onunload = () => {
+        if (this.sharing) {
+          this.peers.socket.emit('disconnect room', { room: this.connectedRoomName })
+        }
       }
     }
   }
@@ -406,6 +390,12 @@ export default {
   text-transform: capitalize;
   margin-right: 10px;
   color: var(--q-color-primary);
+}
+</style>
+
+<style>
+.q-field__control {
+  padding: 0px 20px !important;
 }
 </style>
 

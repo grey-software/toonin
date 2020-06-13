@@ -73,7 +73,7 @@ module.exports = function (ctx) {
       : { // and on build (production):
         API: JSON.stringify(process.env.NETLIFY)
       },
-      vueRouterMode: 'hash', // available values: 'hash', 'history'
+      vueRouterMode: 'history', // available values: 'hash', 'history'
 
       // rtl: false, // https://quasar.dev/options/rtl-support
       // showProgress: false,
