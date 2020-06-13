@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 /* eslint no-console: ["error", { allow: ["log"] }] */
 const serverUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:8443' : process.env.API === 'true' ? "https://toonin-staging.herokuapp.com" : window.location.origin
-console.log(serverUrl)
+
 const servers = {
   iceServers: [
     {
@@ -181,9 +181,9 @@ class StartShare {
       this.app.auth = true
     })
 
-    this.socket.on('room null', () => {
+    this.socket.on('room null', (payload) => {
       this.app.roomName = ''
-      this.app.errors.push('Room name is invalid.')
+      this.app.errors.push(`${payload.roomName} is not an active room`)
       this.app.$store.dispatch('UPDATE_ROOM', '')
     })
 

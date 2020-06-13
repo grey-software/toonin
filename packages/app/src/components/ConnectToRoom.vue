@@ -95,9 +95,18 @@ import ConnectionStatusTimeline from "../components/ConnectionStatusTimeline"
 
 export default {
   name: 'connect-to-room',
-  props: {},
+  props: {
+    roomFromUrl: String
+  },
   components: {
     ConnectionStatusTimeline
+  },
+  created () {
+    if (this.roomFromUrl != '') {
+      console.log("here")
+      this.roomName = this.roomFromUrl
+      this.toonin()
+    };
   },
   data () {
     return {
@@ -108,7 +117,7 @@ export default {
       passwordRequired: false,
       password: '',
       auth: false,
-      isPwd: true
+      isPwd: true,
     }
   },
   methods: {

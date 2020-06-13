@@ -28,10 +28,12 @@ app.get("*", function (req, res, next) {
 //Socket create a new "room" and listens for other connections
 io.on("connection", (socket) => {
   socket.on("create room", (req) => {
+    console.log(`Received request to create a new room: ${req}`)
     if (roomManager.createRoom(socket, req.room, req.isDistributed, req.password)) {
       socketManager.addSocket(socket, req.room)
     }
   });
+
 
   socket.on("new peer", (roomID) => {
     const room = roomManager.getRoom(roomID);
@@ -61,7 +63,9 @@ io.on("connection", (socket) => {
       logger.log('info', 'Room not found.', {
         roomID: roomID
       })
-      socket.emit("room null");
+      socket.emit("room null", {
+        roomName: roomID
+      });
     }
   });
 
@@ -102,7 +106,9 @@ io.on("connection", (socket) => {
       logger.log('info', 'Room not found.', {
         roomID: req.roomID
       })
-      socket.emit("room null");
+      socket.emit("room null", {
+        roomName: req.roomID
+      });
     }
   });
 

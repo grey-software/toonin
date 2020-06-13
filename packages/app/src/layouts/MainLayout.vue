@@ -111,6 +111,12 @@ export default {
     },
 
   },
+  created () {
+    console.log(this.$route.query.room)
+    if (this.$route.query.room) {
+      this.tab = 'toonin'
+    }
+  },
   mounted () {
     this.$q.dark.set(window.localStorage.getItem('isDark') === 'true')
   }
