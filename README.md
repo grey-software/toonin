@@ -20,7 +20,7 @@ The signaling server facilitates a WebRTC handshake between two Toonin web app i
 ## Development setup
 
 ```sh
-npm run setup
+yarn setup
 ```
 
 ## Running Toonin
@@ -28,15 +28,15 @@ npm run setup
 Toonin comes with a local development script that launches the server and app simultaneuously.  
 
 ```sh 
-npm run dev
+yarn dev
 ```
 
 ### Running the web app independently
 ```sh
-npm run app
+yarn run app
 ```
 
 ### Running the signalling server independently
 ```sh
-npm run server
+yarn run server
 ```
