@@ -8,8 +8,8 @@ RUN mkdir -p /usr/toonin
 COPY . /usr/toonin
 WORKDIR /usr/toonin
 
-RUN npm run setup
-RUN npm run rebuild
-RUN npm run build
+RUN yarn run setup
+RUN yarn run rebuild
+RUN yarn run build
 
 CMD [ "npm", "start" ]

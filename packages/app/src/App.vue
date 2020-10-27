@@ -38,13 +38,13 @@
 
 <script >
 const myIcons = {
-  'app:toonin': 'img:statics/toonin.svg',
-  'app:toonin-dark': 'img:statics/toonin-dark.svg',
-  'app:guide': 'img:statics/guide.svg',
-  'app:github': 'img:statics/github.svg',
-  'app:github-dark': 'img:statics/github-dark.svg',
-  'app:moon': 'img:statics/moon.svg',
-  'app:sun': 'img:statics/sun.svg'
+  'app:toonin': 'img:/toonin.svg',
+  'app:toonin-dark': 'img:/toonin-dark.svg',
+  'app:guide': 'img:/guide.svg',
+  'app:github': 'img:/github.svg',
+  'app:github-dark': 'img:/github-dark.svg',
+  'app:moon': 'img:/moon.svg',
+  'app:sun': 'img:/sun.svg'
 }
 export default {
   name: 'App',
