@@ -176,7 +176,6 @@ const copyToClipboard = (str) => {
   document.execCommand('copy')
   document.body.removeChild(el)
 }
-import { mapState } from 'vuex'
 import { StartShare } from '../host'
 export default {
   data: () => ({
