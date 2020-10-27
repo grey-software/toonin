@@ -15,6 +15,7 @@
     },
     "dependencies": {
         "@quasar/extras": "^1.9.10",
+        "node-sass": "^4.14.1",
         "plyr": "^3.6.2",
         "quasar": "^1.14.3",
         "socket.io-client": "^2.3.1",

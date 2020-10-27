@@ -12,7 +12,7 @@
         "server": "yarn --cwd packages/server start",
         "server:bg": "yarn --cwd packages/server start &",
         "app": "yarn --cwd packages/app start",
-        "rebuild": "cd packages/app && yarn rebuild node-sass",
+        "rebuild": "cd packages/app && yarn add node-sass --force",
         "build": "cd packages/app && yarn run build",
         "dev": "yarn run server:bg; yarn run app"
     },
