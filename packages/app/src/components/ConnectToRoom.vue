@@ -143,7 +143,6 @@ export default {
       this.connectToRoom()
     },
     connectToRoom (reconnecting) {
-      _paq.push(['trackEvent', 'Toonin', this.userTrackingId, `Connected to room: ${this.roomName}`]);
       this.$store.dispatch('UPDATE_ROOM', this.roomName)
       if (!reconnecting) {
         this.$store.dispatch('UPDATE_PEERS', new StartShare(this, false))
@@ -251,7 +250,6 @@ export default {
       this.connectToRoom(false)
     },
     async disconnect () {
-      _paq.push(['trackEvent', 'Toonin', this.userTrackingId, `Disconnected from room: ${this.roomName}`]); 
       if (this.rtcConn) {
         this.rtcConn.close()
       }
@@ -304,8 +302,7 @@ export default {
       'videoStream',
       'sharing',
       'peers',
-      'name',
-      'userTrackingId'
+      'name'
     ])
   },
   mounted: function () {
