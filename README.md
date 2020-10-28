@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://www.toonin.ml" target="_blank">
+  <a href="https://toonin.grey.software" target="_blank">
     <img alt="Toonin Icon" width="100" src="https://github.com/grey-software/toonin/raw/master/assets/icon.png">
   </a>
 </p>
