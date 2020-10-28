@@ -61,6 +61,11 @@
         name="share"
         icon="mdi-access-point"
       />
+      <q-tab
+        label="Donate"
+        name="donate"
+        icon="mdi-currency-usd"
+      />
     </q-tabs>
     <q-tab-panels
       v-model="tab"
@@ -72,6 +77,9 @@
       </q-tab-panel>
       <q-tab-panel name="share">
         <SharePage />
+      </q-tab-panel>
+      <q-tab-panel name="donate">
+        <DonatePage />
       </q-tab-panel>
     </q-tab-panels>
 
@@ -90,11 +98,13 @@
 <script>
 import SharePage from '../pages/SharePage'
 import TooninPage from '../pages/TooninPage'
+import DonatePage from 'pages/DonatePage'
 
 export default {
   components: {
     SharePage,
-    TooninPage
+    TooninPage,
+    DonatePage
   },
   data () {
     return {
