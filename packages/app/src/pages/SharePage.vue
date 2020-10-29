@@ -176,8 +176,10 @@ const copyToClipboard = (str) => {
   document.execCommand('copy')
   document.body.removeChild(el)
 }
+
 import { mapState } from 'vuex'
 import { StartShare } from '../host'
+
 export default {
   data: () => ({
     videoTag: null,
@@ -225,7 +227,7 @@ export default {
         this.$store.dispatch('UPDATE_SHARE_VIDEO', value)
       }
     },
-    ...mapState(['connectedRoomName', 'connectedStatus', 'sharing', 'peers', 'sharingStream', 'shareAudio', 'shareVideo', 'userTrackingId'])
+    ...mapState(['connectedRoomName', 'connectedStatus', 'sharing', 'peers', 'sharingStream', 'shareAudio', 'shareVideo'])
   },
   watch: {
     connectedRoomName: function (newValue) {
@@ -273,7 +275,6 @@ export default {
         if (!captureStream) {
           return
         }
-        _paq.push(['trackEvent', 'Share', this.userTrackingId, "Captured their stream"]);
         this.roomNameInputErrorMessages = []
         this.$store.dispatch('UPDATE_SHARING', true)
         if (captureStream.getAudioTracks().length > 0) {
@@ -297,7 +298,6 @@ export default {
       if (!this.sharingStream) {
         return
       }
-      _paq.push(['trackEvent', 'Share', this.userTrackingId, "Stopped sharing their stream"]);
       this.$store.dispatch('UPDATE_SHARE_AUDIO', false)
       this.$store.dispatch('UPDATE_SHARE_VIDEO', false)
       const tracks = this.sharingStream.getTracks()
@@ -310,7 +310,6 @@ export default {
       if (!this.connectedRoomName) {
         return
       }
-      _paq.push(['trackEvent', 'Share', this.userTrackingId, "Disconnected from their room"]);
       await this.peers.removeAllPeersAndClose()
       this.$store.dispatch('UPDATE_CONNECTED_ROOM', null)
       this.$store.dispatch('UPDATE_PEERS', null)
