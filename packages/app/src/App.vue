@@ -48,7 +48,9 @@ const myIcons = {
   'app:github': 'img:/github.svg',
   'app:github-dark': 'img:/github-dark.svg',
   'app:moon': 'img:/moon.svg',
-  'app:sun': 'img:/sun.svg'
+  'app:sun': 'img:/sun.svg',
+  'app:open-collective-dark' : 'img:/open-collective-dark.svg',
+  'app:open-collective' : 'img:/open-collective.svg',
 }
 export default {
   name: 'App',

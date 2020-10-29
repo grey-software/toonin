@@ -64,7 +64,7 @@
       <q-tab
         label="Donate"
         name="donate"
-        icon="mdi-currency-usd"
+        icon="mdi-charity"
       />
     </q-tabs>
     <q-tab-panels

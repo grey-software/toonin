@@ -2,16 +2,16 @@
 /* eslint-disable no-console */
 <template>
 
-  <div class="share-container q-mt-lg">
+  <div class="donate-container q-mt-lg">
     <div class="row justify-center q-col-gutter-y-md">
       <div class="col-8">
         <q-btn
-          label="Grey Software"
-          class="full-width col-8 btn-share"
+          label="Open Collective"
+          class="full-width col-8 btn-donate"
           :class="$q.dark.isActive ? 'text-white' : ''"
           outline
           rounded
-          icon="mdi-currency-usd"
+          :icon="$q.dark.isActive ? 'app:open-collective-dark' : 'app:open-collective'"
           type="a"
           href="https://opencollective.com/grey-software"
           target="_blank"
@@ -21,7 +21,7 @@
       <div class="col-8">
         <q-btn
           label="Github Sponsors"
-          class="full-width col-8 btn-share"
+          class="full-width col-8 btn-donate"
           :class="$q.dark.isActive ? 'text-white' : ''"
           outline
           rounded
@@ -34,7 +34,7 @@
       <div class="col-8">
         <q-btn
           label="PayPal"
-          class="full-width col-8 btn-share"
+          class="full-width col-8 btn-donate"
           :class="$q.dark.isActive ? 'text-white' : ''"
           outline
           rounded
@@ -56,12 +56,12 @@ export default {
 </script>
 
 <style scoped>
-.share-container {
+.donate-container {
   width: 599px;
   height: auto;
 }
 
-.btn-share {
+.btn-donate {
   height: 56px !important;
   font-size: 16px;
   text-transform: capitalize;
