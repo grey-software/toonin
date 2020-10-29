@@ -12,22 +12,26 @@
         style="width: 300px"
       >
         <q-card-section>
-          <div style="color:#343434;" class="text-h6">Are you using Chrome?</div>
+          <div
+            class="text-h6"
+            :class="$q.dark.isActive ? 'text-white' : 'text-grey-9'">Are you using Chrome?</div>
         </q-card-section>
 
-        <q-card-section style="color:#343434;" class="q-pt-none">
+        <q-card-section
+          :class="$q.dark.isActive ? 'text-white' : 'text-grey-9'"
+          class="q-pt-none">
           For the optimal Toonin experience on desktop and mobile, we recommend using Google Chrome.
         </q-card-section>
 
         <q-card-actions
           align="right"
-          class="bg-white"
+          :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
         >
           <q-btn
             flat
             label="I understand"
             v-close-popup
-            style="color:#343434;"
+            :class="$q.dark.isActive ? 'text-white' : 'text-grey-9'"
             @click="showBrowserCompatDialog = false"
           />
         </q-card-actions>
@@ -50,13 +54,7 @@ export default {
   name: 'App',
   data () {
     return {
-      userId: '',
       showBrowserCompatDialog: false
-    }
-  },
-  watch: {
-    userId (id) {
-      this.$store.commit('SET_USER_TRACKING_ID', id)
     }
   },
   created () {
@@ -66,9 +64,6 @@ export default {
         return { icon: icon }
       }
     }
-    var appVisitorId
-    _paq.push([function () { appVisitorId = this.getVisitorId(); }]);
-    setTimeout(() => this.userId = appVisitorId, 343)
   },
   mounted () {
     if (!this.$q.platform.is.chrome) {
