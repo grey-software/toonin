@@ -176,7 +176,10 @@ const copyToClipboard = (str) => {
   document.execCommand('copy')
   document.body.removeChild(el)
 }
+
+import { mapState } from 'vuex'
 import { StartShare } from '../host'
+
 export default {
   data: () => ({
     videoTag: null,
@@ -224,6 +227,7 @@ export default {
         this.$store.dispatch('UPDATE_SHARE_VIDEO', value)
       }
     },
+    ...mapState(['connectedRoomName', 'connectedStatus', 'sharing', 'peers', 'sharingStream', 'shareAudio', 'shareVideo'])
   },
   watch: {
     connectedRoomName: function (newValue) {
