@@ -67,17 +67,14 @@ export default {
     layout () {
       return this.$q.screen.lt.sm ? 'dense' : (this.$q.screen.lt.md ? 'comfortable' : 'loose')
     },
-    ...mapState(['playing', 'connectedStatus', 'room', 'userTrackingId'])
+    ...mapState(['playing', 'connectedStatus', 'room'])
   },
   watch: {
     playing (isPlaying) {
       if (isPlaying) {
         this.setTimelineIndex(3)
-        _paq.push(['trackEvent', 'Toonin', this.userTrackingId, "Started playing"]);     
-
       } else {
         this.setTimelineIndex(2)
-        _paq.push(['trackEvent', 'Toonin', this.userTrackingId, `Connected to room`]); 
       }
     },
     connectedStatus (status) {

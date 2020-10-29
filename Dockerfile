@@ -12,4 +12,4 @@ RUN yarn run setup
 RUN yarn run rebuild
 RUN yarn run build
 
-CMD [ "npm", "start" ]
+CMD [ "yarn", "start" ]
