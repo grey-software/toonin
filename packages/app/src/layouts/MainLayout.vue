@@ -72,13 +72,13 @@
       animated
       class="toonin-tab-panels"
     >
-      <q-tab-panel name="toonin">
+      <q-tab-panel name="toonin" class="no-scroll">
         <TooninPage />
       </q-tab-panel>
-      <q-tab-panel name="share">
+      <q-tab-panel name="share" class="no-scroll">
         <SharePage />
       </q-tab-panel>
-      <q-tab-panel name="donate">
+      <q-tab-panel name="donate" class="no-scroll">
         <DonatePage />
       </q-tab-panel>
     </q-tab-panels>
