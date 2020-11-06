@@ -1,6 +1,6 @@
 <template>
   <div class="connect-container">
-    <div class="row justify-space-between q-mt-lg">
+    <div class="row justify-space-between">
       <q-input
         v-if="!auth"
         v-model="roomName"

@@ -1,47 +1,49 @@
 <template>
-  <q-page class="column items-center toonin-page-container q-px-md">
-    <ConnectToRoom :roomFromUrl="roomFromUrl"></ConnectToRoom>
-    <div class="players-container">
-      <div
-        class="absolute row justify-center"
-        style="width:100%;"
-        v-show="connectedStatus == 'connected' && playing"
-      >
-        <transition
-          name="fade"
-          mode="out-in"
+  <q-page-container>
+    <q-page class="column items-center toonin-page-container">
+      <ConnectToRoom :roomFromUrl="roomFromUrl"></ConnectToRoom>
+      <div class="players-container">
+        <div
+          class="absolute row justify-center"
+          style="width:100%;"
+          v-show="connectedStatus == 'connected' && playing"
         >
-          <audio-player
-            v-if="audioStream && !videoStream"
-            :stream="audioStream"
-          ></audio-player>
-          <video-player v-else />
-        </transition>
-      </div>
-      <div
-        v-if="!playing"
-        class="player-button"
-      >
-        <q-btn
-          class="toonin-play"
-          fab
-          color="primary"
-          v-if="connectedStatus == 'connected'"
-          @click="startPlaying"
+          <transition
+            name="fade"
+            mode="out-in"
+          >
+            <audio-player
+              v-if="audioStream && !videoStream"
+              :stream="audioStream"
+            ></audio-player>
+            <video-player v-else />
+          </transition>
+        </div>
+        <div
+          v-if="!playing"
+          class="player-button"
         >
+          <q-btn
+            class="toonin-play"
+            fab
+            color="primary"
+            v-if="connectedStatus == 'connected'"
+            @click="startPlaying"
+          >
+            <q-icon
+              class="player-icon text-white"
+              name="mdi-play"
+            ></q-icon>
+          </q-btn>
           <q-icon
-            class="player-icon text-white"
-            name="mdi-play"
+            v-else
+            class="player-icon"
+            name="mdi-dots-horizontal"
           ></q-icon>
-        </q-btn>
-        <q-icon
-          v-else
-          class="player-icon"
-          name="mdi-dots-horizontal"
-        ></q-icon>
+        </div>
       </div>
-    </div>
-  </q-page>
+    </q-page>
+  </q-page-container>
 </template>
 
 <script>
