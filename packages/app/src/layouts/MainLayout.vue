@@ -70,7 +70,7 @@
     <q-tab-panels
       v-model="tab"
       animated
-      class="toonin-tab-panels"
+      class="toonin-tab-panels q-pt-lg"
     >
       <q-tab-panel name="toonin" class="no-scroll">
         <TooninPage />

@@ -2,8 +2,8 @@
 /* eslint-disable no-console */
 <template>
 
-  <div class="share-container q-mt-lg">
-    <div class="row justify-space-between q-mt-lg">
+  <div class="share-container">
+    <div class="row justify-space-between">
 
       <q-input
         v-model="roomName"

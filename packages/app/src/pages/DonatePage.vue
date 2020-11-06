@@ -2,7 +2,7 @@
 /* eslint-disable no-console */
 <template>
 
-  <div class="donate-container q-mt-lg">
+  <div class="donate-container">
     <div class="row justify-center q-col-gutter-y-md">
       <div class="col-8">
         <q-btn
